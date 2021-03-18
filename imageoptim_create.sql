@@ -1,9 +1,4 @@
 SHOW DATABASES;
-
-USE imageoptim;
-
-SHOW TABLES;
-
 -- MySQL Workbench Forward Engineering
 
 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
@@ -52,7 +47,7 @@ CREATE TABLE IF NOT EXISTS `Tier` ( `idTier` INT NOT NULL,
 CREATE TABLE IF NOT EXISTS `Licence` (`idLicence` INT NOT NULL,
 									  `name` VARCHAR(45) NOT NULL,
 									  `description` VARCHAR(45) NULL,
-									  `price` INT NOT NULL,
+									  `price` DOUBLE NOT NULL,
 									  PRIMARY KEY (`idLicence`)
 									  ) ENGINE=INNODB;
 
@@ -63,7 +58,7 @@ CREATE TABLE IF NOT EXISTS `Licence` (`idLicence` INT NOT NULL,
 CREATE TABLE IF NOT EXISTS `Purchase` (`idPurchase` INT NOT NULL AUTO_INCREMENT,
 									  `datePurchase` DATE NOT NULL,
 									  `expirePurchase` DATE NOT NULL,
-									  `typePurchase` VARCHAR(45) NOT NULL,
+									  `typePurchase` ENUM('annual', 'permanent') NOT NULL,
 									  `idCompany` INT NOT NULL,
 									  `idLicence` INT NOT NULL,
 									  `idTier` INT NOT NULL,
