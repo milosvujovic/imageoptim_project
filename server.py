@@ -22,9 +22,7 @@ mysql = MySQL(app)
 @app.route("/")
 def homePage():
     print("Loading page")
-    for licence in readLicencesFromDatabase():
-        print(licence)
-    return "Hello"
+    return render_template('home.html', title = "Home", licences = readLicencesFromDatabase())
 
 
 # Example connection to the database

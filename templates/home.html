@@ -1,0 +1,7 @@
+{% extends 'template.html' %}
+{% block MainContents %}
+    {% for licence in licences %}
+        <h2><a href="/licence/{{licence[0]}}">{{licence[1]}}</a></h2>
+      </div>
+    {% endfor %}
+{% endblock %}
