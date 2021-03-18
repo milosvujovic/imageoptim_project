@@ -21,7 +21,6 @@ mysql = MySQL(app)
 #Webpage Routes
 @app.route("/")
 def defaultPage():
-    attemptToReadFromDatabase()
     return "Default Page"
 
 
