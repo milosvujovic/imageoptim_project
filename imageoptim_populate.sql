@@ -4,10 +4,10 @@ USE imageoptim;
 
 SHOW TABLES;
 
-TRUNCATE TABLE company;
-TRUNCATE TABLE tier;
-TRUNCATE TABLE licence;
-TRUNCATE TABLE purchase;
+DELETE FROM company;
+DELETE FROM tier;
+DELETE FROM licence;
+DELETE FROM purchase;
 
 SELECT * FROM company;
 SELECT * FROM tier;
@@ -29,5 +29,5 @@ INSERT INTO licence VALUES
 
 INSERT INTO purchase VALUES
 (1,'2021-01-01','2022-01-01','annual',2,1,2),
-(2,'2021-03-01','2021-04-01','permenant',1,2,2),
+(2,'2021-03-01','2021-04-01','permanent',1,2,2),
 (3,'2021-01-01','2022-01-01','annual',3,1,1)
