@@ -24,6 +24,12 @@ def homePage():
     print("Loading page")
     return render_template('home.html', title = "Home", licences = readLicencesFromDatabase())
 
+@app.route("/DecideLicence")
+def licence():
+    readTiersFromDatabase()
+    readLengthsFromDatabase()
+    return  render_template('licence.html', title = "ChooseLicence", tiers = readTiersFromDatabase(), lengths = readLengthsFromDatabase())
+
 
 # Example connection to the database
 def attemptToReadFromDatabase():
@@ -44,6 +50,31 @@ def readLicencesFromDatabase():
     except Exception as e:
         print("Error " + e)
 
+def readTiersFromDatabase():
+    print("Reading from the database")
+    try:
+        cur = mysql.connection.cursor()
+        cur.execute("SELECT * From `company size` ORDER BY minimumEmployees;")
+        data = cur.fetchall()
+        cur.close()
+        print("Read the tiers from the database")
+        print(data)
+        return data
+    except Exception as e:
+        print("Error " + e)
+
+def readLengthsFromDatabase():
+    print("Reading from the database")
+    try:
+        cur = mysql.connection.cursor()
+        cur.execute("SELECT * From `licence length` ORDER BY idLicenceLength;")
+        data = cur.fetchall()
+        cur.close()
+        print("Read the lengths from the database")
+        print(data)
+        return data
+    except Exception as e:
+        print("Error " + e)
 
 if __name__ == "__main__":
     app.run(debug=True)
