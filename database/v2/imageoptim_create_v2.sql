@@ -49,7 +49,7 @@ ENGINE = INNODB;
 DROP TABLE IF EXISTS `imageoptim`.`Licence` ;
 
 CREATE TABLE IF NOT EXISTS `imageoptim`.`Licence` (
-  `idLicence` INT NOT NULL,
+  `idLicence` INT NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(45) NOT NULL,
   `description` VARCHAR(45) NULL,
   PRIMARY KEY (`idLicence`))
@@ -82,7 +82,7 @@ CREATE TABLE IF NOT EXISTS `imageoptim`.`Purchase` (
   `idLicence` INT NOT NULL,
   `idLicenceLength` INT NOT NULL,
   `datePurchase` DATE NOT NULL,
-  `expirePurchase` DATE NOT NULL,
+  `expirePurchase` DATE,
   INDEX `fk_Purchase_Company_idx` (`idCustomer` ASC),
   PRIMARY KEY (`idPurchase`),
   UNIQUE INDEX `idPurchase_UNIQUE` (`idPurchase` ASC),
@@ -114,32 +114,32 @@ ENGINE = INNODB;
 USE `imageoptim` ;
 
 -- -----------------------------------------------------
--- Table `imageoptim`.`Prices`
+-- Table `imageoptim`.`Price`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `imageoptim`.`Prices` ;
+DROP TABLE IF EXISTS `imageoptim`.`Price` ;
 
-CREATE TABLE IF NOT EXISTS `imageoptim`.`Prices` (
-  `idPrice` INT NOT NULL,
+CREATE TABLE IF NOT EXISTS `imageoptim`.`Price` (
+  `idPrice` INT NOT NULL AUTO_INCREMENT,
   `idLicence` INT NOT NULL,
   `idCompanySize` INT NOT NULL,
   `idLicenceLength` INT NOT NULL,
   `price` DOUBLE NOT NULL,
   `startDate` DATE NOT NULL,
-  `endDate` DATE NOT NULL,
-  PRIMARY KEY (`idPrice`, `startDate`),
-  INDEX `fk_Prices_Tier1_idx` (`idCompanySize` ASC),
-  INDEX `fk_Prices_Licence Length1_idx` (`idLicenceLength` ASC),
-  CONSTRAINT `fk_Prices_Licence`
+  `endDate` DATE,
+  PRIMARY KEY (`idPrice`),
+  INDEX `fk_Price_Tier1_idx` (`idCompanySize` ASC),
+  INDEX `fk_Price_Licence Length1_idx` (`idLicenceLength` ASC),
+  CONSTRAINT `fk_Price_Licence`
     FOREIGN KEY (`idLicence`)
     REFERENCES `imageoptim`.`Licence` (`idLicence`)
     ON DELETE RESTRICT
     ON UPDATE RESTRICT,
-  CONSTRAINT `fk_Prices_Tier1`
+  CONSTRAINT `fk_Price_Tier1`
     FOREIGN KEY (`idCompanySize`)
     REFERENCES `imageoptim`.`Company Size` (`idCompanySize`)
     ON DELETE RESTRICT
     ON UPDATE RESTRICT,
-  CONSTRAINT `fk_Prices_Licence Length1`
+  CONSTRAINT `fk_Price_Licence Length1`
     FOREIGN KEY (`idLicenceLength`)
     REFERENCES `imageoptim`.`Licence Length` (`idLicenceLength`)
     ON DELETE RESTRICT
