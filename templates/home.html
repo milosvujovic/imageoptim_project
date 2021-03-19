@@ -1,0 +1,15 @@
+{% extends 'template.html' %}
+{% block MainContents %}
+  <div class="container-fluid">
+    <h1 class="display-4 text-center">Licences</h1>
+      <table class="table table-striped">
+        <tbody>
+          {% for licence in licences %}
+          <tr>
+            <th scope="row"><a href="/licence/{{licence[0]}}">{{licence[1]}}</a></th>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+  </div>
+{% endblock %}
