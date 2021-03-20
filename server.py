@@ -22,13 +22,11 @@ mysql = MySQL(app)
 @app.route("/")
 def homePage():
     print("Loading page")
-    return render_template('home.html', title = "Home", licences = readLicencesFromDatabase())
+    return render_template('home.html', title = "Home", licences = readFromDatabaseUsingStoredProcedures("getListOfLicence()"))
 
 @app.route("/DecideLicence")
 def licence():
-    readTiersFromDatabase()
-    readLengthsFromDatabase()
-    return  render_template('licence.html', title = "ChooseLicence", tiers = readTiersFromDatabase(), lengths = readLengthsFromDatabase())
+    return  render_template('licence.html', title = "ChooseLicence", tiers = readFromDatabaseUsingStoredProcedures("getDescriptionOfCompanySize()"), lengths = readFromDatabaseUsingStoredProcedures("getPossibleLicenceLength()"))
 
 
 # Example connection to the database
@@ -38,43 +36,18 @@ def attemptToReadFromDatabase():
     mysql.connection.commit()
     cur.close()
 
-def readLicencesFromDatabase():
-    print("Reading from the database")
-    try:
-        cur = mysql.connection.cursor()
-        cur.execute("SELECT imageoptim.licence.idLicence, imageoptim.licence.name FROM imageoptim.licence ORDER BY imageoptim.licence.name;")
-        data = cur.fetchall()
-        cur.close()
-        print("Read the licences from the database")
-        return data
-    except Exception as e:
-        print("Error " + e)
-
-def readTiersFromDatabase():
-    print("Reading from the database")
-    try:
-        cur = mysql.connection.cursor()
-        cur.execute("SELECT * From `company size` ORDER BY minimumEmployees;")
-        data = cur.fetchall()
-        cur.close()
-        print("Read the tiers from the database")
-        print(data)
-        return data
-    except Exception as e:
-        print("Error " + e)
-
-def readLengthsFromDatabase():
-    print("Reading from the database")
-    try:
-        cur = mysql.connection.cursor()
-        cur.execute("SELECT * From `licence length` ORDER BY idLicenceLength;")
-        data = cur.fetchall()
-        cur.close()
-        print("Read the lengths from the database")
-        print(data)
-        return data
-    except Exception as e:
-        print("Error " + e)
+def readFromDatabaseUsingStoredProcedures(function):
+        command = "CALL " + function +";"
+        print("Reading from the database")
+        try:
+            cur = mysql.connection.cursor()
+            cur.execute(command)
+            data = cur.fetchall()
+            cur.close()
+            print("Succesfully from the database")
+            return data
+        except Exception as e:
+            print("Error " + e)
 
 if __name__ == "__main__":
     app.run(debug=True)
