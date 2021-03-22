@@ -12,7 +12,7 @@ USE `imageoptim` ;
 -- Table `imageoptim`.`Customers`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `imageoptim`.`Customers` (
-  `CustomerID` INT NOT NULL AUTO_INCREMENT,
+  `customerID` INT NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(45) NOT NULL,
   `street` VARCHAR(45) NULL,
   `city` VARCHAR(45) NULL,
@@ -20,10 +20,10 @@ CREATE TABLE IF NOT EXISTS `imageoptim`.`Customers` (
   `country` VARCHAR(45) NOT NULL,
   `email` VARCHAR(45) NOT NULL,
   `emailVerified` TINYINT NULL DEFAULT 0,
-  `NameOfContactPerson` VARCHAR(45) NULL,
-  `VATNumber` VARCHAR(20) NULL,
-  PRIMARY KEY (`CustomerID`),
-  UNIQUE INDEX `idCompany_UNIQUE` (`CustomerID` ASC) )
+  `nameOfContactPerson` VARCHAR(45) NULL,
+  `vatNumber` VARCHAR(20) NULL,
+  PRIMARY KEY (`customerID`),
+  UNIQUE INDEX `idCompany_UNIQUE` (`customerID` ASC) )
 ENGINE = InnoDB;
 
 
@@ -31,11 +31,11 @@ ENGINE = InnoDB;
 -- Table `imageoptim`.`Licences`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `imageoptim`.`Licences` (
-  `LicenceID` INT NOT NULL AUTO_INCREMENT,
+  `licenceID` INT NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(45) NOT NULL,
   `description` VARCHAR(45) NULL,
   `discontinued` TINYINT NULL DEFAULT 0,
-  PRIMARY KEY (`LicenceID`))
+  PRIMARY KEY (`licenceID`))
 ENGINE = InnoDB;
 
 
@@ -43,17 +43,17 @@ ENGINE = InnoDB;
 -- Table `imageoptim`.`tiers`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `imageoptim`.`tiers` (
-  `TierID` INT NOT NULL AUTO_INCREMENT,
-  `LicenceID` INT NOT NULL,
+  `tierID` INT NOT NULL AUTO_INCREMENT,
+  `licenceID` INT NOT NULL,
   `minimumEmployees` INT NOT NULL,
   `maximumEmployees` INT NULL,
   `startDate` DATE NOT NULL,
   `endDate` DATE NULL,
-  PRIMARY KEY (`TierID`),
-  INDEX `fk_Company Size_Licence1_idx` (`LicenceID` ASC) ,
+  PRIMARY KEY (`tierID`),
+  INDEX `fk_Company Size_Licence1_idx` (`licenceID` ASC) ,
   CONSTRAINT `fk_Company Size_Licence1`
-    FOREIGN KEY (`LicenceID`)
-    REFERENCES `imageoptim`.`Licences` (`LicenceID`)
+    FOREIGN KEY (`licenceID`)
+    REFERENCES `imageoptim`.`Licences` (`licenceID`)
     ON DELETE RESTRICT
     ON UPDATE RESTRICT)
 ENGINE = InnoDB;
@@ -63,10 +63,10 @@ ENGINE = InnoDB;
 -- Table `imageoptim`.`Licence Lengths`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `imageoptim`.`Licence Lengths` (
-  `LicenceLengthID` INT NOT NULL AUTO_INCREMENT,
+  `licencelengthID` INT NOT NULL AUTO_INCREMENT,
   `length` VARCHAR(45) NOT NULL,
-  PRIMARY KEY (`LicenceLengthID`),
-  UNIQUE INDEX `idLicenceType_UNIQUE` (`LicenceLengthID` ASC) )
+  PRIMARY KEY (`licencelengthID`),
+  UNIQUE INDEX `idLicenceType_UNIQUE` (`licencelengthID` ASC) )
 ENGINE = InnoDB;
 
 
@@ -74,31 +74,31 @@ ENGINE = InnoDB;
 -- Table `imageoptim`.`Purchases`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `imageoptim`.`Purchases` (
-  `PurchaseID` INT NOT NULL AUTO_INCREMENT,
-  `CustomerID` INT NOT NULL,
-  `TierID` INT NOT NULL,
+  `purchaseID` INT NOT NULL AUTO_INCREMENT,
+  `customerID` INT NOT NULL,
+  `tierID` INT NOT NULL,
   `price` DOUBLE NOT NULL,
   `datePurchase` DATE NOT NULL,
   `expirePurchase` DATE NULL,
-  `LengthID` INT NOT NULL,
-  INDEX `fk_Purchase_Company_idx` (`CustomerID` ASC) ,
-  PRIMARY KEY (`PurchaseID`),
-  UNIQUE INDEX `idPurchase_UNIQUE` (`PurchaseID` ASC) ,
-  INDEX `fk_Purchase_Company Size1_idx` (`TierID` ASC) ,
-  INDEX `fk_Purchases_Licence Lengths1_idx` (`LengthID` ASC) ,
+  `lengthID` INT NOT NULL,
+  INDEX `fk_Purchase_Company_idx` (`customerID` ASC) ,
+  PRIMARY KEY (`purchaseID`),
+  UNIQUE INDEX `idPurchase_UNIQUE` (`purchaseID` ASC) ,
+  INDEX `fk_Purchase_Company Size1_idx` (`tierID` ASC) ,
+  INDEX `fk_Purchases_Licence Lengths1_idx` (`lengthID` ASC) ,
   CONSTRAINT `fk_Purchase_Company`
-    FOREIGN KEY (`CustomerID`)
-    REFERENCES `imageoptim`.`Customers` (`CustomerID`)
+    FOREIGN KEY (`customerID`)
+    REFERENCES `imageoptim`.`Customers` (`customerID`)
     ON DELETE RESTRICT
     ON UPDATE RESTRICT,
   CONSTRAINT `fk_Purchase_Company Size1`
-    FOREIGN KEY (`TierID`)
-    REFERENCES `imageoptim`.`tiers` (`TierID`)
+    FOREIGN KEY (`tierID`)
+    REFERENCES `imageoptim`.`tiers` (`tierID`)
     ON DELETE RESTRICT
     ON UPDATE RESTRICT,
   CONSTRAINT `fk_Purchases_Licence Lengths1`
-    FOREIGN KEY (`LengthID`)
-    REFERENCES `imageoptim`.`Licence Lengths` (`LicenceLengthID`)
+    FOREIGN KEY (`lengthID`)
+    REFERENCES `imageoptim`.`Licence Lengths` (`licencelengthID`)
     ON DELETE RESTRICT
     ON UPDATE RESTRICT)
 ENGINE = InnoDB;
@@ -109,23 +109,23 @@ USE `imageoptim` ;
 -- Table `imageoptim`.`Prices`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `imageoptim`.`Prices` (
-  `PriceID` INT NOT NULL AUTO_INCREMENT,
-  `TierID` INT NOT NULL,
-  `LengthID` INT NOT NULL,
+  `priceID` INT NOT NULL AUTO_INCREMENT,
+  `tierID` INT NOT NULL,
+  `lengthID` INT NOT NULL,
   `price` DOUBLE NOT NULL,
   `startDate` DATE NOT NULL,
   `endDate` DATE NULL,
-  PRIMARY KEY (`PriceID`),
-  INDEX `fk_Prices_Pricing Tiers_idx` (`TierID` ASC) ,
-  INDEX `fk_Prices_Licence Lengths1_idx` (`LengthID` ASC) ,
+  PRIMARY KEY (`priceID`),
+  INDEX `fk_Prices_Pricing Tiers_idx` (`tierID` ASC) ,
+  INDEX `fk_Prices_Licence Lengths1_idx` (`lengthID` ASC) ,
   CONSTRAINT `fk_Prices_Pricing Tiers`
-    FOREIGN KEY (`TierID`)
-    REFERENCES `imageoptim`.`tiers` (`TierID`)
+    FOREIGN KEY (`tierID`)
+    REFERENCES `imageoptim`.`tiers` (`tierID`)
     ON DELETE RESTRICT
     ON UPDATE RESTRICT,
   CONSTRAINT `fk_Prices_Licence Lengths1`
-    FOREIGN KEY (`LengthID`)
-    REFERENCES `imageoptim`.`Licence Lengths` (`LicenceLengthID`)
+    FOREIGN KEY (`lengthID`)
+    REFERENCES `imageoptim`.`Licence Lengths` (`licencelengthID`)
     ON DELETE RESTRICT
     ON UPDATE RESTRICT)
 ENGINE = InnoDB;
@@ -152,7 +152,7 @@ INSERT INTO `Licences` VALUES
 (3,"Licence C","Helps with java",false),
 (4,"Licence D","Helps with my sql",false);
 
-INSERT INTO `tiers`(LicenceID,minimumEmployees,maximumEmployees,startDate,endDate) VALUES
+INSERT INTO `Tiers`(licenceID,minimumEmployees,maximumEmployees,startDate,endDate) VALUES
 (1,1,1,'2021-01-01','2021-12-31'),
 (1,2,9,'2021-01-01','2021-12-31'),
 (1,10,49,'2021-01-01','2021-12-31'),
@@ -178,7 +178,7 @@ INSERT INTO `tiers`(LicenceID,minimumEmployees,maximumEmployees,startDate,endDat
 (4,1001,10000,'2021-01-01','2021-12-31'),
 (4,100001,null,'2021-01-01','2021-12-31');
 
-INSERT INTO `prices`(TierID,LengthID,price,startDate,endDate) VALUES
+INSERT INTO `Prices`(tierID,lengthID,price,startDate,endDate) VALUES
 (1,1,950.00,'2021-01-01','2021-12-31'),
 (2,1,950.00,'2021-01-01','2021-12-31'),
 (3,1,1250.00,'2021-01-01','2021-12-31'),
@@ -231,7 +231,7 @@ INSERT INTO `prices`(TierID,LengthID,price,startDate,endDate) VALUES
 (23,2,24000.00,'2021-01-01','2021-12-31'),
 (24,2,28000.00,'2021-01-01','2021-12-31');
 
-INSERT INTO `purchases`(CustomerID,TierID,LengthID,price,datePurchase,expirePurchase) VALUES
+INSERT INTO `Purchases`(customerID,tierID,lengthID,price,datePurchase,expirePurchase) VALUES
 (1,2,1,950.00,'2021-03-22','2022-03-22'),
 (2,7,2,99500.00,'2021-03-22','2022-03-22'),
 (3,5,2,24500.00,'2021-03-22','2022-03-22'),
@@ -248,7 +248,7 @@ INSERT INTO `purchases`(CustomerID,TierID,LengthID,price,datePurchase,expirePurc
 DELIMITER //
 CREATE PROCEDURE getListOfLicence()
 BEGIN 
-SELECT LicenceID, name From licences WHERE discontinued = false ORDER BY name;
+SELECT licenceID, name From licences WHERE discontinued = false ORDER BY name;
 END //
 DELIMITER ;
 
@@ -256,17 +256,17 @@ DELIMITER ;
 DELIMITER //
 CREATE PROCEDURE getTiersForLicence(IN parameter int(11))
 BEGIN 
-SELECT TierID,minimumEmployees,maximumEmployees FROM `tiers` WHERE LicenceID = parameter AND (CURDATE() between startDate and endDate );
+SELECT tierID,minimumEmployees,maximumEmployees FROM `Tiers` WHERE licenceID = parameter AND (CURDATE() between startDate and endDate );
 END //
 DELIMITER ;
 
 DELIMITER //
 CREATE PROCEDURE getLengthOfLicences(IN parameter int(11))
 BEGIN 
-SELECT distinctrow LicenceLengthID,length
-FROM `licence lengths`
-JOIN prices on prices.LengthID = `licence lengths`.LicenceLengthID
-JOIN tiers on tiers.TierID = prices.TierID
-WHERE tiers.LicenceID = parameter;
+SELECT distinctrow licencelengthID,length
+FROM `Licence Lengths`
+JOIN prices on prices.lengthID = `Licence Lengths`.licencelengthID
+JOIN tiers on tiers.tierID = prices.tierID
+WHERE tiers.licenceID = parameter;
 END //
 DELIMITER ;
