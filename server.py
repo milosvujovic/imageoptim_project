@@ -23,13 +23,6 @@ mysql = MySQL(app)
 def homePage():
     print("Loading page")
     return render_template('home.html', title = "Home", licences = readFromDatabaseUsingStoredProcedures("getListOfLicence()"))
-<<<<<<< HEAD
-=======
-
-@app.route("/DecideLicence")
-def licence():
-    return  render_template('licence.html', title = "ChooseLicence", tiers = readFromDatabaseUsingStoredProcedures("getDescriptionOfCompanySize()"), lengths = readFromDatabaseUsingStoredProcedures("getPossibleLicenceLength()"))
->>>>>>> 867ce3dc16dffed5654491fb08b7d62f8e33e0d6
 
 @app.route("/licence/<licenceID>")
 def selectLicence(licenceID):
