@@ -2,6 +2,7 @@
 DELIMITER //
 CREATE PROCEDURE getListOfLicence()
 BEGIN 
+<<<<<<< HEAD
 SELECT LicenceID, name From licences WHERE discontinued = false ORDER BY name;
 END //
 DELIMITER ;
@@ -29,3 +30,24 @@ DELIMITER ;
 
 CALL getLengthOfLicences(4);
 
+=======
+SELECT idLicence, name From licence ORDER BY name;
+END //
+DELIMITER ;
+
+-- Gets the compaines size
+DELIMITER //
+CREATE PROCEDURE getDescriptionOfCompanySize()
+BEGIN 
+SELECT * From `company size` ORDER BY minimumEmployees;
+END //
+DELIMITER ;
+
+-- Gets the possible licence lengths 
+DELIMITER //
+CREATE PROCEDURE getPossibleLicenceLength()
+BEGIN 
+SELECT * From `licence length`;
+END //
+DELIMITER ;
+>>>>>>> 867ce3dc16dffed5654491fb08b7d62f8e33e0d6
