@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS `imageoptim`.`Customer` (
   `postcode` VARCHAR(45) NULL,
   `country` VARCHAR(45) NOT NULL,
   `email` VARCHAR(45) NOT NULL,
+  `emailVerified` boolean DEFAULT FALSE,
   PRIMARY KEY (`idCustomer`),
   UNIQUE INDEX `idCompany_UNIQUE` (`idCustomer` ASC))
 ENGINE = INNODB;
@@ -36,9 +37,8 @@ DROP TABLE IF EXISTS `imageoptim`.`Company Size` ;
 
 CREATE TABLE IF NOT EXISTS `imageoptim`.`Company Size` (
   `idCompanySize` INT NOT NULL,
-  `sizeCategory` VARCHAR(45) NOT NULL,
   `minimumEmployees` INT NOT NULL,
-  `maximumEmployees` INT NOT NULL,
+  `maximumEmployees` INT,
   PRIMARY KEY (`idCompanySize`))
 ENGINE = INNODB;
 
@@ -52,6 +52,7 @@ CREATE TABLE IF NOT EXISTS `imageoptim`.`Licence` (
   `idLicence` INT NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(45) NOT NULL,
   `description` VARCHAR(45) NULL,
+  `discontinued` boolean default false,
   PRIMARY KEY (`idLicence`))
 ENGINE = INNODB;
 

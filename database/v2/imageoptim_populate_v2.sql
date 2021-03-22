@@ -1,30 +1,35 @@
 USE imageoptim;
 
 INSERT INTO `Company Size` VALUES
-(1,'Solo',1,1),
-(2,'Small',2,10),
-(3,'Medium',11,50),
-(4,'Large',51,100);
+(1,1,1),
+(2,2,9),
+(3,10,49),
+(4,50,99),
+(5,100,249),
+(6,250,499),
+(7,500,999),
+(8,1000,2999),
+(9,3000,null);
 
 INSERT INTO `Licence Length` VALUES
 (1,'annual'),
 (2,'permanent');
 
 INSERT INTO `Customer` VALUES
-(1,'example company','1 cardiff road','Cardiff','CF10 4FT','United Kingdom','example@email.com'),
-(2,'different company','2 newport road','Newport','NW01 5HJ','United Kingdom','different@email.com'),
-(3,'random company','3 swansea road','Swansea','SA1 4NT','United Kingdom','different@email.com'),
-(4,'random company','4 wrexham road','Wrexham','WR1 4NT','United Kingdom','different@email.com');
+(1,'example company','1 cardiff road','Cardiff','CF10 4FT','United Kingdom','example@email.com',false),
+(2,'different company','2 newport road','Newport','NW01 5HJ','United Kingdom','different@email.com',false),
+(3,'random company','3 swansea road','Swansea','SA1 4NT','United Kingdom','different@email.com',false),
+(4,'random company','4 wrexham road','Wrexham','WR1 4NT','United Kingdom','different@email.com',false);
 
 INSERT INTO `Licence` VALUES
-(1,"Licence A","Very helpful"),
-(2,"Licence B","Very helpful"),
-(3,"Licence C","Very helpful"),
-(4,"Licence D","Very helpful");
+(1,"Licence A","Very helpful",false),
+(2,"Licence B","Very helpful",false),
+(3,"Licence C","Very helpful",false),
+(4,"Licence D","Very helpful",false);
 
 INSERT INTO `Price` VALUES
-(1,1,1,1,10,'2020-01-01',NULL),
-(2,1,1,2,100,'2020-01-01',NULL),
+(1,1,1,1,950.00,'2020-01-01',NULL),
+(2,1,1,2,9500.00,'2020-01-01',NULL),
 (3,1,2,1,20,'2020-01-01',NULL),
 (4,1,2,2,200,'2020-01-01',NULL),
 (5,1,3,1,30,'2020-01-01',NULL),
@@ -55,6 +60,7 @@ INSERT INTO `Price` VALUES
 (30,4,3,2,450,'2020-01-01',NULL),
 (31,4,4,1,55,'2020-01-01',NULL),
 (32,4,4,2,550,'2020-01-01',NULL);
+
 
 INSERT INTO `Purchase` VALUES
 (1,10,1,1,1,1,'2021-01-01','2022-01-01'),
