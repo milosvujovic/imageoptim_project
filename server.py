@@ -22,8 +22,20 @@ mysql = MySQL(app)
 @app.route("/")
 def homePage():
     print("Loading page")
-    return render_template('home.html', title = "Home", licences = readLicencesFromDatabase())
+    return render_template('home.html', title = "Home", licences = readFromDatabaseUsingStoredProcedures("getListOfLicence()"))
+<<<<<<< HEAD
+=======
 
+@app.route("/DecideLicence")
+def licence():
+    return  render_template('licence.html', title = "ChooseLicence", tiers = readFromDatabaseUsingStoredProcedures("getDescriptionOfCompanySize()"), lengths = readFromDatabaseUsingStoredProcedures("getPossibleLicenceLength()"))
+>>>>>>> 867ce3dc16dffed5654491fb08b7d62f8e33e0d6
+
+@app.route("/licence/<licenceID>")
+def selectLicence(licenceID):
+    callTiers = "getTiersForLicence("+licenceID+")"
+    callLengths = "getLengthOfLicences("+licenceID+")"
+    return render_template('licence.html', title = "Licence", tiers = readFromDatabaseUsingStoredProcedures(callTiers), lengths= readFromDatabaseUsingStoredProcedures(callLengths))
 
 # Example connection to the database
 def attemptToReadFromDatabase():
@@ -32,18 +44,18 @@ def attemptToReadFromDatabase():
     mysql.connection.commit()
     cur.close()
 
-def readLicencesFromDatabase():
-    print("Reading from the database")
-    try:
-        cur = mysql.connection.cursor()
-        cur.execute("SELECT imageoptim.licence.idLicence, imageoptim.licence.name FROM imageoptim.licence ORDER BY imageoptim.licence.name;")
-        data = cur.fetchall()
-        cur.close()
-        print("Read the licences from the database")
-        return data
-    except Exception as e:
-        print("Error " + e)
-
+def readFromDatabaseUsingStoredProcedures(function):
+        command = "CALL " + function +";"
+        print("Reading from the database")
+        try:
+            cur = mysql.connection.cursor()
+            cur.execute(command)
+            data = cur.fetchall()
+            cur.close()
+            print("Succesfully from the database")
+            return data
+        except Exception as e:
+            print("Error " + e)
 
 if __name__ == "__main__":
     app.run(debug=True)
