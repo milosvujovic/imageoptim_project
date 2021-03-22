@@ -24,10 +24,11 @@ def homePage():
     print("Loading page")
     return render_template('home.html', title = "Home", licences = readFromDatabaseUsingStoredProcedures("getListOfLicence()"))
 
-@app.route("/DecideLicence")
-def licence():
-    return  render_template('licence.html', title = "ChooseLicence", tiers = readFromDatabaseUsingStoredProcedures("getDescriptionOfCompanySize()"), lengths = readFromDatabaseUsingStoredProcedures("getPossibleLicenceLength()"))
-
+@app.route("/licence/<licenceID>")
+def selectLicence(licenceID):
+    callTiers = "getTiersForLicence("+licenceID+")"
+    callLengths = "getLengthOfLicences("+licenceID+")"
+    return render_template('licence.html', title = "Licence", tiers = readFromDatabaseUsingStoredProcedures(callTiers), lengths= readFromDatabaseUsingStoredProcedures(callLengths))
 
 # Example connection to the database
 def attemptToReadFromDatabase():

@@ -8,8 +8,15 @@
             <h4>Select Tier</h4>
             {% for tier in tiers %}
               <div class="form-check">
+
                 <input class="form-check-input" type="radio" name="tier" id={{tier[0]}}  value={{tier[0]}} checked>
-                <label class="form-check-label" for={{tier[0]}}>{{tier[1]}} - ({{tier[2]}} -{{tier[3]}} employees)</label>
+                {%if tier[1] == 1%}
+                  <label class="form-check-label" for={{tier[0]}}>1 employee</label>
+                {%elif tier[2] == None%}
+                  <label class="form-check-label" for={{tier[0]}}>{{tier[1]}} + employee</label>
+                {%else%}
+                  <label class="form-check-label" for={{tier[0]}}>{{tier[1]}} - {{tier[2]}} employees</label>
+                {%endif%}
               </div>
             {% endfor %}
           </fieldset>

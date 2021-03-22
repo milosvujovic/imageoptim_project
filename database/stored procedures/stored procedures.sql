@@ -2,22 +2,30 @@
 DELIMITER //
 CREATE PROCEDURE getListOfLicence()
 BEGIN 
-SELECT idLicence, name From licence ORDER BY name;
+SELECT LicenceID, name From licences WHERE discontinued = false ORDER BY name;
 END //
 DELIMITER ;
+
+CALL getListOfLicence();
 
 -- Gets the compaines size
 DELIMITER //
-CREATE PROCEDURE getDescriptionOfCompanySize()
+CREATE PROCEDURE getTiersForLicence(IN parameter int(11))
 BEGIN 
-SELECT * From `company size` ORDER BY minimumEmployees;
+SELECT TierID,minimumEmployees,maximumEmployees FROM `tiers` WHERE LicenceID = parameter AND (CURDATE() between startDate and endDate );
 END //
 DELIMITER ;
 
--- Gets the possible licence lengths 
 DELIMITER //
-CREATE PROCEDURE getPossibleLicenceLength()
+CREATE PROCEDURE getLengthOfLicences(IN parameter int(11))
 BEGIN 
-SELECT * From `licence length`;
+SELECT distinctrow LicenceLengthID,length
+FROM `licence lengths`
+JOIN prices on prices.LengthID = `licence lengths`.LicenceLengthID
+JOIN tiers on tiers.TierID = prices.TierID
+WHERE tiers.LicenceID = parameter;
 END //
 DELIMITER ;
+
+CALL getLengthOfLicences(4);
+
