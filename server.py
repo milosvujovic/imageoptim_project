@@ -24,6 +24,11 @@ def homePage():
     print("Loading page")
     return render_template('home.html', title = "Home", licences = readFromDatabaseUsingStoredProcedures("getListOfLicence()"))
 
+@app.route("/customer")
+def customerPage():
+    print("Loading page")
+    return render_template('customer.html', title = "Customer Details")
+
 @app.route("/licence/<licenceID>")
 def selectLicence(licenceID):
     callTiers = "getTiersForLicence("+licenceID+")"

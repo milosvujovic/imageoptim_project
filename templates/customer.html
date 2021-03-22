@@ -1,0 +1,52 @@
+{% extends 'template.html' %}
+
+{% block MainContents %}
+<div class="container-fluid">
+  <h1 class="display-4 text-center">Customer Details</h1>
+  <form id='customerDetails' method='post' class="form-group">
+    <!-- action="/url" -->
+    <div class="form-group mb-4">
+      <label class="mb-0"><h6 class="font-weight-bold small">Company Name</h6></label>
+      <input name="name" class="form-control w-75" placeholder="Please enter the company name" required>
+    </div>
+
+    <div class="form-group mb-4">
+      <label class="mb-0"><h6 class="font-weight-bold small">Contact Person Name</h6></label>
+      <input name="nameOfContactPerson" type="text" class="form-control w-75" placeholder="Please enter your name">
+    </div>
+
+    <div class="form-group mb-4">
+      <label class="mb-0"><h6 class="font-weight-bold small">Email</h6></label>
+      <input name="email" type="email" size="30" class="form-control w-75" placeholder="Please enter the contact email address" required>
+    </div>
+
+    <div class="form-group mb-4">
+      <label class="mb-0"><h6 class="font-weight-bold small">Street Address</h6></label>
+      <input name="street" class="form-control w-75" placeholder="Please enter the company street address">
+    </div>
+
+    <div class="form-group mb-4">
+      <label class="mb-0"><h6 class="font-weight-bold small">City</h6></label>
+      <input name="city" type="text" class="form-control w-75" placeholder="Please enter the company's city">
+    </div>
+
+    <div class="form-group mb-4">
+      <label class="mb-0"><h6 class="font-weight-bold small">Postcode</h6></label>
+      <input name="postcode" class="form-control w-75" placeholder="Please enter the company's postcode">
+    </div>
+
+    <div class="form-group mb-4">
+      <label class="mb-0"><h6 class="font-weight-bold small">Country</h6></label>
+      <input name="country" type="text" class="form-control w-75" placeholder="Please enter your country" required>
+    </div>
+
+    <div class="form-group mb-4">
+      <label class="mb-0"><h6 class="font-weight-bold small">VAT Number</h6></label>
+      <input name="vatNumber" type="number" class="form-control w-75" placeholder="Please enter the company's VAT number">
+    </div>
+
+    <button class="btn btn-primary">Submit Details</button>
+  </form>
+  <button class="btn btn-primary" onClick="location.href='/'">Back</button>
+</div>
+{% endblock %}
