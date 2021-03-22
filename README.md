@@ -2,7 +2,7 @@
 
 How to run the server
 
-pipenv install MySQL
-pipenv install flask-mysqldb
-pipenv shell
-py server.py
+pipenv install MySQL,
+pipenv install flask-mysqldb,
+pipenv shell,
+py server.py,
