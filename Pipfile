@@ -9,6 +9,7 @@ verify_ssl = true
 shell = "*"
 flask = "*"
 flask-mysqldb = "*"
+mysql = "*"
 
 [requires]
 python_version = "3.8"

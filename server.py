@@ -38,7 +38,8 @@ def purchaseConfirmationPage():
 def selectLicence(licenceID):
     callTiers = "getTiersForLicence("+licenceID+")"
     callLengths = "getLengthOfLicences("+licenceID+")"
-    return render_template('licence.html', title = "Licence", tiers = readFromDatabaseUsingStoredProcedures(callTiers), lengths= readFromDatabaseUsingStoredProcedures(callLengths))
+    callDescription = "getDescription("+licenceID+")"
+    return render_template('licence.html', title = "Licence", tiers = readFromDatabaseUsingStoredProcedures(callTiers), lengths= readFromDatabaseUsingStoredProcedures(callLengths), description = readFromDatabaseUsingStoredProcedures(callDescription))
 
 # Example connection to the database
 def attemptToReadFromDatabase():

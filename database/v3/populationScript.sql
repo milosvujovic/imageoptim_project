@@ -12,10 +12,10 @@ INSERT INTO `Licence Lengths` VALUES
 (2,'perpetual');
 
 INSERT INTO `Licences` VALUES
-(1,"Licence A","Very helpful",false),
-(2,"Licence B","Mildly helpful",false),
-(3,"Licence C","Helps with java",false),
-(4,"Licence D","Helps with my sql",false);
+(1,"Licence A","Very helpful" ,false),
+(2,"Licence B","Mildly helpful" ,false),
+(3,"Licence C","Helps with java" ,false),
+(4,"Licence D","Helps with my sql" ,false);
 
 INSERT INTO `tiers`(LicenceID,minimumEmployees,maximumEmployees,startDate,endDate) VALUES
 (1,1,1,'2021-01-01','2021-12-31'),
