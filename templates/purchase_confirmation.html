@@ -1,0 +1,11 @@
+{% extends 'template.html' %}
+
+{% block MainContents %}
+<div class="container-fluid">
+  <h1 class="display-4 text-center">Purchase Confirmation</h1>
+  <p>Purchase was successful</p>
+  <a href='/static/invoice/invoice.pdf' download>
+    <button class="btn btn-primary">Invoice</button>
+  </a>
+</div>
+{% endblock %}
