@@ -29,6 +29,11 @@ def customerPage():
     print("Loading page")
     return render_template('customer.html', title = "Customer Details")
 
+@app.route("/purchase/confirmation")
+def purchaseConfirmationPage():
+    print("Loading page")
+    return render_template('purchase_confirmation.html', title = "Purchase Confirmation")
+
 @app.route("/licence/<licenceID>")
 def selectLicence(licenceID):
     callTiers = "getTiersForLicence("+licenceID+")"
