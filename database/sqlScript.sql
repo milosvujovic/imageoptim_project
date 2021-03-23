@@ -6,7 +6,27 @@ SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,N
 -- -----------------------------------------------------
 DROP SCHEMA IF EXISTS `imageoptim`;
 CREATE SCHEMA IF NOT EXISTS `imageoptim`;
-USE `imageoptim` ;
+USE `imageoptim`;
+
+-- -----------------------------------------------------
+-- Table `imageoptim`.`Countries`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `imageoptim`.`Countries` (
+  `isoCode` VARCHAR(3) NOT NULL,
+  `name` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`isoCode`),
+  UNIQUE INDEX `isoCode_UNIQUE` (`isoCode` ASC))
+ENGINE = InnoDB;
+
+-- -----------------------------------------------------
+-- Table `imageoptim`.`Admin`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `imageoptim`.`Admin` (
+  `adminID` INT NOT NULL,
+  `email` VARCHAR(45) NOT NULL,
+  `username` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`adminID`))
+ENGINE = InnoDB;
 
 -- -----------------------------------------------------
 -- Table `imageoptim`.`Customers`
@@ -17,13 +37,19 @@ CREATE TABLE IF NOT EXISTS `imageoptim`.`Customers` (
   `street` VARCHAR(45) NULL,
   `city` VARCHAR(45) NULL,
   `postcode` VARCHAR(20) NULL,
-  `country` VARCHAR(45) NOT NULL,
+  `isoCode` VARCHAR(3) NOT NULL,
   `email` VARCHAR(45) NOT NULL,
   `emailVerified` TINYINT NULL DEFAULT 0,
   `nameOfContactPerson` VARCHAR(45) NULL,
   `vatNumber` VARCHAR(20) NULL,
   PRIMARY KEY (`customerID`),
-  UNIQUE INDEX `idCompany_UNIQUE` (`customerID` ASC) )
+  UNIQUE INDEX `idCompany_UNIQUE` (`customerID` ASC),
+  INDEX `fk_Customers_Countries1_idx` (`isoCode` ASC),
+  CONSTRAINT `fk_Customers_Countries1`
+    FOREIGN KEY (`isoCode`)
+    REFERENCES `imageoptim`.`Countries` (`isoCode`)
+    ON DELETE RESTRICT
+    ON UPDATE RESTRICT)
 ENGINE = InnoDB;
 
 
@@ -135,11 +161,20 @@ SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
 
+INSERT INTO `Admin` VALUES
+(1,"admin@email.com","vipadmin");
+
+INSERT INTO `Countries` VALUES	
+("GBR","United Kingdom"),
+("USA","United States of America"),
+("CHE","Switzerland"),
+("PSE","Palestine");
+
 INSERT INTO `Customers` VALUES
-(1,'example company','1 cardiff road','Cardiff','CF10 4FT','United Kingdom','example@email.com',false,"Karen Douglas","10191882"),
-(2,'different company','2 newport road','Newport','NW01 5HJ','United Kingdom','different@email.com',false,"Claire White","10195882"),
-(3,'random company','3 swansea road','Swansea','SA1 4NT','United Kingdom','different@email.com',false,"Tony Stevens","10194882"),
-(4,'random company','4 wrexham road','Wrexham','WR1 4NT','United Kingdom','different@email.com',false,"Stewart Smith","10131882");
+(1,'example company','1 cardiff road','Cardiff','CF10 4FT','GBR','example@email.com',false,"Karen Douglas","10191882"),
+(2,'different company','2 newport road','Newport','NW01 5HJ','GBR','different@email.com',false,"Claire White","10195882"),
+(3,'random company','3 swansea road','Swansea','SA1 4NT','GBR','different@email.com',false,"Tony Stevens","10194882"),
+(4,'random company','4 wrexham road','Wrexham','WR1 4NT','GBR','different@email.com',false,"Stewart Smith","10131882");
 
 INSERT INTO `Licence Lengths` VALUES
 (1,'annual'),
