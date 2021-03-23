@@ -27,8 +27,7 @@ def homePage():
 
 @app.route("/customer")
 def customerPage():
-    print("Loading page")
-    return render_template('customer.html', title = "Customer Details")
+    return render_template('customer.html', title = "Customer Details", countries = readFromDatabaseUsingStoredProcedures("getCountries()"))
 
 @app.route("/purchase/confirmation")
 def purchaseConfirmationPage():
