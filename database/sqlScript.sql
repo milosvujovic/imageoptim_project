@@ -270,3 +270,23 @@ JOIN tiers on tiers.tierID = prices.tierID
 WHERE tiers.licenceID = parameter;
 END //
 DELIMITER ;
+
+
+DELIMITER //
+CREATE PROCEDURE insertCustomer(
+IN name varchar(45),
+IN street varchar(45),
+IN city varchar(45),
+IN postcode varchar(20),
+IN country varchar(45),
+IN email varchar(45),
+IN NameOfContactPerson varchar(45),
+IN VATNumber varchar(20))
+
+BEGIN 
+INSERT INTO `Customers` (name,street,city,postcode,country,email,emailVerified,NameOfContactPerson,VATNumber)VALUES (name,street,city,postcode,country,email,false,NameOfContactPerson,VATNumber);
+END //
+DELIMITER ;
+
+CALL insertCustomer('Group 10', 'Parkfield','Cardiff','GU7 1tp', 'wales','owain.lansdowne@btinternet.com','Owain Lansdowne','11111');
+
