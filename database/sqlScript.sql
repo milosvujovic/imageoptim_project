@@ -314,3 +314,17 @@ FROM `Countries`
 ORDER BY name ASC;
 END //
 DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE getBasketDetails(
+IN tierParameter int,
+IN lengthParameter int)
+BEGIN
+SELECT name,minimumEmployees,maximumEmployees,length,price
+FROM licences
+JOIN tiers ON tiers.licenceID = licences.licenceID
+JOIN prices ON prices.tierID = tiers.tierID
+JOIN `licence lengths` on `licence lengths`.licencelengthID = prices.lengthID
+WHERE tiers.tierID = tierParameter AND lengthParameter = licencelengthID AND (CURDATE() between prices.startDate and prices.endDate);
+END //
+DELIMITER ;

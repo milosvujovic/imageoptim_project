@@ -1,0 +1,36 @@
+{% extends 'template.html' %}
+{% block MainContents %}
+  <div class="container-fluid">
+    <h1 class="display-4 text-center">Basket</h1>
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th scope="col">Licence</th>
+            <th scope="col">Number of Employees</th>
+            <th scope="col">Length</th>
+            <th scope="col">Price</th>
+            <th scope="col"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in basket %}
+          <tr>
+              <th scope="row">{{item[0]}}</th>
+              <td>{{item[1]}} - {{item[2]}}</td>
+              <td>{{item[3]}}</td>
+              <td>${{item[4]}}</td>
+              <td><a href = "/remove"><button type="submit" class="btn btn-primary">Remove</button></a></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      {%if size != 0%}
+      <div class="col align-items-end container">
+        <a href = "/customer" class = "p-1">
+          <button type="submit" class="btn btn-primary" >Proceed to Checkout</button>
+        <a>
+      </div>
+      {%endif%}
+  </div>
+{% endblock %}
