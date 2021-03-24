@@ -78,7 +78,6 @@ def licenceForm():
     if request.method == 'POST':
         session['tier'] =  request.form['tier']
         session['length'] = request.form['length']
-    testSession()
     return redirect('/basket')
 
 # Example connection to the database
