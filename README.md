@@ -6,3 +6,6 @@ pipenv install MySQL,
 pipenv install flask-mysqldb,
 pipenv shell,
 py server.py,
+
+
+Email Address - group11IMAGEOPTIM@outlook.com
