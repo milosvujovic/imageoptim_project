@@ -1,7 +1,7 @@
 # Imports
 import os
 import json
-from flask import Flask, render_template, request,redirect,make_response
+from flask import Flask, render_template, request,redirect,make_response,session
 from flask_mysqldb import MySQL
 
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
@@ -13,11 +13,9 @@ app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = 'comsc'
 app.config['MYSQL_DB'] = 'imageoptim'
-app.secret_key = 'fj590Rt?h40gg'
+
 
 mysql = MySQL(app)
-
-
 
 #Webpage Routes
 @app.route("/")
@@ -25,10 +23,12 @@ def homePage():
     print("Loading page")
     return render_template('home.html', title = "Home", licences = readFromDatabaseUsingStoredProcedures("getListOfLicence()"))
 
-@app.route("/customer")
+@app.route("/checkout")
 def customerPage():
-    print("Loading page")
-    return render_template('customer.html', title = "Customer Details")
+    if 'tier' in session and 'length' in session:
+        return render_template('customer.html', title = "Customer Details")
+    else:
+        return render_template('checkoutWarning.html', title = "Checkout")
 
 @app.route("/purchase/confirmation")
 def purchaseConfirmationPage():
@@ -41,13 +41,19 @@ def selectLicence(licenceID):
     callLengths = "getLengthOfLicences("+licenceID+")"
     return render_template('licence.html', title = "Licence", tiers = readFromDatabaseUsingStoredProcedures(callTiers), lengths= readFromDatabaseUsingStoredProcedures(callLengths))
 
-# @app.route("/gatherLicenceData", methods=['POST'])
-# def licenceForm():
-#     if request.method == 'POST':
-#         resp = make_response(customerPage())
-#         resp.set_cookie('tier', request.form['tier'])
-#         resp.set_cookie('length', request.form['length'])
-#         return resp
+@app.route("/basket")
+def basketPage():
+    if 'tier' in session and 'length' in session:
+        callItem = "getBasketDetails(" + session.get('tier') +","+ session.get('length') + ")"
+        return render_template('basket.html', title = "Basket", basket =  readFromDatabaseUsingStoredProcedures(callItem), size = 1)
+    else:
+        return render_template('basket.html', title = "Basket", basket =  [], size = 0)
+
+@app.route("/remove")
+def removeFromBasket():
+     session.pop('tier', None)
+     session.pop('length', None)
+     return redirect('/basket')
 
 @app.route("/gatherCustomerData", methods=['POST'])
 def customerForm():
@@ -62,6 +68,13 @@ def customerForm():
         vatNumber =request.form['vatNumber']
     return "Read form"
 
+@app.route("/gatherLicenceData", methods=['POST'])
+def licenceForm():
+    if request.method == 'POST':
+        session['tier'] =  request.form['tier']
+        session['length'] = request.form['length']
+    testSession()
+    return redirect('/basket')
 
 # Example connection to the database
 def attemptToReadFromDatabase():
@@ -84,5 +97,10 @@ def readFromDatabaseUsingStoredProcedures(function):
         except Exception as e:
             print("Error " + e)
 
+def testSession():
+    print(session.get('tier'))
+    print(session.get('length'))
+
 if __name__ == "__main__":
+    app.secret_key = 'fj590Rt?h40gg'
     app.run(debug=True)
