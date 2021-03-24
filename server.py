@@ -124,6 +124,8 @@ def sentEmail(recipient,name, body):
     msg.html = render_template('emailConfirmation.html',basket = body, name = name)
     with app.open_resource('static\invoice\invoice.pdf') as fp:
         msg.attach('invoice.pdf', "invoice/pdf", fp.read())
+    with app.open_resource('static\contract\contract.pdf') as fp:
+        msg.attach('contract.pdf', "contract/pdf", fp.read())
     mail.send(msg)
 
 if __name__ == "__main__":
