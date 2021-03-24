@@ -57,6 +57,7 @@ def removeFromBasket():
 
 @app.route("/gatherCustomerData", methods=['POST'])
 def customerForm():
+    print("Requesting data")
     if request.method == 'POST':
         name = request.form['name']
         contactPerson = request.form['nameOfContactPerson']
@@ -64,9 +65,14 @@ def customerForm():
         street = request.form['street']
         city = request.form['city']
         postcode =request.form['postcode']
-        country =request.form['country']
+        country =request.form['countries']
         vatNumber =request.form['vatNumber']
-    return "Read form"
+        id = attemptToWriteToDatabaseUsingFunction(name, street, city, postcode,country,email,contactPerson,vatNumber)
+        writePurchaseIntoDatabase(id)
+        session.pop('tier', None)
+        session.pop('length', None)
+        return purchaseConfirmationPage()
+    return "Recorded purchase"
 
 @app.route("/gatherLicenceData", methods=['POST'])
 def licenceForm():
@@ -83,6 +89,21 @@ def attemptToReadFromDatabase():
     mysql.connection.commit()
     cur.close()
 
+def attemptToWriteToDatabaseUsingFunction(name, street, city, postcode,country,email,contactPerson,vatNumber):
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT createCustomer(%s,%s,%s,%s,%s,%s,%s,%s) as 'ID Number';", (name, street, city, postcode,country,email,contactPerson,vatNumber))
+    mysql.connection.commit()
+    data = cur.fetchall()
+    cur.close()
+    return data
+
+def writePurchaseIntoDatabase(customerID):
+    cur = mysql.connection.cursor()
+    cur.execute("CALL recordPurchase(%s,%s,%s);", (session.get('tier'), session.get('length'), customerID))
+    mysql.connection.commit()
+    data = cur.fetchall()
+    cur.close()
+    print(data)
 
 def readFromDatabaseUsingStoredProcedures(function):
         command = "CALL " + function +";"
