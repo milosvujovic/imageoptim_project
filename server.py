@@ -20,7 +20,6 @@ mysql = MySQL(app)
 #Webpage Routes
 @app.route("/")
 def homePage():
-    print("Loading page")
     return render_template('home.html', title = "Home", licences = readFromDatabaseUsingStoredProcedures("getListOfLicence()"))
 
 @app.route("/checkout")
@@ -29,11 +28,6 @@ def customerPage():
         return render_template('customer.html', title = "Customer Details", countries = readFromDatabaseUsingStoredProcedures("getCountries()"))
     else:
         return render_template('checkoutWarning.html', title = "Checkout")
-
-@app.route("/purchase/confirmation")
-def purchaseConfirmationPage():
-    print("Loading page")
-    return render_template('purchase_confirmation.html', title = "Purchase Confirmation")
 
 @app.route("/licence/<licenceID>")
 def selectLicence(licenceID):
@@ -49,12 +43,17 @@ def basketPage():
     else:
         return render_template('basket.html', title = "Basket", basket =  [], size = 0)
 
+def purchaseConfirmationPage():
+    return render_template('purchase_confirmation.html', title = "Purchase Confirmation")
+
 @app.route("/remove")
 def removeFromBasket():
      session.pop('tier', None)
      session.pop('length', None)
      return redirect('/basket')
 
+
+# Reading forms.
 @app.route("/gatherCustomerData", methods=['POST'])
 def customerForm():
     print("Requesting data")
@@ -83,12 +82,6 @@ def licenceForm():
     return redirect('/basket')
 
 # Example connection to the database
-def attemptToReadFromDatabase():
-    cur = mysql.connection.cursor()
-    cur.execute("INSERT INTO tier(idTier, type) VALUES (%s, %s)", (4, "global company"))
-    mysql.connection.commit()
-    cur.close()
-
 def attemptToWriteToDatabaseUsingFunction(name, street, city, postcode,country,email,contactPerson,vatNumber):
     cur = mysql.connection.cursor()
     cur.execute("SELECT createCustomer(%s,%s,%s,%s,%s,%s,%s,%s) as 'ID Number';", (name, street, city, postcode,country,email,contactPerson,vatNumber))
@@ -117,10 +110,6 @@ def readFromDatabaseUsingStoredProcedures(function):
             return data
         except Exception as e:
             print("Error " + e)
-
-def testSession():
-    print(session.get('tier'))
-    print(session.get('length'))
 
 if __name__ == "__main__":
     app.secret_key = 'fj590Rt?h40gg'
