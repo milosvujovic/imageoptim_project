@@ -26,7 +26,7 @@ def homePage():
 @app.route("/checkout")
 def customerPage():
     if 'tier' in session and 'length' in session:
-        return render_template('customer.html', title = "Customer Details")
+    return render_template('customer.html', title = "Customer Details", countries = readFromDatabaseUsingStoredProcedures("getCountries()"))
     else:
         return render_template('checkoutWarning.html', title = "Checkout")
 

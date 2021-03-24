@@ -306,23 +306,14 @@ WHERE tiers.licenceID = parameter;
 END //
 DELIMITER ;
 
-
 DELIMITER //
-CREATE PROCEDURE insertCustomer(
-IN name varchar(45),
-IN street varchar(45),
-IN city varchar(45),
-IN postcode varchar(20),
-IN country varchar(45),
-IN email varchar(45),
-IN NameOfContactPerson varchar(45),
-IN VATNumber varchar(20))
-
+CREATE PROCEDURE getCountries()
 BEGIN 
-INSERT INTO `Customers` (name,street,city,postcode,country,email,emailVerified,NameOfContactPerson,VATNumber)VALUES (name,street,city,postcode,country,email,false,NameOfContactPerson,VATNumber);
+SELECT distinctrow isoCode,name
+FROM `Countries`
+ORDER BY name ASC;
 END //
 DELIMITER ;
-
 
 DELIMITER //
 CREATE PROCEDURE getBasketDetails(
@@ -337,5 +328,3 @@ JOIN `licence lengths` on `licence lengths`.licencelengthID = prices.lengthID
 WHERE tiers.tierID = tierParameter AND lengthParameter = licencelengthID AND (CURDATE() between prices.startDate and prices.endDate);
 END //
 DELIMITER ;
-
-
