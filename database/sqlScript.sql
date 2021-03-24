@@ -328,3 +328,69 @@ JOIN `licence lengths` on `licence lengths`.licencelengthID = prices.lengthID
 WHERE tiers.tierID = tierParameter AND lengthParameter = licencelengthID AND (CURDATE() between prices.startDate and prices.endDate);
 END //
 DELIMITER ;
+
+
+DELIMITER $$
+DROP TRIGGER IF EXISTS imageoptim.getIDNumber$$
+CREATE TRIGGER customers_AFTER_INSERT
+AFTER INSERT ON `customers` FOR EACH ROW
+BEGIN 
+	SET @idNumber = NEW.customerID;
+END $$
+
+
+DELIMITER //
+CREATE FUNCTION `createCustomer`(name varchar(45),
+street varchar(45),
+city varchar(45),
+postcode varchar(20),
+isoCode varchar(45),
+email varchar(45),
+NameOfContactPerson varchar(45),
+VATNumber varchar(20)) RETURNS int(11)
+BEGIN
+INSERT INTO `Customers` (name,street,city,postcode,isoCode,email,emailVerified,NameOfContactPerson,VATNumber)VALUES (name,street,city,postcode,isoCode,email,false,NameOfContactPerson,VATNumber);
+RETURN @idNumber;
+END //
+
+DELIMITER //
+CREATE FUNCTION `getPrice`(tierParameter int,
+lengthParameter int) RETURNS double
+BEGIN
+RETURN (SELECT price
+FROM prices
+WHERE prices.tierID = tierParameter AND lengthParameter = prices.lengthID AND (CURDATE() between prices.startDate and prices.endDate));
+END //
+
+DELIMITER //
+CREATE FUNCTION `getLength`(lengthParameter int) RETURNS int
+BEGIN
+IF lengthParameter = 1
+THEN 
+RETURN 1;
+ELSEIF lengthParameter = 3
+THEN
+RETURN 10;
+ELSE
+RETURN -1;
+END IF;
+END //
+
+DELIMITER //
+DROP PROCEDURE IF EXISTS imageoptim.recordPurchase//
+CREATE PROCEDURE recordPurchase(
+IN tierParameter int,
+IN lengthParameter int,
+IN customerParameter int)
+BEGIN
+SET @priceValue = (SELECT getPrice(tierParameter,lengthParameter));
+SET @numberOfYears = (SELECT getLength(lengthParameter));
+IF @numberOfYears = -1
+THEN 
+SET @endDate = null;
+ELSE
+SET @endDate = DATE_ADD(now(), INTERVAL @numberOfYears YEAR);
+END IF;
+INSERT INTO purchases (customerID,tierID,price,datePurchase,expirePurchase,lengthID) VALUES (customerParameter,tierParameter,@priceValue, date(now()),@endDate,lengthParameter);
+END //
+DELIMITER ;
