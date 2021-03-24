@@ -3,6 +3,7 @@ import os
 import json
 from flask import Flask, render_template, request,redirect,make_response,session
 from flask_mysqldb import MySQL
+from flask_mail import Mail, Message
 
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
 
@@ -13,8 +14,14 @@ app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = 'comsc'
 app.config['MYSQL_DB'] = 'imageoptim'
+app.config['MAIL_SERVER']='smtp.office365.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USERNAME'] = 'group11IMAGEOPTIM@outlook.com'
+app.config['MAIL_PASSWORD'] = '1m@g30ptim'
+app.config["MAIL_USE_SSL:1123"] = True
+app.config["MAIL_USE_TLS"] = True
 
-
+mail = Mail(app)
 mysql = MySQL(app)
 
 #Webpage Routes
@@ -68,6 +75,8 @@ def customerForm():
         vatNumber =request.form['vatNumber']
         id = attemptToWriteToDatabaseUsingFunction(name, street, city, postcode,country,email,contactPerson,vatNumber)
         writePurchaseIntoDatabase(id)
+        callItem = "getBasketDetails(" + session.get('tier') +","+ session.get('length') + ")"
+        sentEmail(email, contactPerson, readFromDatabaseUsingStoredProcedures(callItem))
         session.pop('tier', None)
         session.pop('length', None)
         return purchaseConfirmationPage()
@@ -109,6 +118,15 @@ def readFromDatabaseUsingStoredProcedures(function):
             return data
         except Exception as e:
             print("Error " + e)
+
+def sentEmail(recipient,name, body):
+    msg = Message(subject='Confirmation Email',sender='group11IMAGEOPTIM@outlook.com', recipients = [recipient])
+    msg.html = render_template('emailConfirmation.html',basket = body, name = name)
+    with app.open_resource('static\invoice\invoice.pdf') as fp:
+        msg.attach('invoice.pdf', "invoice/pdf", fp.read())
+    with app.open_resource('static\contract\contract.pdf') as fp:
+        msg.attach('contract.pdf', "contract/pdf", fp.read())
+    mail.send(msg)
 
 if __name__ == "__main__":
     app.secret_key = 'fj590Rt?h40gg'
