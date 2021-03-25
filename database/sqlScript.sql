@@ -162,7 +162,7 @@ SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
 
 INSERT INTO `Admin` VALUES
-(1,"admin@email.com","vipadmin");
+(1,"group11IMAGEOPTIM@outlook.com","vipadmin");
 
 INSERT INTO `Countries` VALUES	
 ("GBR","United Kingdom"),
@@ -392,5 +392,11 @@ ELSE
 SET @endDate = DATE_ADD(now(), INTERVAL @numberOfYears YEAR);
 END IF;
 INSERT INTO purchases (customerID,tierID,price,datePurchase,expirePurchase,lengthID) VALUES (customerParameter,tierParameter,@priceValue, date(now()),@endDate,lengthParameter);
+END //
+DELIMITER ;
+DELIMITER //
+CREATE PROCEDURE getAdminEmail()
+BEGIN
+SELECT distinct(email) FROM admin;
 END //
 DELIMITER ;

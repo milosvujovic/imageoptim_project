@@ -1,0 +1,43 @@
+{% extends 'emailTemplate.html' %}
+{% block MainContents %}
+  <div class="container-fluid">
+    <p>Dear Admin,</p>
+    <p>We are pleased to confirm that an order has gone through</p>
+    <p>Below is the details about the order.</p>
+    <p>Details about the Customer</p>
+    <p>Customer - {{customer}}</p>
+    <p>Employee Name - {{employeeName}}</p>
+    <p>Email Address - {{emailAddress}}</p>
+    <p>Attached is the contract.</p>
+  </div>
+  <div class="container-fluid">
+    <h1 class="display-4 text-center">Order</h1>
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th scope="col">Licence</th>
+            <th scope="col">Number of Employees</th>
+            <th scope="col">Length</th>
+            <th scope="col">Price</th>
+            <th scope="col"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in basket %}
+          <tr>
+              <td>{{item[0]}}</td>
+              {%if item[2] == 1%}
+                <td>{{item[1]}} Employee</td>
+              {%elif item[2] == None%}
+                <td>{{item[1]}} + Employees</td>
+              {%else%}
+                <td>{{item[1]}} - {{item[2]}} Employees</td>
+              {%endif%}
+              <td>{{item[3]}}</td>
+              <td>${{item[4]}}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+  </div>
+{% endblock %}

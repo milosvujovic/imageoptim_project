@@ -21,7 +21,13 @@
           {% for item in basket %}
           <tr>
               <td>{{item[0]}}</td>
-              <td>{{item[1]}} - {{item[2]}}</td>
+              {%if item[2] == 1%}
+                <td>{{item[1]}} Employee</td>
+              {%elif item[2] == None%}
+                <td>{{item[1]}} + Employees</td>
+              {%else%}
+                <td>{{item[1]}} - {{item[2]}} Employees</td>
+              {%endif%}
               <td>{{item[3]}}</td>
               <td>${{item[4]}}</td>
           </tr>

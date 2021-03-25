@@ -14,6 +14,7 @@ app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = 'comsc'
 app.config['MYSQL_DB'] = 'imageoptim'
+# Email settings
 app.config['MAIL_SERVER']='smtp.office365.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USERNAME'] = 'group11IMAGEOPTIM@outlook.com'
@@ -29,6 +30,7 @@ mysql = MySQL(app)
 def homePage():
     return render_template('home.html', title = "Home", licences = readFromDatabaseUsingStoredProcedures("getListOfLicence()"))
 
+# Displays checkout page asking for users details.
 @app.route("/checkout")
 def customerPage():
     if 'tier' in session and 'length' in session:
@@ -36,12 +38,15 @@ def customerPage():
     else:
         return render_template('checkoutWarning.html', title = "Checkout")
 
+# Displays page with options to select a licence
 @app.route("/licence/<licenceID>")
 def selectLicence(licenceID):
     callTiers = "getTiersForLicence("+licenceID+")"
     callLengths = "getLengthOfLicences("+licenceID+")"
     return render_template('licence.html', title = "Licence", tiers = readFromDatabaseUsingStoredProcedures(callTiers), lengths= readFromDatabaseUsingStoredProcedures(callLengths))
 
+# Displays basket page.
+# Having read the details about each item from the database.
 @app.route("/basket")
 def basketPage():
     if 'tier' in session and 'length' in session:
@@ -50,11 +55,13 @@ def basketPage():
     else:
         return render_template('basket.html', title = "Basket", basket =  [], size = 0)
 
+# Displays purchase confirmation page
 def purchaseConfirmationPage():
     return render_template('purchase_confirmation.html', title = "Purchase Confirmation")
 
 @app.route("/remove")
 def removeFromBasket():
+    # Removes everything from the basket and redirects them to the basket
      session.pop('tier', None)
      session.pop('length', None)
      return redirect('/basket')
@@ -65,32 +72,33 @@ def removeFromBasket():
 def customerForm():
     print("Requesting data")
     if request.method == 'POST':
-        name = request.form['name']
-        contactPerson = request.form['nameOfContactPerson']
-        email = request.form['email']
-        street = request.form['street']
-        city = request.form['city']
-        postcode =request.form['postcode']
-        country =request.form['countries']
-        vatNumber =request.form['vatNumber']
-        id = attemptToWriteToDatabaseUsingFunction(name, street, city, postcode,country,email,contactPerson,vatNumber)
-        writePurchaseIntoDatabase(id)
-        callItem = "getBasketDetails(" + session.get('tier') +","+ session.get('length') + ")"
-        sentEmail(email, contactPerson, readFromDatabaseUsingStoredProcedures(callItem))
-        session.pop('tier', None)
-        session.pop('length', None)
-        return purchaseConfirmationPage()
-    return "Recorded purchase"
+        # Stores the customer details in a dictionary in the server session storage
+        session['customer'] = {}
+        session['customer']['name'] = request.form['name']
+        session['customer']['nameOfContactPerson'] = request.form['nameOfContactPerson']
+        session['customer']['email'] = request.form['email']
+        session['customer']['street'] = request.form['street']
+        session['customer']['city'] = request.form['city']
+        session['customer']['country'] = request.form['countries']
+        session['customer']['postcode'] = request.form['postcode']
+        session['customer']['vatNumber'] = request.form['vatNumber']
+        # Calls function to process transactions
+        return processTransaction()
+    return "Error with form"
 
 @app.route("/gatherLicenceData", methods=['POST'])
 def licenceForm():
     if request.method == 'POST':
+        # Stores the licence selected in server session storage
         session['tier'] =  request.form['tier']
         session['length'] = request.form['length']
+    # Redirects them to the basket
     return redirect('/basket')
 
-# Example connection to the database
-def attemptToWriteToDatabaseUsingFunction(name, street, city, postcode,country,email,contactPerson,vatNumber):
+
+# Database Functions
+def writeToDatabaseWithCustomerDetails(name, street, city, postcode,country,email,contactPerson,vatNumber):
+    # Writes to the database with details of the customer
     cur = mysql.connection.cursor()
     cur.execute("SELECT createCustomer(%s,%s,%s,%s,%s,%s,%s,%s) as 'ID Number';", (name, street, city, postcode,country,email,contactPerson,vatNumber))
     mysql.connection.commit()
@@ -99,6 +107,7 @@ def attemptToWriteToDatabaseUsingFunction(name, street, city, postcode,country,e
     return data
 
 def writePurchaseIntoDatabase(customerID):
+    # Writes to the database with details of the purchase
     cur = mysql.connection.cursor()
     cur.execute("CALL recordPurchase(%s,%s,%s);", (session.get('tier'), session.get('length'), customerID))
     mysql.connection.commit()
@@ -119,14 +128,54 @@ def readFromDatabaseUsingStoredProcedures(function):
         except Exception as e:
             print("Error " + e)
 
-def sentEmail(recipient,name, body):
+
+# Functions
+def sentCustomerEmail(recipient,name, body):
+    # Prepares the email with the main body of the email being a html template
     msg = Message(subject='Confirmation Email',sender='group11IMAGEOPTIM@outlook.com', recipients = [recipient])
-    msg.html = render_template('emailConfirmation.html',basket = body, name = name)
+    msg.html = render_template('emailConfirmationCustomer.html',basket = body, name = name)
+    # Attaches the invoice file
     with app.open_resource('static\invoice\invoice.pdf') as fp:
         msg.attach('invoice.pdf', "invoice/pdf", fp.read())
-    # with app.open_resource('static\contract\contract.pdf') as fp:
-    #     msg.attach('contract.pdf', "contract/pdf", fp.read())
+    # Attaches the contract file
+    with app.open_resource('static\contract\contract.pdf') as fp:
+        msg.attach('contract.pdf', "contract/pdf", fp.read())
+    # Sends the email
     mail.send(msg)
+
+def sentAdminEmail(recipient,companyName, customerName,emailAddress, body):
+    # Prepares the email with the main body of the email being a html template
+    recipients = [ ]
+    for i in recipient:
+        recipients.append(i)
+    msg = Message(subject='Purchase Confirmation',sender='group11IMAGEOPTIM@outlook.com', recipients = recipients)
+    msg.html = render_template('emailConfirmationAdmin.html',basket = body, customer = companyName,employeeName = customerName,emailAddress = emailAddress)
+    # Attaches the contract file
+    with app.open_resource('static\contract\contract.pdf') as fp:
+        msg.attach('contract.pdf', "contract/pdf", fp.read())
+    # Sends email
+    mail.send(msg)
+
+def processTransaction():
+    # Writes the new customer to the database and returns the Id of the customer
+    id = writeToDatabaseWithCustomerDetails(session.get("customer")["name"], session.get("customer")["street"], session.get("customer")["city"], session.get("customer")["postcode"],session.get("customer")["country"],session.get("customer")["email"],session.get("customer")["nameOfContactPerson"],session.get("customer")["vatNumber"])
+    # Writes the details of the purchase into the database
+    writePurchaseIntoDatabase(id)
+    # Reads the details of the basket from the datbase to put in email
+    callItem = "getBasketDetails(" + session.get('tier') +","+ session.get('length') + ")"
+    basketDetails = readFromDatabaseUsingStoredProcedures(callItem)
+    # Sents the email to the customer with details of their purchase
+    sentCustomerEmail(session.get("customer")["email"], session.get("customer")["nameOfContactPerson"], basketDetails)
+    #  Reads the email address of the admin from the datbase
+    callItem = "getAdminEmail()"
+    adminEmails = readFromDatabaseUsingStoredProcedures(callItem)
+    # Sents email to the admin with details of the purchase
+    sentAdminEmail(adminEmails[0],session.get("customer")["name"], session.get("customer")["nameOfContactPerson"],session.get("customer")["email"], basketDetails)
+    # Clears the basket
+    session.pop('tier', None)
+    session.pop('length', None)
+    # Redirects to confirmation page.
+    return purchaseConfirmationPage()
 
 if __name__ == "__main__":
     app.secret_key = 'fj590Rt?h40gg'
