@@ -33,7 +33,7 @@ def homePage():
 # Displays checkout page asking for users details.
 @app.route("/checkout")
 def customerPage():
-    if 'tier' in session and 'length' in session:
+    if 'basket' in session:
         return render_template('customer.html', title = "Customer Details", countries = readFromDatabaseUsingStoredProcedures("getCountries()"))
     else:
         return render_template('checkoutWarning.html', title = "Checkout")
@@ -49,8 +49,8 @@ def selectLicence(licenceID):
 # Having read the details about each item from the database.
 @app.route("/basket")
 def basketPage():
-    if 'tier' in session and 'length' in session:
-        callItem = "getBasketDetails(" + session.get('tier') +","+ session.get('length') + ")"
+    if 'basket' in session:
+        callItem = "getBasketDetails(" + session.get('basket')['tier'] +","+ session.get('basket')['length'] + ")"
         return render_template('basket.html', title = "Basket", basket =  readFromDatabaseUsingStoredProcedures(callItem), size = 1)
     else:
         return render_template('basket.html', title = "Basket", basket =  [], size = 0)
@@ -62,8 +62,7 @@ def purchaseConfirmationPage():
 @app.route("/remove")
 def removeFromBasket():
     # Removes everything from the basket and redirects them to the basket
-     session.pop('tier', None)
-     session.pop('length', None)
+     session.pop('basket', None)
      return redirect('/basket')
 
 
@@ -90,8 +89,7 @@ def customerForm():
 def licenceForm():
     if request.method == 'POST':
         # Stores the licence selected in server session storage
-        session['tier'] =  request.form['tier']
-        session['length'] = request.form['length']
+        session['basket'] = {'tier' : request.form['tier'], 'length'  : request.form['length']}
     # Redirects them to the basket
     return redirect('/basket')
 
