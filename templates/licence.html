@@ -1,7 +1,7 @@
 {% extends 'template.html' %}
 {% block MainContents %}
   <div class="container-fluid pb-2">
-    <form action="/gatherLicenceData" method= "post" id="typeOfLicence" name="typeOfLicence"">
+    <form id="typeOfLicence" name="typeOfLicence" action = "/gatherLicenceData" method='post'>
       <div class="row">
         <div class="col">
           <fieldset id="tier">
@@ -31,6 +31,7 @@
             {% endfor %}
           </fieldset>
         </div>
+        <input type="hidden" value ={{licenceID}} name ="licenceID" id = "licenceID">
     </form>
       <div class = "container-fluid">
         <div class="row">
@@ -43,7 +44,7 @@
             </div>
           </div> -->
           <div class="col align-items-end container">
-            <button type="submit" class="btn btn-primary" >Add to basket</button>
+            <button type="submit" class="btn btn-primary">Add to basket</button>
           </div>
         </div>
       </div>

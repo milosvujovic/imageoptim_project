@@ -21,18 +21,22 @@ app.config['MAIL_USERNAME'] = 'group11IMAGEOPTIM@outlook.com'
 app.config['MAIL_PASSWORD'] = '1m@g30ptim'
 app.config["MAIL_USE_SSL:1123"] = True
 app.config["MAIL_USE_TLS"] = True
-
 mail = Mail(app)
 mysql = MySQL(app)
+
 
 #Webpage Routes
 @app.route("/")
 def homePage():
+    print("home")
+    print(session['basket'])
     return render_template('home.html', title = "Home", licences = readFromDatabaseUsingStoredProcedures("getListOfLicence()"))
 
 # Displays checkout page asking for users details.
 @app.route("/checkout")
 def customerPage():
+    print("checkout")
+    print(session['basket'])
     if 'tier' in session and 'length' in session:
         return render_template('customer.html', title = "Customer Details", countries = readFromDatabaseUsingStoredProcedures("getCountries()"))
     else:
@@ -41,19 +45,32 @@ def customerPage():
 # Displays page with options to select a licence
 @app.route("/licence/<licenceID>")
 def selectLicence(licenceID):
+    print("licence page")
+    print(session['basket'])
     callTiers = "getTiersForLicence("+licenceID+")"
     callLengths = "getLengthOfLicences("+licenceID+")"
-    return render_template('licence.html', title = "Licence", tiers = readFromDatabaseUsingStoredProcedures(callTiers), lengths= readFromDatabaseUsingStoredProcedures(callLengths))
+    return render_template('licence.html', title = "Licence", tiers = readFromDatabaseUsingStoredProcedures(callTiers), lengths= readFromDatabaseUsingStoredProcedures(callLengths),licenceID =licenceID)
 
 # Displays basket page.
 # Having read the details about each item from the database.
 @app.route("/basket")
 def basketPage():
-    if 'tier' in session and 'length' in session:
-        callItem = "getBasketDetails(" + session.get('tier') +","+ session.get('length') + ")"
-        return render_template('basket.html', title = "Basket", basket =  readFromDatabaseUsingStoredProcedures(callItem), size = 1)
-    else:
-        return render_template('basket.html', title = "Basket", basket =  [], size = 0)
+    return (session['basket'])
+    # print(session['basket'])
+    # print(len(session['basket']))
+    # if  len(session['basket']) > 0:
+    #     price = 0
+    #     basketList = []
+    #
+    #     for item in session['basket'].values():
+    #         print(item)
+    #         # callItem = "getBasketDetails(" +item.get('tier')  +","+ item.get('length') + ")"
+    #         # holder = readFromDatabaseUsingStoredProcedures(callItem)
+    #         # basketList.append(holder[0])
+    #         # price = holder[0][4] + price
+    #     return render_template('basket.html', title = "Basket", basket =  basketList, size = 1, price = price)
+    # else:
+    #     return render_template('basket.html', title = "Basket", basket =  [], size = 0, price = 0)
 
 # Displays purchase confirmation page
 def purchaseConfirmationPage():
@@ -62,9 +79,8 @@ def purchaseConfirmationPage():
 @app.route("/remove")
 def removeFromBasket():
     # Removes everything from the basket and redirects them to the basket
-     session.pop('tier', None)
-     session.pop('length', None)
-     return redirect('/basket')
+     session.clear()
+     return homePage()
 
 
 # Reading forms.
@@ -89,12 +105,12 @@ def customerForm():
 @app.route("/gatherLicenceData", methods=['POST'])
 def licenceForm():
     if request.method == 'POST':
-        # Stores the licence selected in server session storage
-        session['tier'] =  request.form['tier']
-        session['length'] = request.form['length']
-    # Redirects them to the basket
-    return redirect('/basket')
-
+        print("beforehand")
+        print(session['basket'])
+        session['basket'][request.form['licenceID']] = {'tier' :  request.form['tier'],  'length' :request.form['length']}
+        print("afterwards")
+        print(session['basket'])
+    return homePage()
 
 # Database Functions
 def writeToDatabaseWithCustomerDetails(name, street, city, postcode,country,email,contactPerson,vatNumber):
@@ -113,20 +129,20 @@ def writePurchaseIntoDatabase(customerID):
     mysql.connection.commit()
     data = cur.fetchall()
     cur.close()
-    print(data)
 
 def readFromDatabaseUsingStoredProcedures(function):
         command = "CALL " + function +";"
-        print("Reading from the database")
+        # print("Reading from the database")
         try:
             cur = mysql.connection.cursor()
             cur.execute(command)
             data = cur.fetchall()
             cur.close()
-            print("Succesfully from the database")
+            # print("Succesfully from the database")
             return data
         except Exception as e:
-            print("Error " + e)
+            v =2
+            # print("Error " + e)
 
 
 # Functions
@@ -172,11 +188,13 @@ def processTransaction():
     # Sents email to the admin with details of the purchase
     sentAdminEmail(adminEmails[0],session.get("customer")["name"], session.get("customer")["nameOfContactPerson"],session.get("customer")["email"], basketDetails)
     # Clears the basket
-    session.pop('tier', None)
-    session.pop('length', None)
+    # session.pop('tier', None)
+    # session.pop('length', None)
     # Redirects to confirmation page.
     return purchaseConfirmationPage()
 
 if __name__ == "__main__":
     app.secret_key = 'fj590Rt?h40gg'
     app.run(debug=True)
+    if 'basket' not in session:
+        session['basket'] = {}
