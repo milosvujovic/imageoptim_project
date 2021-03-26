@@ -31,6 +31,7 @@ app.secret_key = 'fj590Rt?h40gg'
 mail = Mail(app)
 mysql = MySQL(app)
 
+# Reference https://devqa.io/encrypt-decrypt-data-python/
 # Sets up the key for the encryption
 def generate_key():
     """
@@ -86,25 +87,24 @@ def basketPage():
 def purchaseConfirmationPage():
     return render_template('purchase_confirmation.html', title = "Purchase Confirmation")
 
+# Removes selected item from the basket and redirects them to the basket
 @app.route("/basket/remove/<licenceID>")
 def removeFromBasket(licenceID):
-    # Removes selected item from the basket and redirects them to the basket
     if 'basket' in session:
         if licenceID in session['basket']:
             session['basket'].pop(licenceID, None)
             session.modified = True
     return basketPage()
 
+    # Removes all item from the basket and redirects them to the basket
 @app.route("/basket/clear")
 def removeAllFromBasket():
-    # Removes all item from the basket and redirects them to the basket
     if 'basket' in session:
         session['basket'].clear()
         session.modified = True
     return basketPage()
 
 # Customers Web routes
-
 # Logs  user in
 @app.route("/customer/<input>")
 def displayCustomerDetails(input):
