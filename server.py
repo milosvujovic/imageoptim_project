@@ -162,7 +162,6 @@ def readFromDatabaseUsingStoredProcedures(function):
 
 
 # Functions
-<<<<<<< server.py
 def sentCustomerEmail(recipient,name, body,id,price):
     # Creates link for the user
     # Reference https://cryptography.io/en/latest
