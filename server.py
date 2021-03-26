@@ -108,7 +108,7 @@ def removeAllFromBasket():
 # Logs  user in
 @app.route("/customer/<input>")
 def displayCustomerDetails(input):
-    try:
+    # try:
         # Decodes the code in the email
         token = input.encode("utf-8")
         key = load_key()
@@ -116,7 +116,7 @@ def displayCustomerDetails(input):
         value = f.decrypt(token)
         id = str(value, 'utf-8')
         index = int(id.index(','))
-        newId = (id[2:index])
+        newId = str(id[2:index])
         # Needs verifying stage
         if (readFromDatabaseUsingFunction('`checkWhetherCustomer`('+newId+')')[0][0] == 1):
             # Verifies there email address and logs them in by storing it in session storage.
@@ -127,8 +127,8 @@ def displayCustomerDetails(input):
             return editCustomerDetails()
         else:
             return "You can't be here"
-    except:
-        return "Invalid Code"
+    # except:
+    #     return "Invalid Code"
 
 # To Save us having to get a code each time.
 @app.route("/customer/hack")
@@ -230,7 +230,7 @@ def writePurchaseIntoDatabase(customerID):
 
 def verifyEmailInDatabase(customerID):
         cur = mysql.connection.cursor()
-        cur.execute("CALL verifyEmail(%s);",customerID)
+        cur.execute("CALL verifyEmail(%s);",[customerID])
         mysql.connection.commit()
         cur.close()
 
