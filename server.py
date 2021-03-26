@@ -4,6 +4,7 @@ import json
 from flask import Flask, render_template, request,redirect,make_response,session
 from flask_mysqldb import MySQL
 from flask_mail import Mail, Message
+from cryptography.fernet import Fernet
 
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
 
@@ -21,6 +22,9 @@ app.config['MAIL_USERNAME'] = 'group11IMAGEOPTIM@outlook.com'
 app.config['MAIL_PASSWORD'] = '1m@g30ptim'
 app.config["MAIL_USE_SSL:1123"] = True
 app.config["MAIL_USE_TLS"] = True
+# Encryption variables
+key = Fernet.generate_key()
+f = Fernet(key)
 
 mail = Mail(app)
 mysql = MySQL(app)
@@ -65,6 +69,11 @@ def removeFromBasket():
      session.pop('tier', None)
      session.pop('length', None)
      return redirect('/basket')
+
+@app.route("/customer/<code>")
+def displayCustomerDetails(code):
+    return code
+
 
 
 # Reading forms.
@@ -130,10 +139,15 @@ def readFromDatabaseUsingStoredProcedures(function):
 
 
 # Functions
-def sentCustomerEmail(recipient,name, body):
+def sentCustomerEmail(recipient,name, body,id):
+    # Creates link for the user
+    # Reference https://cryptography.io/en/latest
+    code = f.encrypt(id.encode())
+    emailBody = "http://127.0.0.1:5000/"
+    link = emailBody + "customer/" + str(code, 'utf-8')
     # Prepares the email with the main body of the email being a html template
     msg = Message(subject='Confirmation Email',sender='group11IMAGEOPTIM@outlook.com', recipients = [recipient])
-    msg.html = render_template('emailConfirmationCustomer.html',basket = body, name = name)
+    msg.html = render_template('emailConfirmationCustomer.html',basket = body, name = name,link = link)
     # Attaches the invoice file
     with app.open_resource('static\invoice\invoice.pdf') as fp:
         msg.attach('invoice.pdf', "invoice/pdf", fp.read())
@@ -165,7 +179,7 @@ def processTransaction():
     callItem = "getBasketDetails(" + session.get('tier') +","+ session.get('length') + ")"
     basketDetails = readFromDatabaseUsingStoredProcedures(callItem)
     # Sents the email to the customer with details of their purchase
-    sentCustomerEmail(session.get("customer")["email"], session.get("customer")["nameOfContactPerson"], basketDetails)
+    sentCustomerEmail(session.get("customer")["email"], session.get("customer")["nameOfContactPerson"], basketDetails,str(id))
     #  Reads the email address of the admin from the datbase
     callItem = "getAdminEmail()"
     adminEmails = readFromDatabaseUsingStoredProcedures(callItem)
