@@ -315,6 +315,7 @@ FROM `Countries`
 ORDER BY name ASC;
 END //
 DELIMITER ;
+
 -- Get the name of the item in the basket and the price.
 DELIMITER //
 CREATE PROCEDURE getBasketDetails(
@@ -396,5 +397,18 @@ DELIMITER //
 CREATE PROCEDURE getAdminEmail()
 BEGIN
 SELECT distinct(email) FROM admin;
+END //
+DELIMITER ;
+
+-- gets customer details
+DELIMITER //
+CREATE PROCEDURE getCustomerDetails(
+IN parameter int
+)
+BEGIN
+SELECT customers.name, nameOfContactPerson, email, street, city, postcode, countries.isocode, countries.name, vatNumber
+FROM customers
+JOIN countries ON customers.isoCode = countries.isoCode
+WHERE parameter = customerID;
 END //
 DELIMITER ;

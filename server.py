@@ -97,6 +97,23 @@ def removeAllFromBasket():
         session.modified = True
     return basketPage()
 
+@app.route("/customer/edit/<customerID>")
+def editCustomerDetails(customerID):
+    details = readFromDatabaseUsingStoredProcedures("getCustomerDetails("+customerID+")")[0]
+    return render_template('customer_edit.html', title = 'Edit Company Details', countries = readFromDatabaseUsingStoredProcedures("getCountries()"), customer = details)
+
+@app.route("/updatedCustomerData", methods=['POST'])
+def editCustomerForm():
+    if request.method == 'POST':
+        name = request.form['name']
+        nameOfContactPerson = request.form['nameOfContactPerson']
+        email = request.form['email']
+        street = request.form['street']
+        city = request.form['city']
+        country = request.form['countries']
+        postcode = request.form['postcode']
+        vatNumber = request.form['vatNumber']
+    return "Error with form"
 
 # Reading forms.
 @app.route("/gatherCustomerData", methods=['POST'])
