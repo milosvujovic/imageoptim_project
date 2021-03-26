@@ -91,6 +91,7 @@ ENGINE = InnoDB;
 CREATE TABLE IF NOT EXISTS `imageoptim`.`Licence Lengths` (
   `licencelengthID` INT NOT NULL AUTO_INCREMENT,
   `length` VARCHAR(45) NOT NULL,
+  `lengthInYears` int NOT NULL,
   PRIMARY KEY (`licencelengthID`),
   UNIQUE INDEX `idLicenceType_UNIQUE` (`licencelengthID` ASC) )
 ENGINE = InnoDB;
@@ -177,9 +178,9 @@ INSERT INTO `Customers` VALUES
 (4,'random company','4 wrexham road','Wrexham','WR1 4NT','GBR','different@email.com',false,"Stewart Smith","10131882");
 
 INSERT INTO `Licence Lengths` VALUES
-(1,'annual'),
-(3,'decade'),
-(2,'perpetual');
+(1,'annual',1),
+(3,'decade',10),
+(2,'perpetual',-1);
 
 INSERT INTO `Licences` VALUES
 (1,"Licence A","Very helpful",false),
@@ -294,7 +295,7 @@ BEGIN
 SELECT tierID,minimumEmployees,maximumEmployees FROM `Tiers` WHERE licenceID = parameter AND (CURDATE() between startDate and endDate );
 END //
 DELIMITER ;
-
+-- Gets the length of the licences for the licence.
 DELIMITER //
 CREATE PROCEDURE getLengthOfLicences(IN parameter int(11))
 BEGIN 
@@ -305,7 +306,7 @@ JOIN tiers on tiers.tierID = prices.tierID
 WHERE tiers.licenceID = parameter;
 END //
 DELIMITER ;
-
+-- Gets the list of countries
 DELIMITER //
 CREATE PROCEDURE getCountries()
 BEGIN 
@@ -314,7 +315,7 @@ FROM `Countries`
 ORDER BY name ASC;
 END //
 DELIMITER ;
-
+-- Get the name of the item in the basket and the price.
 DELIMITER //
 CREATE PROCEDURE getBasketDetails(
 IN tierParameter int,
@@ -329,7 +330,7 @@ WHERE tiers.tierID = tierParameter AND lengthParameter = licencelengthID AND (CU
 END //
 DELIMITER ;
 
-
+-- When new customer created then it will save the new id number as session variable.
 DELIMITER $$
 DROP TRIGGER IF EXISTS imageoptim.getIDNumber$$
 CREATE TRIGGER customers_AFTER_INSERT
@@ -338,7 +339,7 @@ BEGIN
 	SET @idNumber = NEW.customerID;
 END $$
 
-
+-- Creates customer
 DELIMITER //
 CREATE FUNCTION `createCustomer`(name varchar(45),
 street varchar(45),
@@ -353,6 +354,7 @@ INSERT INTO `Customers` (name,street,city,postcode,isoCode,email,emailVerified,N
 RETURN @idNumber;
 END //
 
+-- Returns the price of the licence.
 DELIMITER //
 CREATE FUNCTION `getPrice`(tierParameter int,
 lengthParameter int) RETURNS double
@@ -362,20 +364,15 @@ FROM prices
 WHERE prices.tierID = tierParameter AND lengthParameter = prices.lengthID AND (CURDATE() between prices.startDate and prices.endDate));
 END //
 
+-- returns the number of years of the licence. Needs to be changed to have table with length of licence.
 DELIMITER //
 CREATE FUNCTION `getLength`(lengthParameter int) RETURNS int
 BEGIN
-IF lengthParameter = 1
-THEN 
-RETURN 1;
-ELSEIF lengthParameter = 3
-THEN
-RETURN 10;
-ELSE
-RETURN -1;
-END IF;
+SET @LENGTH = (SELECT lengthInYears FROM `licence lengths` WHERE licencelengthID = lengthParameter);
+RETURN @LENGTH;
 END //
 
+-- records purchase in the database and calculates the end date of the licence.
 DELIMITER //
 DROP PROCEDURE IF EXISTS imageoptim.recordPurchase//
 CREATE PROCEDURE recordPurchase(
@@ -394,6 +391,7 @@ END IF;
 INSERT INTO purchases (customerID,tierID,price,datePurchase,expirePurchase,lengthID) VALUES (customerParameter,tierParameter,@priceValue, date(now()),@endDate,lengthParameter);
 END //
 DELIMITER ;
+-- returns all the admins email addres
 DELIMITER //
 CREATE PROCEDURE getAdminEmail()
 BEGIN
