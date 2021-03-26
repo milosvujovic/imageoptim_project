@@ -47,7 +47,14 @@ def customerPage():
 def selectLicence(licenceID):
     callTiers = "getTiersForLicence("+licenceID+")"
     callLengths = "getLengthOfLicences("+licenceID+")"
-    return render_template('licence.html', title = "Licence", tiers = readFromDatabaseUsingStoredProcedures(callTiers), lengths= readFromDatabaseUsingStoredProcedures(callLengths), licenceID = licenceID)
+    tier = -1
+    length = -1
+    if 'basket' in session:
+        if licenceID in session['basket']:
+            tier = int(session['basket'][licenceID]['tier'])
+            length = int(session['basket'][licenceID]['length'])
+
+    return render_template('licence.html', title = "Licence", tiers = readFromDatabaseUsingStoredProcedures(callTiers), lengths= readFromDatabaseUsingStoredProcedures(callLengths), licenceID = licenceID, selectedTier = tier, selectedLength = length)
 
 # Displays basket page.
 # Having read the details about each item from the database.
