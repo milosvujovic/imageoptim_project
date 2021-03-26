@@ -1,9 +1,11 @@
 # Imports
 import os
 import json
-from flask import Flask, render_template, request,redirect,make_response,session
+import datetime
+from flask import Flask, render_template, request,redirect,make_response,session, url_for, flash
 from flask_mysqldb import MySQL
 from flask_mail import Mail, Message
+
 
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
 
@@ -21,13 +23,26 @@ app.config['MAIL_USERNAME'] = 'group11IMAGEOPTIM@outlook.com'
 app.config['MAIL_PASSWORD'] = '1m@g30ptim'
 app.config["MAIL_USE_SSL:1123"] = True
 app.config["MAIL_USE_TLS"] = True
+# app.config['SESSION_PERMANENT'] = True
+# app.config['SESSION_COOKIE_PATH'] = '/'
+# app.permanent_session_lifetime = datetime.timedelta(days=365)
+app.secret_key = 'fj590Rt?h40gg'
 
 mail = Mail(app)
 mysql = MySQL(app)
 
+# @app.before_first_request
+# def begin():
+#     print("Beginnning the system")
+#     session['basket'] = {}
+#     print(session['basket'])
+
 #Webpage Routes
 @app.route("/")
 def homePage():
+    if 'basket' in session:
+        print("home")
+        print(session['basket'])
     return render_template('home.html', title = "Home", licences = readFromDatabaseUsingStoredProcedures("getListOfLicence()"))
 
 # Displays checkout page asking for users details.
@@ -41,17 +56,22 @@ def customerPage():
 # Displays page with options to select a licence
 @app.route("/licence/<licenceID>")
 def selectLicence(licenceID):
+    if 'basket' in session:
+        print("select licence")
+        print(session['basket'])
     callTiers = "getTiersForLicence("+licenceID+")"
     callLengths = "getLengthOfLicences("+licenceID+")"
-    return render_template('licence.html', title = "Licence", tiers = readFromDatabaseUsingStoredProcedures(callTiers), lengths= readFromDatabaseUsingStoredProcedures(callLengths))
+    return render_template('licence.html', title = "Licence", tiers = readFromDatabaseUsingStoredProcedures(callTiers), lengths= readFromDatabaseUsingStoredProcedures(callLengths), licenceID = licenceID)
 
 # Displays basket page.
 # Having read the details about each item from the database.
 @app.route("/basket")
 def basketPage():
     if 'basket' in session:
-        callItem = "getBasketDetails(" + session.get('basket')['tier'] +","+ session.get('basket')['length'] + ")"
-        return render_template('basket.html', title = "Basket", basket =  readFromDatabaseUsingStoredProcedures(callItem), size = 1)
+        print("basket")
+        print(session['basket'])
+            # callItem = "getBasketDetails(" + session.get('basket')[1]['tier'] +","+ session.get('basket')[1]['length'] + ")"
+        return render_template('basket.html', title = "Basket", basket =  [], size = 1)
     else:
         return render_template('basket.html', title = "Basket", basket =  [], size = 0)
 
@@ -63,7 +83,7 @@ def purchaseConfirmationPage():
 def removeFromBasket():
     # Removes everything from the basket and redirects them to the basket
      session.pop('basket', None)
-     return redirect('/basket')
+     return redirect('/')
 
 
 # Reading forms.
@@ -88,10 +108,18 @@ def customerForm():
 @app.route("/gatherLicenceData", methods=['POST'])
 def licenceForm():
     if request.method == 'POST':
-        # Stores the licence selected in server session storage
-        session['basket'] = {'tier' : request.form['tier'], 'length'  : request.form['length']}
+        if 'basket' not in session:
+            print("creating new basket")
+            session['basket'] = {}
+        print("before adding")
+        print(session['basket'])
+        licenceID = (request.form['licenceID'])
+        session['basket'][licenceID] = {'tier' : request.form['tier'], 'length' : request.form['length'] }
+        session.modified = True
+        print("After adding")
+        print(session['basket'])
     # Redirects them to the basket
-    return redirect('/basket')
+    return basketPage()
 
 
 # Database Functions
@@ -121,8 +149,8 @@ def readFromDatabaseUsingStoredProcedures(function):
             cur.execute(command)
             data = cur.fetchall()
             cur.close()
-            print("Succesfully from the database")
             return data
+            print("Succesfully from the database")
         except Exception as e:
             print("Error " + e)
 
@@ -176,5 +204,4 @@ def processTransaction():
     return purchaseConfirmationPage()
 
 if __name__ == "__main__":
-    app.secret_key = 'fj590Rt?h40gg'
     app.run(debug=True)
