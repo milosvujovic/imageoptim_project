@@ -398,3 +398,16 @@ BEGIN
 SELECT distinct(email) FROM admin;
 END //
 DELIMITER ;
+
+-- verfifies someones email
+DELIMITER //
+CREATE PROCEDURE verifyEmail(
+IN idNumber INT)
+BEGIN
+UPDATE customers 
+SET emailVerified = 1
+WHERE customerID = idNumber;
+END //
+DELIMITER ;
+
+CALL verifyEmail(4);
