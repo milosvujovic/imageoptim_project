@@ -24,10 +24,9 @@ app.config['MAIL_USERNAME'] = 'group11IMAGEOPTIM@outlook.com'
 app.config['MAIL_PASSWORD'] = '1m@g30ptim'
 app.config["MAIL_USE_SSL:1123"] = True
 app.config["MAIL_USE_TLS"] = True
-
-# Encryption variables
 key = Fernet.generate_key()
 f = Fernet(key)
+# Encryption variables
 app.secret_key = 'fj590Rt?h40gg'
 
 
@@ -73,9 +72,13 @@ def basketPage():
 def purchaseConfirmationPage():
     return render_template('purchase_confirmation.html', title = "Purchase Confirmation")
 
-@app.route("/customer/<code>")
-def displayCustomerDetails(code):
-    return code
+@app.route("/customer/<input>")
+def displayCustomerDetails(input):
+    token = str(input)
+    token = token.encode("utf-8")
+    value = f.decrypt(token)
+    id =  list(str(value, 'utf-8'))
+    return id[2]
 
 @app.route("/basket/remove/<licenceID>")
 def removeFromBasket(licenceID):
@@ -166,6 +169,7 @@ def sentCustomerEmail(recipient,name, body,id,price):
     # Creates link for the user
     # Reference https://cryptography.io/en/latest
     code = f.encrypt(id.encode())
+    print(type(code))
     emailBody = "http://127.0.0.1:5000/"
     link = emailBody + "customer/" + str(code, 'utf-8')
     # Prepares the email with the main body of the email being a html template
