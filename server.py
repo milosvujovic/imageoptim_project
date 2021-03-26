@@ -202,7 +202,7 @@ def processTransaction():
     basketDetails = gatherBasketDetails()
     # Sents the email to the customer with details of their purchase
 
-    sentCustomerEmail(session.get("customer")["email"], session.get("customer")["nameOfContactPerson"], , basketDetails[0],str(id),basketDetails[1])
+    sentCustomerEmail(session.get("customer")["email"], session.get("customer")["nameOfContactPerson"],basketDetails[0],str(id),basketDetails[1])
     #  Reads the email address of the admin from the datbase
     callItem = "getAdminEmail()"
     adminEmails = readFromDatabaseUsingStoredProcedures(callItem)
