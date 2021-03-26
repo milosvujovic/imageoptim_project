@@ -192,22 +192,20 @@ def licenceForm():
 @app.route("/updatedCustomerData", methods=['POST'])
 def editCustomerForm():
     if 'customerID' in session:
-        if session['loggedIn'] == True:
-            if request.method == 'POST':
-                name = request.form['name']
-                nameOfContactPerson = request.form['nameOfContactPerson']
-                email = request.form['email']
-                street = request.form['street']
-                city = request.form['city']
-                country = request.form['countries']
-                postcode = request.form['postcode']
-                vatNumber = request.form['vatNumber']
-                customerID = session['customerID']
+        if request.method == 'POST':
+            name = request.form['name']
+            nameOfContactPerson = request.form['nameOfContactPerson']
+            email = request.form['email']
+            street = request.form['street']
+            city = request.form['city']
+            country = request.form['countries']
+            postcode = request.form['postcode']
+            vatNumber = request.form['vatNumber']
+            customerID = session['customerID']
                 # Space to save to database
 
-                return "Updated details"
-            return "Error with form"
-        return "Error you can't view this area"
+            return "Updated details"
+        return "Error with form"
     return "Error you can't view this area"
 
 # Database Functions
