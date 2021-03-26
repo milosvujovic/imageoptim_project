@@ -5,6 +5,7 @@ import datetime
 from flask import Flask, render_template, request,redirect,make_response,session, url_for, flash
 from flask_mysqldb import MySQL
 from flask_mail import Mail, Message
+from cryptography.fernet import Fernet
 
 
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
@@ -23,7 +24,12 @@ app.config['MAIL_USERNAME'] = 'group11IMAGEOPTIM@outlook.com'
 app.config['MAIL_PASSWORD'] = '1m@g30ptim'
 app.config["MAIL_USE_SSL:1123"] = True
 app.config["MAIL_USE_TLS"] = True
+
+# Encryption variables
+key = Fernet.generate_key()
+f = Fernet(key)
 app.secret_key = 'fj590Rt?h40gg'
+
 
 mail = Mail(app)
 mysql = MySQL(app)
@@ -67,6 +73,10 @@ def basketPage():
 def purchaseConfirmationPage():
     return render_template('purchase_confirmation.html', title = "Purchase Confirmation")
 
+@app.route("/customer/<code>")
+def displayCustomerDetails(code):
+    return code
+
 @app.route("/basket/remove/<licenceID>")
 def removeFromBasket(licenceID):
     # Removes selected item from the basket and redirects them to the basket
@@ -83,6 +93,7 @@ def removeAllFromBasket():
         session['basket'].clear()
         session.modified = True
     return basketPage()
+
 
 # Reading forms.
 @app.route("/gatherCustomerData", methods=['POST'])
@@ -151,10 +162,16 @@ def readFromDatabaseUsingStoredProcedures(function):
 
 
 # Functions
-def sentCustomerEmail(recipient,name, body, price):
+<<<<<<< server.py
+def sentCustomerEmail(recipient,name, body,id,price):
+    # Creates link for the user
+    # Reference https://cryptography.io/en/latest
+    code = f.encrypt(id.encode())
+    emailBody = "http://127.0.0.1:5000/"
+    link = emailBody + "customer/" + str(code, 'utf-8')
     # Prepares the email with the main body of the email being a html template
     msg = Message(subject='Confirmation Email',sender='group11IMAGEOPTIM@outlook.com', recipients = [recipient])
-    msg.html = render_template('emailConfirmationCustomer.html',basket = body, name = name, price = price)
+    msg.html = render_template('emailConfirmationCustomer.html',basket = body, name = name,link = link,price = price)
     # Attaches the invoice file
     with app.open_resource('static\invoice\invoice.pdf') as fp:
         msg.attach('invoice.pdf', "invoice/pdf", fp.read())
@@ -185,7 +202,8 @@ def processTransaction():
     # Reads the details of the basket from the datbase to put in email
     basketDetails = gatherBasketDetails()
     # Sents the email to the customer with details of their purchase
-    sentCustomerEmail(session.get("customer")["email"], session.get("customer")["nameOfContactPerson"], basketDetails[0],basketDetails[1])
+
+    sentCustomerEmail(session.get("customer")["email"], session.get("customer")["nameOfContactPerson"], , basketDetails[0],str(id),basketDetails[1])
     #  Reads the email address of the admin from the datbase
     callItem = "getAdminEmail()"
     adminEmails = readFromDatabaseUsingStoredProcedures(callItem)

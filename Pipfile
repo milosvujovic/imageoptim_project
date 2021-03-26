@@ -10,7 +10,8 @@ shell = "*"
 flask = "*"
 flask-mysqldb = "*"
 flask-mail = "*"
-timedelta = "*"
+cryptography = "*"
+paramiko = "*"
 
 [requires]
 python_version = "3.8"
