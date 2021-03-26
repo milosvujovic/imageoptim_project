@@ -78,7 +78,7 @@ def removeFromBasket(licenceID):
 
 @app.route("/basket/clear")
 def removeAllFromBasket():
-    # Removes selected item from the basket and redirects them to the basket
+    # Removes all item from the basket and redirects them to the basket
     if 'basket' in session:
         session['basket'].clear()
         session.modified = True
