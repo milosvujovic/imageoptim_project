@@ -108,8 +108,8 @@ def removeAllFromBasket():
 # Logs  user in
 @app.route("/customer/<input>")
 def displayCustomerDetails(input):
-    # try:
-        # Decodes the code in the email
+    try:
+        Decodes the code in the email
         token = input.encode("utf-8")
         key = load_key()
         f = Fernet(key)
@@ -127,8 +127,8 @@ def displayCustomerDetails(input):
             return editCustomerDetails()
         else:
             return "You can't be here"
-    # except:
-    #     return "Invalid Code"
+    except:
+        return "Invalid Code"
 
 # To Save us having to get a code each time.
 @app.route("/customer/hack")
