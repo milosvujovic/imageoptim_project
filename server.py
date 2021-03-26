@@ -74,11 +74,17 @@ def purchaseConfirmationPage():
 
 @app.route("/customer/<input>")
 def displayCustomerDetails(input):
+    # Decodes the code in the email
     token = str(input)
     token = token.encode("utf-8")
     value = f.decrypt(token)
     id =  list(str(value, 'utf-8'))
-    return id[2]
+    idValue = id[2]
+    # Verifies there email address and logs them in by storing it in session storage.
+    verifyEmailInDatabase(idValue)
+    session['customerID'] = idValue
+    session.modified = True
+    return "Hello customer"
 
 @app.route("/basket/remove/<licenceID>")
 def removeFromBasket(licenceID):
@@ -166,6 +172,12 @@ def writePurchaseIntoDatabase(customerID):
             mysql.connection.commit()
             data = cur.fetchall()
             cur.close()
+
+def verifyEmailInDatabase(customerID):
+        cur = mysql.connection.cursor()
+        cur.execute("CALL verifyEmail(%s);",customerID)
+        mysql.connection.commit()
+        cur.close()
 
 def readFromDatabaseUsingStoredProcedures(function):
         command = "CALL " + function +";"
