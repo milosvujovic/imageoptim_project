@@ -423,3 +423,18 @@ JOIN countries ON customers.isoCode = countries.isoCode
 WHERE parameter = customerID;
 END //
 DELIMITER ;
+
+-- returns whether someone has the customerID
+DELIMITER //
+CREATE FUNCTION `checkWhetherCustomer`(parameter int) RETURNS boolean
+BEGIN
+SET @LENGTH = (SELECT COUNT(*) FROM customers where parameter = customerID);
+IF @LENGTH = 1
+THEN 
+return true;
+ELSE
+return false;
+END IF;
+END //
+
+SELECT `checkWhetherCustomer`(100);

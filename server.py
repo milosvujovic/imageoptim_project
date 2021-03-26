@@ -24,8 +24,6 @@ app.config['MAIL_USERNAME'] = 'group11IMAGEOPTIM@outlook.com'
 app.config['MAIL_PASSWORD'] = '1m@g30ptim'
 app.config["MAIL_USE_SSL:1123"] = True
 app.config["MAIL_USE_TLS"] = True
-key = Fernet.generate_key()
-f = Fernet(key)
 # Encryption variables
 app.secret_key = 'fj590Rt?h40gg'
 
@@ -33,8 +31,24 @@ app.secret_key = 'fj590Rt?h40gg'
 mail = Mail(app)
 mysql = MySQL(app)
 
+# Sets up the key for the encryption
+def generate_key():
+    """
+    Generates a key and save it into a file
+    """
+    key = Fernet.generate_key()
+    with open("secret.key", "wb") as key_file:
+        key_file.write(key)
+
+def load_key():
+    """
+    Loads the key named `secret.key` from the current directory.
+    """
+    return open("secret.key", "rb").read()
+
 
 #Webpage Routes
+# User web Routes
 @app.route("/")
 def homePage():
     return render_template('home.html', title = "Home", licences = readFromDatabaseUsingStoredProcedures("getListOfLicence()"))
@@ -72,20 +86,6 @@ def basketPage():
 def purchaseConfirmationPage():
     return render_template('purchase_confirmation.html', title = "Purchase Confirmation")
 
-@app.route("/customer/<input>")
-def displayCustomerDetails(input):
-    # Decodes the code in the email
-    token = str(input)
-    token = token.encode("utf-8")
-    value = f.decrypt(token)
-    id =  list(str(value, 'utf-8'))
-    idValue = id[2]
-    # Verifies there email address and logs them in by storing it in session storage.
-    verifyEmailInDatabase(idValue)
-    session['customerID'] = idValue
-    session.modified = True
-    return "Hello customer"
-
 @app.route("/basket/remove/<licenceID>")
 def removeFromBasket(licenceID):
     # Removes selected item from the basket and redirects them to the basket
@@ -103,23 +103,57 @@ def removeAllFromBasket():
         session.modified = True
     return basketPage()
 
-@app.route("/customer/edit/<customerID>")
-def editCustomerDetails(customerID):
-    details = readFromDatabaseUsingStoredProcedures("getCustomerDetails("+customerID+")")[0]
-    return render_template('customer_edit.html', title = 'Edit Company Details', countries = readFromDatabaseUsingStoredProcedures("getCountries()"), customer = details)
+# Customers Web routes
 
-@app.route("/updatedCustomerData", methods=['POST'])
-def editCustomerForm():
-    if request.method == 'POST':
-        name = request.form['name']
-        nameOfContactPerson = request.form['nameOfContactPerson']
-        email = request.form['email']
-        street = request.form['street']
-        city = request.form['city']
-        country = request.form['countries']
-        postcode = request.form['postcode']
-        vatNumber = request.form['vatNumber']
-    return "Error with form"
+# Logs  user in
+@app.route("/customer/<input>")
+def displayCustomerDetails(input):
+    # Decodes the code in the email
+    token = input.encode("utf-8")
+    key = load_key()
+    f = Fernet(key)
+    value = f.decrypt(token)
+    id = str(value, 'utf-8')
+    index = int(id.index(','))
+    newId = (id[2:index])
+    # Needs verifying stage
+    if (readFromDatabaseUsingFunction('`checkWhetherCustomer`('+newId+')')[0][0] == 1):
+        # Verifies there email address and logs them in by storing it in session storage.
+        verifyEmailInDatabase(newId)
+        session['customerID'] = newId
+        session.modified = True
+        # Directs them to edit there details. Will change this path later on.
+        return editCustomerDetails()
+    else:
+        return "You can't be here"
+
+# To Save us having to get a code each time.
+@app.route("/customer/hack")
+def hackSystem():
+    session['customerID'] = '1'
+    session.modified = True
+    return editCustomerDetails()
+
+# Logs a user out
+@app.route("/customer/logOut")
+def customerLogOut():
+    session.clear()
+    session.modified = True
+    return "Logged Out"
+
+# Lets a user edit there details
+@app.route("/customer/edit")
+def editCustomerDetails():
+    if 'customerID' in session:
+        customerID = session['customerID']
+        details = readFromDatabaseUsingStoredProcedures("getCustomerDetails("+customerID+")")[0]
+        return render_template('customer_edit.html', title = 'Edit Company Details', countries = readFromDatabaseUsingStoredProcedures("getCountries()"), customer = details)
+    else:
+        return "Error you can't view this area"
+
+
+# Admin routes
+
 
 # Reading forms.
 @app.route("/gatherCustomerData", methods=['POST'])
@@ -152,6 +186,26 @@ def licenceForm():
     # Redirects them to the basket
     return basketPage()
 
+@app.route("/updatedCustomerData", methods=['POST'])
+def editCustomerForm():
+    if 'customerID' in session:
+        if session['loggedIn'] == True:
+            if request.method == 'POST':
+                name = request.form['name']
+                nameOfContactPerson = request.form['nameOfContactPerson']
+                email = request.form['email']
+                street = request.form['street']
+                city = request.form['city']
+                country = request.form['countries']
+                postcode = request.form['postcode']
+                vatNumber = request.form['vatNumber']
+                customerID = session['customerID']
+                # Space to save to database
+
+                return "Updated details"
+            return "Error with form"
+        return "Error you can't view this area"
+    return "Error you can't view this area"
 
 # Database Functions
 def writeToDatabaseWithCustomerDetails(name, street, city, postcode,country,email,contactPerson,vatNumber):
@@ -192,13 +246,28 @@ def readFromDatabaseUsingStoredProcedures(function):
         except Exception as e:
             print("Error " + e)
 
+def readFromDatabaseUsingFunction(function):
+        command = "SELECT " + function +";"
+        print("Reading from the database")
+        try:
+            cur = mysql.connection.cursor()
+            cur.execute(command)
+            data = cur.fetchall()
+            cur.close()
+            return data
+            print("Succesfully from the database")
+        except Exception as e:
+            print("Error " + e)
+
 
 # Functions
 def sentCustomerEmail(recipient,name, body,id,price):
     # Creates link for the user
     # Reference https://cryptography.io/en/latest
-    code = f.encrypt(id.encode())
-    print(type(code))
+    message = id.encode()
+    key = load_key()
+    f = Fernet(key)
+    code = f.encrypt(message)
     emailBody = "http://127.0.0.1:5000/"
     link = emailBody + "customer/" + str(code, 'utf-8')
     # Prepares the email with the main body of the email being a html template
@@ -259,6 +328,8 @@ def gatherBasketDetails():
             price = price + temp[4]
             size =  size + 1
     return basketArray,price,size
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)
