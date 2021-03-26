@@ -1,0 +1,60 @@
+{% extends 'template.html' %}
+
+{% block MainContents %}
+<div class="container-fluid">
+  <h1 class="display-4 text-center">Edit Customer Details</h1>
+  <form action = "/customer/edit/<customerID>" id='editCustomerDetails' method='post' class="form-group">
+    <!-- action="/url" -->
+    <div class="form-group mb-4">
+      <label class="mb-0"><h6 class="font-weight-bold small">Company Name</h6></label>
+      <input name="name" class="form-control w-75" placeholder="Please enter the company name" value='{{customer[0]}}' required>
+    </div>
+
+    <div class="form-group mb-4">
+      <label class="mb-0"><h6 class="font-weight-bold small">Contact Person Name</h6></label>
+      <input name="nameOfContactPerson" type="text" class="form-control w-75" placeholder="Please enter your name" value='{{customer[1]}}'>
+    </div>
+
+    <div class="form-group mb-4">
+      <label class="mb-0"><h6 class="font-weight-bold small">Email</h6></label>
+      <input name="email" type="email" size="30" class="form-control w-75" placeholder="Please enter the contact email address" value='{{customer[2]}}' required>
+    </div>
+
+    <div class="form-group mb-4">
+      <label class="mb-0"><h6 class="font-weight-bold small">Street Address</h6></label>
+      <input name="street" class="form-control w-75" placeholder="Please enter the company street address" value='{{customer[3]}}'>
+    </div>
+
+    <div class="form-group mb-4">
+      <label class="mb-0"><h6 class="font-weight-bold small">City</h6></label>
+      <input name="city" type="text" class="form-control w-75" placeholder="Please enter the company's city" value='{{customer[4]}}'>
+    </div>
+
+    <div class="form-group mb-4">
+      <label class="mb-0"><h6 class="font-weight-bold small">Postcode</h6></label>
+      <input name="postcode" class="form-control w-75" placeholder="Please enter the company's postcode" value='{{customer[5]}}'>
+    </div>
+
+    <div class="form-group mb-4">
+      <label class="mb-0"><h6 class="font-weight-bold small">Country</h6></label>
+      <select name="countries" id="countries" required>
+        {% for country in countries %}
+        {%if country[0] == '{{customer[6]}}'%}
+        <option value={{country[0]}} selected>{{country[1]}}</option>
+        {%else%}
+          <option value={{country[0]}}>{{country[1]}}</option>
+        {%endif%}
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="form-group mb-4">
+      <label class="mb-0"><h6 class="font-weight-bold small">VAT Number</h6></label>
+      <input name="vatNumber" type="number" class="form-control w-75" placeholder="Please enter the company's VAT number" value='{{customer[8]}}'>
+    </div>
+
+    <button class="btn btn-primary">Edit Details</button>
+  </form>
+  <button class="btn btn-primary" onClick="location.href='/'">Back</button>
+</div>
+{% endblock %}
