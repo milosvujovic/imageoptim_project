@@ -176,14 +176,22 @@ def editCustomerDetails():
 # Admin routes
 @app.route("/admin/login")
 def adminLogIn():
-    session['admin'] = True
-    session.modified = True
-    return "Logged in"
+    return render_template('admin_logIn.html', title = 'Admin Log in')
+    # session['admin'] = True
+    # session.modified = True
+    # return "Logged in"
 
+# Route to show all of the licences that they sell
 @app.route("/admin/home")
 @admin_required
 def adminHome():
     return "Top Secret Admin Details"
+
+# Route to show all of the details about whose bought a specfic licence
+@app.route("/admin/licence/<licenceID>")
+@admin_required
+def adminLicence(licenceID):
+    return "Top Secret Details aboyt hte licence"
 
 @app.route("/admin/logOut")
 @admin_required
@@ -243,6 +251,21 @@ def editCustomerForm():
             return "Updated details"
         return "Error with form"
     return "Error you can't view this area"
+
+@app.route("/formLogIn", methods=['POST'])
+def logInForm():
+    print("receiving data")
+    if request.method == 'POST':
+        username = request.form['email']
+        password = request.form['password']
+        if username == "group11IMAGEOPTIM@outlook.com" and password == "password":
+            session.clear()
+            session['admin'] = True
+            session.modified = True
+            return redirect("/admin/home")
+        else:
+            flash("Incorrect username or password")
+    return redirect("/admin/login")
 
 # Database Functions
 def writeToDatabaseWithCustomerDetails(name, street, city, postcode,country,email,contactPerson,vatNumber):
