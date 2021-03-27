@@ -2,6 +2,7 @@
 import os
 import json
 import datetime
+import functools
 from flask import Flask, render_template, request,redirect,make_response,session, url_for, flash
 from flask_mysqldb import MySQL
 from flask_mail import Mail, Message
@@ -30,6 +31,24 @@ app.secret_key = 'fj590Rt?h40gg'
 
 mail = Mail(app)
 mysql = MySQL(app)
+
+def customer_required(func):
+    @functools.wraps(func)
+    def secure_function(*args, **kwargs):
+            if  'customerID' not in session:
+                return "You need to access this page by the link in the email"
+            print("Valid input")
+            return func(*args, **kwargs)
+    return secure_function
+
+def admin_required(func):
+    @functools.wraps(func)
+    def secure_function(*args, **kwargs):
+        if 'admin' not in session:
+            return "You don't have access here"
+            # return redirect(url_for("login", next=request.url))
+        return func(*args, **kwargs)
+    return secure_function
 
 # Reference https://devqa.io/encrypt-decrypt-data-python/
 # Sets up the key for the encryption
@@ -109,7 +128,7 @@ def removeAllFromBasket():
 @app.route("/customer/<input>")
 def displayCustomerDetails(input):
     try:
-        Decodes the code in the email
+        # Decodes the code in the email
         token = input.encode("utf-8")
         key = load_key()
         f = Fernet(key)
@@ -139,6 +158,7 @@ def hackSystem():
 
 # Logs a user out
 @app.route("/customer/logOut")
+@customer_required
 def customerLogOut():
     session.clear()
     session.modified = True
@@ -146,16 +166,31 @@ def customerLogOut():
 
 # Lets a user edit there details
 @app.route("/customer/edit")
+@customer_required
 def editCustomerDetails():
-    if 'customerID' in session:
-        customerID = session['customerID']
-        details = readFromDatabaseUsingStoredProcedures("getCustomerDetails("+customerID+")")[0]
-        return render_template('customer_edit.html', title = 'Edit Company Details', countries = readFromDatabaseUsingStoredProcedures("getCountries()"), customer = details)
-    else:
-        return "Error you can't view this area"
+    customerID = session['customerID']
+    details = readFromDatabaseUsingStoredProcedures("getCustomerDetails("+customerID+")")[0]
+    return render_template('customer_edit.html', title = 'Edit Company Details', countries = readFromDatabaseUsingStoredProcedures("getCountries()"), customer = details)
 
 
 # Admin routes
+@app.route("/admin/login")
+def adminLogIn():
+    session['admin'] = True
+    session.modified = True
+    return "Logged in"
+
+@app.route("/admin/home")
+@admin_required
+def adminHome():
+    return "Top Secret Admin Details"
+
+@app.route("/admin/logOut")
+@admin_required
+def adminLogOut():
+    session.clear()
+    session.modified = True
+    return "Logged Out"
 
 
 # Reading forms.
@@ -190,6 +225,7 @@ def licenceForm():
     return basketPage()
 
 @app.route("/updatedCustomerData", methods=['POST'])
+@customer_required
 def editCustomerForm():
     if 'customerID' in session:
         if request.method == 'POST':
