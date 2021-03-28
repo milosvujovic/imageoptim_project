@@ -1,23 +1,24 @@
 {% extends 'template.html' %}
 
 {% block MainContents %}
-  <div class="container-fluid">
+<div class = "container-fluid w-100 p-3">
     <h1 class="display-4 text-center">Login</h1>
     <form action = "/formLogIn" id='logIn' method='post' class="form-group">
-      <div class="form-group mb-4">
+      <div class="form-group">
         <label class="mb-0"><h6 class="font-weight-bold small">Username</h6></label>
-        <input name="email" type="text" class="form-control w-75" placeholder="Username" required>
+        <input name="email" type="text" class="form-control w-50" placeholder="Username" required>
       </div>
 
       <div class="form-group mb-4">
         <label class="mb-0"><h6 class="font-weight-bold small">Password</h6></label>
-        <input name="password" type="password" class="form-control w-75" placeholder="Password" required>
+        <input name="password" type="password" class="form-control w-50" placeholder="Password" required>
       </div>
 
       <button type="submit" class="btn btn-primary">Submit</button>
     </form>
   </div>
-  {% for message in get_flashed_messages() %}
-    <div class="alert-error">{{ message }}</div>
-  {% endfor %}
+
+{% for message in get_flashed_messages() %}
+  <div class="alert-error">{{ message }}</div>
+{% endfor %}
 {% endblock %}
