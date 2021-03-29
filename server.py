@@ -116,8 +116,10 @@ def purchaseConfirmationPage():
 # Removes selected item from the basket and redirects them to the basket
 @app.route("/basket/remove/<licenceID>")
 def removeFromBasket(licenceID):
+    print("remove item")
     if 'basket' in session:
         if licenceID in session['basket']:
+            print("remove item")
             session['basket'].pop(licenceID, None)
             session.modified = True
     return redirect("/basket")
