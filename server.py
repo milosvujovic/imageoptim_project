@@ -38,7 +38,6 @@ def customer_required(func):
     def secure_function(*args, **kwargs):
             if  'customerID' not in session:
                 return "You need to access this page by the link in the email"
-            print("Valid input")
             return func(*args, **kwargs)
     return secure_function
 
@@ -46,8 +45,7 @@ def admin_required(func):
     @functools.wraps(func)
     def secure_function(*args, **kwargs):
         if 'admin' not in session:
-            return "You don't have access here"
-            # return redirect(url_for("login", next=request.url))
+            return redirect(url_for("adminLogIn", next=request.url))
         return func(*args, **kwargs)
     return secure_function
 
@@ -183,7 +181,10 @@ def editCustomerDetails():
 # Admin routes
 @app.route("/admin/login")
 def adminLogIn():
-    return render_template('admin_logIn.html', title = 'Admin Log in')
+    if 'admin' in session:
+        return redirect('/admin/home')
+    else:
+        return render_template('admin_logIn.html', title = 'Admin Log in')
 
 
 # Route to show all of the licences that they sell
@@ -227,7 +228,7 @@ def createLink(tierID,lengthID,priceID):
     originalTier = decryptWord(tierCode)
     originalPrice = decryptWord(priceCode)
     code = code + originalLength + "/" + originalPrice + "/" + originalTier
-    return code
+    return redirect("/admin/home")
 
 def encryptWord(word):
     # Reference https://cryptography.io/en/latest
@@ -277,13 +278,16 @@ def linkForm():
         tierID = request.form['tier']
         lengthID = request.form['length']
         priceID = request.form['price']
+        email =  request.form['email']
+        name =  request.form['name']
         key = load_key()
         f = Fernet(key)
         lengthCode = encryptWord(lengthID)
         priceCode = encryptWord(priceID)
         tierCode = encryptWord(tierID)
-        code = "http://127.0.0.1:5000/"+lengthCode + "/" + tierCode + "/" + priceCode
-        return code
+        code = "http://127.0.0.1:5000/purchase/"+tierCode + "/" + lengthCode + "/" + priceCode
+        sentOfferEmail(email,name,code)
+        return redirect("/admin/home")
     return "Error with form"
 
 
@@ -303,13 +307,17 @@ def licenceForm():
     # Redirects them to the basket
         return redirect("/basket")
 
-@app.route("/addLicence/<tier>/<length>/<price>")
+@app.route("/purchase/<tier>/<length>/<price>")
 def addLicence(tier,length,price):
     tier = str(decryptWord(tier))
     length = str(decryptWord(length))
     price = float(decryptWord(price))
     message = 'checkWhetherValidTierAndLength(' + tier + ','+ length +')'
     result = (readFromDatabaseUsingFunction(message))
+    print(tier)
+    print(length)
+    print(price)
+    print(result[0][0])
     if (result[0][0] == None or price < 0):
         return "Invalid codes"
     else:
@@ -411,7 +419,7 @@ def readFromDatabaseUsingFunction(function):
 def sentCustomerEmail(recipient,name, body,id,price):
     # Creates link for the user to access account
     emailBody = "http://127.0.0.1:5000/"
-    code = encryptWord(code)
+    code = encryptWord(id)
     link = emailBody + "customer/" + code
     # Prepares the email with the main body of the email being a html template
     msg = Message(subject='Confirmation Email',sender='group11IMAGEOPTIM@outlook.com', recipients = [recipient])
@@ -438,6 +446,14 @@ def sentAdminEmail(recipient,companyName, customerName,emailAddress, body, price
     # Sends email
     mail.send(msg)
 
+def sentOfferEmail(recipient,name, link):
+    # Prepares the email with the main body of the email being a html template
+    msg = Message(subject='Negotiated Price',sender='group11IMAGEOPTIM@outlook.com', recipients = [recipient])
+    msg.html = render_template('customer_offerEmail.html',name = name,link = link)
+    # Sends the email
+    mail.send(msg)
+
+
 def processTransaction():
     # Writes the new customer to the database and returns the Id of the customer
     id = writeToDatabaseWithCustomerDetails(session.get("customer")["name"], session.get("customer")["street"], session.get("customer")["city"], session.get("customer")["postcode"],session.get("customer")["country"],session.get("customer")["email"],session.get("customer")["nameOfContactPerson"],session.get("customer")["vatNumber"])
@@ -462,7 +478,6 @@ def gatherBasketDetails():
     basketArray = []
     price = 0
     size = 0
-    print(basketArray)
     if 'basket' in session:
         for key,item in session['basket'].items():
             callItem = "getBasketDetails(" +str(item['tier']) +","+ str(item['length']) + ")"
@@ -472,7 +487,6 @@ def gatherBasketDetails():
             basketArray.append(temp)
             price = price + float(item['price'])
             size =  size + 1
-    print(basketArray)
     return basketArray,price,size
 
 if __name__ == "__main__":

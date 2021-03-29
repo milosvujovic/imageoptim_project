@@ -1,0 +1,10 @@
+{% extends 'emailTemplate.html' %}
+{% block MainContents %}
+  <div class="container-fluid">
+    <p>Dear {{name}},</p>
+    <p>We are pleased to attach the link for the item that you requested.</p>
+    <a href = {{link}}>Purchase item</a>
+    <p>Thank you,</p>
+    <p>Image Optim</p>
+  </div>
+{% endblock %}
