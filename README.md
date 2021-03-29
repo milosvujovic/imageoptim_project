@@ -12,3 +12,7 @@ py server.py,
 
 
 Email Address - group11IMAGEOPTIM@outlook.com
+
+Admin login details
+username - group11IMAGEOPTIM@outlook.com
+password - password
