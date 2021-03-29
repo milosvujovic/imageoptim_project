@@ -80,13 +80,13 @@ def load_key():
 # User web Routes
 @app.route("/")
 def homePage():
-    return render_template('home.html', title = "Home", licences = readFromDatabaseUsingStoredProcedures("getListOfLicence()"))
+    return render_template('user_home.html', title = "Home", licences = readFromDatabaseUsingStoredProcedures("getListOfLicence()"))
 
 # Displays checkout page asking for users details.
 @app.route("/checkout")
 @basket_required
 def customerPage():
-    return render_template('customer.html', title = "Customer Details", countries = readFromDatabaseUsingStoredProcedures("getCountries()"))
+    return render_template('user_customerDetails.html', title = "Customer Details", countries = readFromDatabaseUsingStoredProcedures("getCountries()"))
 
 # Displays page with options to select a licence
 @app.route("/licence/<licenceID>")
@@ -100,18 +100,18 @@ def selectLicence(licenceID):
         if licenceID in session['basket']:
             tier = int(session['basket'][licenceID]['tier'])
             length = int(session['basket'][licenceID]['length'])
-    return render_template('licence.html', title = "Licence", tiers = readFromDatabaseUsingStoredProcedures(callTiers), lengths= readFromDatabaseUsingStoredProcedures(callLengths), licenceID = licenceID, selectedTier = tier, selectedLength = length)
+    return render_template('user_licence.html', title = "Licence", tiers = readFromDatabaseUsingStoredProcedures(callTiers), lengths= readFromDatabaseUsingStoredProcedures(callLengths), licenceID = licenceID, selectedTier = tier, selectedLength = length)
 
 # Displays basket page.
 # Having read the details about each item from the database.
 @app.route("/basket")
 def basketPage():
         basketDetails = gatherBasketDetails()
-        return render_template('basket.html', title = "Basket", basket =  basketDetails[0], size = basketDetails[2], price = basketDetails[1])
+        return render_template('user_basket.html', title = "Basket", basket =  basketDetails[0], size = basketDetails[2], price = basketDetails[1])
 
 # Displays purchase confirmation page
 def purchaseConfirmationPage():
-    return render_template('purchase_confirmation.html', title = "Purchase Confirmation")
+    return render_template('user_purchaseConfirmation.html', title = "Purchase Confirmation")
 
 # Removes selected item from the basket and redirects them to the basket
 @app.route("/basket/remove/<licenceID>")
@@ -185,9 +185,7 @@ def editCustomerDetails():
 @app.route("/admin/login")
 def adminLogIn():
     return render_template('admin_logIn.html', title = 'Admin Log in')
-    # session['admin'] = True
-    # session.modified = True
-    # return "Logged in"
+
 
 # Route to show all of the licences that they sell
 @app.route("/admin/home")
@@ -199,7 +197,7 @@ def adminHome():
 @app.route("/admin/licence/<licenceID>")
 @admin_required
 def adminLicence(licenceID):
-    return "Top Secret Details aboyt hte licence"
+    return "Top Secret Details about the licence"
 
 @app.route("/admin/logOut")
 @admin_required
@@ -339,7 +337,7 @@ def sentCustomerEmail(recipient,name, body,id,price):
     link = emailBody + "customer/" + str(code, 'utf-8')
     # Prepares the email with the main body of the email being a html template
     msg = Message(subject='Confirmation Email',sender='group11IMAGEOPTIM@outlook.com', recipients = [recipient])
-    msg.html = render_template('emailConfirmationCustomer.html',basket = body, name = name,link = link,price = price)
+    msg.html = render_template('customer_emailConfirmation.html',basket = body, name = name,link = link,price = price)
     # Attaches the invoice file
     with app.open_resource('static\invoice\invoice.pdf') as fp:
         msg.attach('invoice.pdf', "invoice/pdf", fp.read())
@@ -355,7 +353,7 @@ def sentAdminEmail(recipient,companyName, customerName,emailAddress, body, price
     for i in recipient:
         recipients.append(i)
     msg = Message(subject='Purchase Confirmation',sender='group11IMAGEOPTIM@outlook.com', recipients = recipients)
-    msg.html = render_template('emailConfirmationAdmin.html',basket = body, customer = companyName,employeeName = customerName,emailAddress = emailAddress,price = price)
+    msg.html = render_template('admin_emailConfirmation.html',basket = body, customer = companyName,employeeName = customerName,emailAddress = emailAddress,price = price)
     # Attaches the contract file
     with app.open_resource('static\contract\contract.pdf') as fp:
         msg.attach('contract.pdf', "contract/pdf", fp.read())
@@ -395,8 +393,6 @@ def gatherBasketDetails():
             price = price + temp[4]
             size =  size + 1
     return basketArray,price,size
-
-
 
 if __name__ == "__main__":
     app.run(debug=True)
