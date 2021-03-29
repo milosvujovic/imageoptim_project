@@ -7,6 +7,7 @@ from flask import Flask, render_template, request,redirect,make_response,session
 from flask_mysqldb import MySQL
 from flask_mail import Mail, Message
 from cryptography.fernet import Fernet
+from datetime import timedelta
 
 
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
@@ -25,9 +26,9 @@ app.config['MAIL_USERNAME'] = 'group11IMAGEOPTIM@outlook.com'
 app.config['MAIL_PASSWORD'] = '1m@g30ptim'
 app.config["MAIL_USE_SSL:1123"] = True
 app.config["MAIL_USE_TLS"] = True
-# Encryption variables
+# session data Variables
 app.secret_key = 'fj590Rt?h40gg'
-
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
 
 mail = Mail(app)
 mysql = MySQL(app)
@@ -47,6 +48,14 @@ def admin_required(func):
         if 'admin' not in session:
             return "You don't have access here"
             # return redirect(url_for("login", next=request.url))
+        return func(*args, **kwargs)
+    return secure_function
+
+def basket_required(func):
+    @functools.wraps(func)
+    def secure_function(*args, **kwargs):
+        if 'basket' not in session or len(session['basket']) == 0:
+            return render_template('checkoutWarning.html', title = "Checkout")
         return func(*args, **kwargs)
     return secure_function
 
@@ -75,11 +84,9 @@ def homePage():
 
 # Displays checkout page asking for users details.
 @app.route("/checkout")
+@basket_required
 def customerPage():
-    if 'basket' in session:
-        return render_template('customer.html', title = "Customer Details", countries = readFromDatabaseUsingStoredProcedures("getCountries()"))
-    else:
-        return render_template('checkoutWarning.html', title = "Checkout")
+    return render_template('customer.html', title = "Customer Details", countries = readFromDatabaseUsingStoredProcedures("getCountries()"))
 
 # Displays page with options to select a licence
 @app.route("/licence/<licenceID>")
@@ -103,6 +110,7 @@ def basketPage():
         return render_template('basket.html', title = "Basket", basket =  basketDetails[0], size = basketDetails[2], price = basketDetails[1])
 
 # Displays purchase confirmation page
+@basket_required
 def purchaseConfirmationPage():
     return render_template('purchase_confirmation.html', title = "Purchase Confirmation")
 
@@ -138,6 +146,7 @@ def displayCustomerDetails(input):
         newId = str(id[2:index])
         # Needs verifying stage
         if (readFromDatabaseUsingFunction('`checkWhetherCustomer`('+newId+')')[0][0] == 1):
+            session.clear()
             # Verifies there email address and logs them in by storing it in session storage.
             verifyEmailInDatabase(newId)
             session['customerID'] = newId
@@ -203,6 +212,7 @@ def adminLogOut():
 
 # Reading forms.
 @app.route("/gatherCustomerData", methods=['POST'])
+@basket_required
 def customerForm():
     print("Requesting data")
     if request.method == 'POST':
@@ -277,8 +287,8 @@ def writeToDatabaseWithCustomerDetails(name, street, city, postcode,country,emai
     cur.close()
     return data
 
+# Writes to the database with details of the purchase
 def writePurchaseIntoDatabase(customerID):
-    # Writes to the database with details of the purchase
     if 'basket' in session:
         for item in session['basket'].values():
             cur = mysql.connection.cursor()
