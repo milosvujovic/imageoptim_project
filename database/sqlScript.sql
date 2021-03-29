@@ -424,7 +424,7 @@ WHERE parameter = customerID;
 END //
 DELIMITER ;
 
--- returns whether someone has the customerID
+-- returns whether its a valid customer ID
 DELIMITER //
 CREATE FUNCTION `checkWhetherCustomer`(parameter int) RETURNS boolean
 BEGIN
@@ -436,3 +436,14 @@ ELSE
 return false;
 END IF;
 END //
+DELIMITER ;
+
+DELIMITER //
+CREATE FUNCTION `checkWhetherValidTierAndLength`(tierParameter int, lengthParameter int) RETURNS int
+BEGIN
+return (SELECT licenceID 
+FROM tiers
+JOIN prices on prices.tierID = tiers.tierID
+WHERE prices.tierID = tierParameter AND prices.lengthID = lengthParameter);
+END //
+DELIMITER ;

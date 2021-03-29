@@ -106,9 +106,10 @@ def selectLicence(licenceID):
 # Having read the details about each item from the database.
 @app.route("/basket")
 def basketPage():
-        basketDetails = gatherBasketDetails()
-        print(basketDetails)
-        return render_template('user_basket.html', title = "Basket", basket =  basketDetails[0], size = basketDetails[2], price = basketDetails[1])
+    print("basket")
+    basketDetails = gatherBasketDetails()
+    print(basketDetails)
+    return render_template('user_basket.html', title = "Basket", basket =  basketDetails[0], size = basketDetails[2], price = basketDetails[1])
 
 # Displays purchase confirmation page
 def purchaseConfirmationPage():
@@ -135,13 +136,10 @@ def removeAllFromBasket():
 # Logs  user in
 @app.route("/customer/<input>")
 def displayCustomerDetails(input):
-    try:
+    # try:
         # Decodes the code in the email
-        token = input.encode("utf-8")
-        key = load_key()
-        f = Fernet(key)
-        value = f.decrypt(token)
-        id = str(value, 'utf-8')
+        id = decryptWord(input)
+        print(list(id))
         index = int(id.index(','))
         newId = str(id[2:index])
         # Needs verifying stage
@@ -155,8 +153,8 @@ def displayCustomerDetails(input):
             return redirect("/customer/edit")
         else:
             return "You can't be here"
-    except:
-        return "Invalid Code"
+    # except:
+    #     return "Invalid Code"
 
 # To Save us having to get a code each time.
 @app.route("/customer/hack")
@@ -200,6 +198,14 @@ def adminHome():
 def adminLicence(licenceID):
     return "Top Secret Details about the licence"
 
+@app.route("/admin/negotiate/<licenceID>")
+@admin_required
+def negotiatePrice(licenceID):
+    callTiers = "getTiersForLicence("+licenceID+")"
+    callLengths = "getLengthOfLicences("+licenceID+")"
+    return render_template('admin_negoitatePrice.html', title = "Negotiate", tiers = readFromDatabaseUsingStoredProcedures(callTiers), lengths= readFromDatabaseUsingStoredProcedures(callLengths))
+
+
 @app.route("/admin/logOut")
 @admin_required
 def adminLogOut():
@@ -207,6 +213,41 @@ def adminLogOut():
     session.modified = True
     return "Logged Out"
 
+@app.route("/admin/neg/<tierID>/<lengthID>/<priceID>")
+def createLink(tierID,lengthID,priceID):
+
+    # Reference https://cryptography.io/en/latest
+    key = load_key()
+    f = Fernet(key)
+    lengthCode = encryptWord(lengthID)
+    priceCode = encryptWord(priceID)
+    tierCode = encryptWord(tierID)
+    code = lengthCode + "/" + tierCode + "/" + priceCode
+    originalLength = decryptWord(lengthCode)
+    originalTier = decryptWord(tierCode)
+    originalPrice = decryptWord(priceCode)
+    code = code + originalLength + "/" + originalPrice + "/" + originalTier
+    return code
+
+def encryptWord(word):
+    # Reference https://cryptography.io/en/latest
+    key = load_key()
+    encryptor = Fernet(key)
+    word = str(word)
+    word = word.encode()
+    wordCode = encryptor.encrypt(word)
+    wordCode = str(wordCode, 'utf-8')
+    return wordCode
+
+def decryptWord(word):
+    # Reference https://cryptography.io/en/latest
+    key = load_key()
+    decryptor = Fernet(key)
+    word = str(word)
+    word = word.encode()
+    word = decryptor.decrypt(word)
+    word = str(word, 'utf-8')
+    return word
 
 # Reading forms.
 @app.route("/gatherCustomerData", methods=['POST'])
@@ -228,6 +269,25 @@ def customerForm():
         return processTransaction()
     return "Error with form"
 
+@app.route("/createLink", methods=['POST'])
+@admin_required
+def linkForm():
+    if request.method == 'POST':
+        # Stores the customer details in a dictionary in the server session storage
+        tierID = request.form['tier']
+        lengthID = request.form['length']
+        priceID = request.form['price']
+        key = load_key()
+        f = Fernet(key)
+        lengthCode = encryptWord(lengthID)
+        priceCode = encryptWord(priceID)
+        tierCode = encryptWord(tierID)
+        code = "http://127.0.0.1:5000/"+lengthCode + "/" + tierCode + "/" + priceCode
+        return code
+    return "Error with form"
+
+
+
 @app.route("/gatherLicenceData", methods=['POST'])
 def licenceForm():
     if request.method == 'POST':
@@ -238,20 +298,27 @@ def licenceForm():
         price = read[0][0]
         print(price)
         licenceID = (request.form['licenceID'])
-        session['basket'][licenceID] = {'tier' : request.form['tier'], 'length' : request.form['length'], 'price' : price }
+        session['basket'][str(licenceID)] = {'tier' : str(request.form['tier']), 'length' : str(request.form['length']), 'price' : str(price) }
         session.modified = True
     # Redirects them to the basket
         return redirect("/basket")
 
-@app.route("/addLicence/<licenceID>/<tier>/<length>/<price>")
-def addLicence(licenceID,tier,length,price):
-    if 'basket' not in session:
-        session['basket'] = {}
-    print(price)
-    session['basket'][licenceID] = {'tier' : tier, 'length' : length, 'price' : float(price)}
-    session.modified = True
-    # Redirects them to the basket
-    return redirect("/basket")
+@app.route("/addLicence/<tier>/<length>/<price>")
+def addLicence(tier,length,price):
+    tier = str(decryptWord(tier))
+    length = str(decryptWord(length))
+    price = float(decryptWord(price))
+    message = 'checkWhetherValidTierAndLength(' + tier + ','+ length +')'
+    result = (readFromDatabaseUsingFunction(message))
+    if (result[0][0] == None or price < 0):
+        return "Invalid codes"
+    else:
+        if 'basket' not in session:
+            session['basket'] = {}
+        licenceID = result[0][0]
+        session['basket'][str(licenceID)] = {'tier' : str(tier), 'length' : str(length), 'price' : str(price)}
+        session.modified = True
+    return redirect('/basket')
 
 @app.route("/updatedCustomerData", methods=['POST'])
 def editCustomerForm():
@@ -342,14 +409,10 @@ def readFromDatabaseUsingFunction(function):
 
 # Functions
 def sentCustomerEmail(recipient,name, body,id,price):
-    # Creates link for the user
-    # Reference https://cryptography.io/en/latest
-    message = id.encode()
-    key = load_key()
-    f = Fernet(key)
-    code = f.encrypt(message)
+    # Creates link for the user to access account
     emailBody = "http://127.0.0.1:5000/"
-    link = emailBody + "customer/" + str(code, 'utf-8')
+    code = encryptWord(code)
+    link = emailBody + "customer/" + code
     # Prepares the email with the main body of the email being a html template
     msg = Message(subject='Confirmation Email',sender='group11IMAGEOPTIM@outlook.com', recipients = [recipient])
     msg.html = render_template('customer_emailConfirmation.html',basket = body, name = name,link = link,price = price)
@@ -399,15 +462,17 @@ def gatherBasketDetails():
     basketArray = []
     price = 0
     size = 0
+    print(basketArray)
     if 'basket' in session:
         for key,item in session['basket'].items():
-            callItem = "getBasketDetails(" +item['tier'] +","+ item['length'] + ")"
+            callItem = "getBasketDetails(" +str(item['tier']) +","+ str(item['length']) + ")"
             temp = list(readFromDatabaseUsingStoredProcedures(callItem)[0])
             temp.append(key)
             temp.append(item['price'])
             basketArray.append(temp)
-            price = price + item['price']
+            price = price + float(item['price'])
             size =  size + 1
+    print(basketArray)
     return basketArray,price,size
 
 if __name__ == "__main__":
