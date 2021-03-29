@@ -110,7 +110,6 @@ def basketPage():
         return render_template('basket.html', title = "Basket", basket =  basketDetails[0], size = basketDetails[2], price = basketDetails[1])
 
 # Displays purchase confirmation page
-@basket_required
 def purchaseConfirmationPage():
     return render_template('purchase_confirmation.html', title = "Purchase Confirmation")
 
@@ -214,7 +213,6 @@ def adminLogOut():
 @app.route("/gatherCustomerData", methods=['POST'])
 @basket_required
 def customerForm():
-    print("Requesting data")
     if request.method == 'POST':
         # Stores the customer details in a dictionary in the server session storage
         session['customer'] = {}
@@ -243,7 +241,6 @@ def licenceForm():
         return redirect("/basket")
 
 @app.route("/updatedCustomerData", methods=['POST'])
-@customer_required
 def editCustomerForm():
     if 'customerID' in session:
         if request.method == 'POST':
@@ -381,7 +378,7 @@ def processTransaction():
     # Sents email to the admin with details of the purchase
     sentAdminEmail(adminEmails[0],session.get("customer")["name"], session.get("customer")["nameOfContactPerson"],session.get("customer")["email"], basketDetails[0],basketDetails[1])
     # Clears the basket
-    session['basket'].clear()
+    session.clear()
     # Redirects to confirmation page.
     return purchaseConfirmationPage()
 
