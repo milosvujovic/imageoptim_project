@@ -107,6 +107,7 @@ def selectLicence(licenceID):
 @app.route("/basket")
 def basketPage():
         basketDetails = gatherBasketDetails()
+        print(basketDetails)
         return render_template('user_basket.html', title = "Basket", basket =  basketDetails[0], size = basketDetails[2], price = basketDetails[1])
 
 # Displays purchase confirmation page
@@ -232,11 +233,25 @@ def licenceForm():
     if request.method == 'POST':
         if 'basket' not in session:
             session['basket'] = {}
+        call = "getPrice("+ request.form['tier'] +","+ request.form['length'] +")"
+        read = readFromDatabaseUsingFunction(call)
+        price = read[0][0]
+        print(price)
         licenceID = (request.form['licenceID'])
-        session['basket'][licenceID] = {'tier' : request.form['tier'], 'length' : request.form['length'] }
+        session['basket'][licenceID] = {'tier' : request.form['tier'], 'length' : request.form['length'], 'price' : price }
         session.modified = True
     # Redirects them to the basket
         return redirect("/basket")
+
+@app.route("/addLicence/<licenceID>/<tier>/<length>/<price>")
+def addLicence(licenceID,tier,length,price):
+    if 'basket' not in session:
+        session['basket'] = {}
+    print(price)
+    session['basket'][licenceID] = {'tier' : tier, 'length' : length, 'price' : float(price)}
+    session.modified = True
+    # Redirects them to the basket
+    return redirect("/basket")
 
 @app.route("/updatedCustomerData", methods=['POST'])
 def editCustomerForm():
@@ -252,7 +267,6 @@ def editCustomerForm():
             vatNumber = request.form['vatNumber']
             customerID = session['customerID']
                 # Space to save to database
-
             return "Updated details"
         return "Error with form"
     return "Error you can't view this area"
@@ -286,8 +300,9 @@ def writeToDatabaseWithCustomerDetails(name, street, city, postcode,country,emai
 def writePurchaseIntoDatabase(customerID):
     if 'basket' in session:
         for item in session['basket'].values():
+            print("Writing purchase")
             cur = mysql.connection.cursor()
-            cur.execute("CALL recordPurchase(%s,%s,%s);", (item.get('tier'), item.get('length'), customerID))
+            cur.execute("CALL recordPurchase(%s,%s,%s,%s);", (item.get('tier'), item.get('length'), customerID, item.get('price')))
             mysql.connection.commit()
             data = cur.fetchall()
             cur.close()
@@ -389,8 +404,9 @@ def gatherBasketDetails():
             callItem = "getBasketDetails(" +item['tier'] +","+ item['length'] + ")"
             temp = list(readFromDatabaseUsingStoredProcedures(callItem)[0])
             temp.append(key)
+            temp.append(item['price'])
             basketArray.append(temp)
-            price = price + temp[4]
+            price = price + item['price']
             size =  size + 1
     return basketArray,price,size
 
