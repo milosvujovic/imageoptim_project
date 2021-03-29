@@ -121,7 +121,7 @@ def removeFromBasket(licenceID):
         if licenceID in session['basket']:
             session['basket'].pop(licenceID, None)
             session.modified = True
-    return basketPage()
+    return redirect("/basket")
 
     # Removes all item from the basket and redirects them to the basket
 @app.route("/basket/clear")
@@ -129,7 +129,7 @@ def removeAllFromBasket():
     if 'basket' in session:
         session['basket'].clear()
         session.modified = True
-    return basketPage()
+    return redirect("/basket")
 
 # Customers Web routes
 # Logs  user in
@@ -152,7 +152,7 @@ def displayCustomerDetails(input):
             session['customerID'] = newId
             session.modified = True
             # Directs them to edit there details. Will change this path later on.
-            return editCustomerDetails()
+            return redirect("/customer/edit")
         else:
             return "You can't be here"
     except:
@@ -163,7 +163,7 @@ def displayCustomerDetails(input):
 def hackSystem():
     session['customerID'] = '1'
     session.modified = True
-    return editCustomerDetails()
+    return redirect("/customer/edit")
 
 # Logs a user out
 @app.route("/customer/logOut")
@@ -240,7 +240,7 @@ def licenceForm():
         session['basket'][licenceID] = {'tier' : request.form['tier'], 'length' : request.form['length'] }
         session.modified = True
     # Redirects them to the basket
-    return basketPage()
+        return redirect("/basket")
 
 @app.route("/updatedCustomerData", methods=['POST'])
 @customer_required
