@@ -2,10 +2,12 @@
 import os
 import json
 import datetime
+import functools
 from flask import Flask, render_template, request,redirect,make_response,session, url_for, flash
 from flask_mysqldb import MySQL
 from flask_mail import Mail, Message
 from cryptography.fernet import Fernet
+from datetime import timedelta
 
 
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
@@ -24,12 +26,38 @@ app.config['MAIL_USERNAME'] = 'group11IMAGEOPTIM@outlook.com'
 app.config['MAIL_PASSWORD'] = '1m@g30ptim'
 app.config["MAIL_USE_SSL:1123"] = True
 app.config["MAIL_USE_TLS"] = True
-# Encryption variables
+# session data Variables
 app.secret_key = 'fj590Rt?h40gg'
-
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
 
 mail = Mail(app)
 mysql = MySQL(app)
+
+def customer_required(func):
+    @functools.wraps(func)
+    def secure_function(*args, **kwargs):
+            if  'customerID' not in session:
+                return "You need to access this page by the link in the email"
+            print("Valid input")
+            return func(*args, **kwargs)
+    return secure_function
+
+def admin_required(func):
+    @functools.wraps(func)
+    def secure_function(*args, **kwargs):
+        if 'admin' not in session:
+            return "You don't have access here"
+            # return redirect(url_for("login", next=request.url))
+        return func(*args, **kwargs)
+    return secure_function
+
+def basket_required(func):
+    @functools.wraps(func)
+    def secure_function(*args, **kwargs):
+        if 'basket' not in session or len(session['basket']) == 0:
+            return render_template('checkoutWarning.html', title = "Checkout")
+        return func(*args, **kwargs)
+    return secure_function
 
 # Reference https://devqa.io/encrypt-decrypt-data-python/
 # Sets up the key for the encryption
@@ -52,15 +80,13 @@ def load_key():
 # User web Routes
 @app.route("/")
 def homePage():
-    return render_template('home.html', title = "Home", licences = readFromDatabaseUsingStoredProcedures("getListOfLicence()"))
+    return render_template('user_home.html', title = "Home", licences = readFromDatabaseUsingStoredProcedures("getListOfLicence()"))
 
 # Displays checkout page asking for users details.
 @app.route("/checkout")
+@basket_required
 def customerPage():
-    if 'basket' in session:
-        return render_template('customer.html', title = "Customer Details", countries = readFromDatabaseUsingStoredProcedures("getCountries()"))
-    else:
-        return render_template('checkoutWarning.html', title = "Checkout")
+    return render_template('user_customerDetails.html', title = "Customer Details", countries = readFromDatabaseUsingStoredProcedures("getCountries()"))
 
 # Displays page with options to select a licence
 @app.route("/licence/<licenceID>")
@@ -74,18 +100,18 @@ def selectLicence(licenceID):
         if licenceID in session['basket']:
             tier = int(session['basket'][licenceID]['tier'])
             length = int(session['basket'][licenceID]['length'])
-    return render_template('licence.html', title = "Licence", tiers = readFromDatabaseUsingStoredProcedures(callTiers), lengths= readFromDatabaseUsingStoredProcedures(callLengths), licenceID = licenceID, selectedTier = tier, selectedLength = length)
+    return render_template('user_licence.html', title = "Licence", tiers = readFromDatabaseUsingStoredProcedures(callTiers), lengths= readFromDatabaseUsingStoredProcedures(callLengths), licenceID = licenceID, selectedTier = tier, selectedLength = length)
 
 # Displays basket page.
 # Having read the details about each item from the database.
 @app.route("/basket")
 def basketPage():
         basketDetails = gatherBasketDetails()
-        return render_template('basket.html', title = "Basket", basket =  basketDetails[0], size = basketDetails[2], price = basketDetails[1])
+        return render_template('user_basket.html', title = "Basket", basket =  basketDetails[0], size = basketDetails[2], price = basketDetails[1])
 
 # Displays purchase confirmation page
 def purchaseConfirmationPage():
-    return render_template('purchase_confirmation.html', title = "Purchase Confirmation")
+    return render_template('user_purchaseConfirmation.html', title = "Purchase Confirmation")
 
 # Removes selected item from the basket and redirects them to the basket
 @app.route("/basket/remove/<licenceID>")
@@ -94,7 +120,7 @@ def removeFromBasket(licenceID):
         if licenceID in session['basket']:
             session['basket'].pop(licenceID, None)
             session.modified = True
-    return basketPage()
+    return redirect("/basket")
 
     # Removes all item from the basket and redirects them to the basket
 @app.route("/basket/clear")
@@ -102,14 +128,14 @@ def removeAllFromBasket():
     if 'basket' in session:
         session['basket'].clear()
         session.modified = True
-    return basketPage()
+    return redirect("/basket")
 
 # Customers Web routes
 # Logs  user in
 @app.route("/customer/<input>")
 def displayCustomerDetails(input):
     try:
-        Decodes the code in the email
+        # Decodes the code in the email
         token = input.encode("utf-8")
         key = load_key()
         f = Fernet(key)
@@ -119,12 +145,13 @@ def displayCustomerDetails(input):
         newId = str(id[2:index])
         # Needs verifying stage
         if (readFromDatabaseUsingFunction('`checkWhetherCustomer`('+newId+')')[0][0] == 1):
+            session.clear()
             # Verifies there email address and logs them in by storing it in session storage.
             verifyEmailInDatabase(newId)
             session['customerID'] = newId
             session.modified = True
             # Directs them to edit there details. Will change this path later on.
-            return editCustomerDetails()
+            return redirect("/customer/edit")
         else:
             return "You can't be here"
     except:
@@ -135,10 +162,11 @@ def displayCustomerDetails(input):
 def hackSystem():
     session['customerID'] = '1'
     session.modified = True
-    return editCustomerDetails()
+    return redirect("/customer/edit")
 
 # Logs a user out
 @app.route("/customer/logOut")
+@customer_required
 def customerLogOut():
     session.clear()
     session.modified = True
@@ -146,22 +174,43 @@ def customerLogOut():
 
 # Lets a user edit there details
 @app.route("/customer/edit")
+@customer_required
 def editCustomerDetails():
-    if 'customerID' in session:
-        customerID = session['customerID']
-        details = readFromDatabaseUsingStoredProcedures("getCustomerDetails("+customerID+")")[0]
-        return render_template('customer_edit.html', title = 'Edit Company Details', countries = readFromDatabaseUsingStoredProcedures("getCountries()"), customer = details)
-    else:
-        return "Error you can't view this area"
+    customerID = session['customerID']
+    details = readFromDatabaseUsingStoredProcedures("getCustomerDetails("+customerID+")")[0]
+    return render_template('customer_edit.html', title = 'Edit Company Details', countries = readFromDatabaseUsingStoredProcedures("getCountries()"), customer = details)
 
 
 # Admin routes
+@app.route("/admin/login")
+def adminLogIn():
+    return render_template('admin_logIn.html', title = 'Admin Log in')
+
+
+# Route to show all of the licences that they sell
+@app.route("/admin/home")
+@admin_required
+def adminHome():
+    return "Top Secret Admin Details"
+
+# Route to show all of the details about whose bought a specfic licence
+@app.route("/admin/licence/<licenceID>")
+@admin_required
+def adminLicence(licenceID):
+    return "Top Secret Details about the licence"
+
+@app.route("/admin/logOut")
+@admin_required
+def adminLogOut():
+    session.clear()
+    session.modified = True
+    return "Logged Out"
 
 
 # Reading forms.
 @app.route("/gatherCustomerData", methods=['POST'])
+@basket_required
 def customerForm():
-    print("Requesting data")
     if request.method == 'POST':
         # Stores the customer details in a dictionary in the server session storage
         session['customer'] = {}
@@ -187,7 +236,7 @@ def licenceForm():
         session['basket'][licenceID] = {'tier' : request.form['tier'], 'length' : request.form['length'] }
         session.modified = True
     # Redirects them to the basket
-    return basketPage()
+        return redirect("/basket")
 
 @app.route("/updatedCustomerData", methods=['POST'])
 def editCustomerForm():
@@ -208,6 +257,21 @@ def editCustomerForm():
         return "Error with form"
     return "Error you can't view this area"
 
+@app.route("/formLogIn", methods=['POST'])
+def logInForm():
+    print("receiving data")
+    if request.method == 'POST':
+        username = request.form['email']
+        password = request.form['password']
+        if username == "group11IMAGEOPTIM@outlook.com" and password == "password":
+            session.clear()
+            session['admin'] = True
+            session.modified = True
+            return redirect("/admin/home")
+        else:
+            flash("Incorrect username or password")
+    return redirect("/admin/login")
+
 # Database Functions
 def writeToDatabaseWithCustomerDetails(name, street, city, postcode,country,email,contactPerson,vatNumber):
     # Writes to the database with details of the customer
@@ -218,8 +282,8 @@ def writeToDatabaseWithCustomerDetails(name, street, city, postcode,country,emai
     cur.close()
     return data
 
+# Writes to the database with details of the purchase
 def writePurchaseIntoDatabase(customerID):
-    # Writes to the database with details of the purchase
     if 'basket' in session:
         for item in session['basket'].values():
             cur = mysql.connection.cursor()
@@ -273,7 +337,7 @@ def sentCustomerEmail(recipient,name, body,id,price):
     link = emailBody + "customer/" + str(code, 'utf-8')
     # Prepares the email with the main body of the email being a html template
     msg = Message(subject='Confirmation Email',sender='group11IMAGEOPTIM@outlook.com', recipients = [recipient])
-    msg.html = render_template('emailConfirmationCustomer.html',basket = body, name = name,link = link,price = price)
+    msg.html = render_template('customer_emailConfirmation.html',basket = body, name = name,link = link,price = price)
     # Attaches the invoice file
     with app.open_resource('static\invoice\invoice.pdf') as fp:
         msg.attach('invoice.pdf', "invoice/pdf", fp.read())
@@ -289,7 +353,7 @@ def sentAdminEmail(recipient,companyName, customerName,emailAddress, body, price
     for i in recipient:
         recipients.append(i)
     msg = Message(subject='Purchase Confirmation',sender='group11IMAGEOPTIM@outlook.com', recipients = recipients)
-    msg.html = render_template('emailConfirmationAdmin.html',basket = body, customer = companyName,employeeName = customerName,emailAddress = emailAddress,price = price)
+    msg.html = render_template('admin_emailConfirmation.html',basket = body, customer = companyName,employeeName = customerName,emailAddress = emailAddress,price = price)
     # Attaches the contract file
     with app.open_resource('static\contract\contract.pdf') as fp:
         msg.attach('contract.pdf', "contract/pdf", fp.read())
@@ -312,7 +376,7 @@ def processTransaction():
     # Sents email to the admin with details of the purchase
     sentAdminEmail(adminEmails[0],session.get("customer")["name"], session.get("customer")["nameOfContactPerson"],session.get("customer")["email"], basketDetails[0],basketDetails[1])
     # Clears the basket
-    session['basket'].clear()
+    session.clear()
     # Redirects to confirmation page.
     return purchaseConfirmationPage()
 
@@ -329,8 +393,6 @@ def gatherBasketDetails():
             price = price + temp[4]
             size =  size + 1
     return basketArray,price,size
-
-
 
 if __name__ == "__main__":
     app.run(debug=True)
