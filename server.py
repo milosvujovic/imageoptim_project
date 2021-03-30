@@ -191,7 +191,7 @@ def adminLogIn():
 @app.route("/admin/home")
 @admin_required
 def adminHome():
-    return "Top Secret Admin Details"
+    return render_template('admin_home.html')
 
 # Route to show all of the details about whose bought a specfic licence
 @app.route("/admin/licence/<licenceID>")
