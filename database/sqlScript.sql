@@ -466,7 +466,56 @@ FROM purchases
 JOIN `licence lengths` on `licence lengths`.licencelengthID = purchases.lengthID
 JOIN tiers on tiers.tierID = purchases.tierID
 JOIN licences on tiers.licenceID = licences.licenceID
-WHERE parameter = purchases.customerID and ((purchases.expirePurchase is null ) or (purchases.expirePurchase < date(now())));
+WHERE parameter = purchases.customerID and ((purchases.expirePurchase < date(now())));
 END //
 DELIMITER ;
 CALL getCustomersPastLicences(1);
+
+
+DELIMITER //
+CREATE PROCEDURE getPurchasesForLicences(
+IN parameter int
+)
+BEGIN
+SELECT tiers.minimumEmployees,tiers.maximumEmployees,`licence lengths`.length,purchases.price,purchases.datePurchase,purchases.expirePurchase, customers.customerID, customers.name
+FROM purchases
+JOIN `licence lengths` on `licence lengths`.licencelengthID = purchases.lengthID
+JOIN tiers on tiers.tierID = purchases.tierID
+JOIN licences on tiers.licenceID = licences.licenceID
+JOIN customers on customers.customerID = purchases.customerID
+WHERE parameter = tiers.licenceID and ((purchases.expirePurchase is null ) or (purchases.expirePurchase > date(now())));
+END //
+DELIMITER ;
+
+CALL getPurchasesForLicences(1);
+
+DELIMITER //
+CREATE PROCEDURE getPastPurchasesForLicences(
+IN parameter int
+)
+BEGIN
+SELECT tiers.minimumEmployees,tiers.maximumEmployees,`licence lengths`.length,purchases.price,purchases.datePurchase,purchases.expirePurchase, customers.customerID, customers.name
+FROM purchases
+JOIN `licence lengths` on `licence lengths`.licencelengthID = purchases.lengthID
+JOIN tiers on tiers.tierID = purchases.tierID
+JOIN licences on tiers.licenceID = licences.licenceID
+JOIN customers on customers.customerID = purchases.customerID
+WHERE parameter = tiers.licenceID and ((purchases.expirePurchase < date(now())));
+END //
+DELIMITER ;
+
+CALL getPastPurchasesForLicences(1);
+DELIMITER //
+CREATE PROCEDURE getDetailsOnCompany(
+IN parameter int
+)
+BEGIN
+SELECT customers.name,street,city,postcode,countries.name,email,nameOfContactPerson,vatNumber
+FROM customers
+JOIN countries on countries.isoCode = customers.isoCode
+WHERE customers.customerID =  parameter;
+END //
+DELIMITER ;
+
+
+CALL getDetailsOnCompany(1);

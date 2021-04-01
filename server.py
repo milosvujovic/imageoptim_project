@@ -210,7 +210,18 @@ def adminHome():
 @app.route("/admin/licence/<licenceID>")
 @admin_required
 def adminLicence(licenceID):
-    return "Top Secret Details about the licence"
+    call = "getPurchasesForLicences("+ licenceID + ")"
+    call2 = "getPastPurchasesForLicences("+ licenceID + ")"
+    return render_template('admin_licenceStats.html', title = "Purchases", currentLicences = readFromDatabaseUsingStoredProcedures(call),expiredLicences = readFromDatabaseUsingStoredProcedures(call2))
+
+@app.route("/admin/customerDetails/<customerID>")
+@admin_required
+def adminCustomerDetails(customerID):
+    call = "getCustomersCurrentLicences("+ customerID + ")"
+    call2 = "getCustomersPastLicences("+ customerID + ")"
+    call3 = "getDetailsOnCompany(" + customerID + ")"
+    return render_template('admin_customerDetails.html', title = "Customer", currentLicences = readFromDatabaseUsingStoredProcedures(call),expiredLicences = readFromDatabaseUsingStoredProcedures(call2), company = readFromDatabaseUsingStoredProcedures(call3)[0])
+
 
 @app.route("/admin/logOut")
 @admin_required
@@ -340,7 +351,7 @@ def readFromDatabaseUsingStoredProcedures(function):
             return data
             print("Succesfully from the database")
         except Exception as e:
-            print("Error " + e)
+            print(e)
 
 def readFromDatabaseUsingFunction(function):
         command = "SELECT " + function +";"
@@ -353,7 +364,7 @@ def readFromDatabaseUsingFunction(function):
             return data
             print("Succesfully from the database")
         except Exception as e:
-            print("Error " + e)
+            print(e)
 
 
 # Functions
