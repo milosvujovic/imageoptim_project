@@ -437,4 +437,36 @@ return false;
 END IF;
 END //
 
-SELECT `checkWhetherCustomer`(100);
+
+DELIMITER //
+CREATE PROCEDURE getCustomersCurrentLicences(
+IN parameter int
+)
+BEGIN
+SELECT licences.name,tiers.minimumEmployees,tiers.maximumEmployees,`licence lengths`.length,purchases.price,purchases.datePurchase,purchases.expirePurchase
+FROM purchases
+JOIN `licence lengths` on `licence lengths`.licencelengthID = purchases.lengthID
+JOIN tiers on tiers.tierID = purchases.tierID
+JOIN licences on tiers.licenceID = licences.licenceID
+WHERE parameter = purchases.customerID and ((purchases.expirePurchase is null ) or (purchases.expirePurchase > date(now())));
+END //
+DELIMITER ;
+
+CALL getCustomersCurrentLicences(1);
+DROP PROCEDURE getCustomersCurrentLicences;
+
+
+DELIMITER //
+CREATE PROCEDURE getCustomersPastLicences(
+IN parameter int
+)
+BEGIN
+SELECT licences.name,tiers.minimumEmployees,tiers.maximumEmployees,`licence lengths`.length,purchases.price,purchases.datePurchase,purchases.expirePurchase
+FROM purchases
+JOIN `licence lengths` on `licence lengths`.licencelengthID = purchases.lengthID
+JOIN tiers on tiers.tierID = purchases.tierID
+JOIN licences on tiers.licenceID = licences.licenceID
+WHERE parameter = purchases.customerID and ((purchases.expirePurchase is null ) or (purchases.expirePurchase < date(now())));
+END //
+DELIMITER ;
+CALL getCustomersPastLicences(1);

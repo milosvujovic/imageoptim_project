@@ -55,7 +55,7 @@ def basket_required(func):
     @functools.wraps(func)
     def secure_function(*args, **kwargs):
         if 'basket' not in session or len(session['basket']) == 0:
-            return render_template('checkoutWarning.html', title = "Checkout")
+            return render_template('user_checkoutWarning.html', title = "Checkout")
         return func(*args, **kwargs)
     return secure_function
 
@@ -81,6 +81,12 @@ def load_key():
 @app.route("/")
 def homePage():
     return render_template('user_home.html', title = "Home", licences = readFromDatabaseUsingStoredProcedures("getListOfLicence()"))
+
+@app.route("/payment")
+@basket_required
+def payment():
+    return render_template('user_paymentForm.html', title = 'Payment')
+
 
 # Displays checkout page asking for users details.
 @app.route("/checkout")
@@ -164,6 +170,13 @@ def hackSystem():
     session.modified = True
     return redirect("/customer/edit")
 
+@app.route("/customer/licences")
+def gatherCustomersLicences():
+    call = "getCustomersCurrentLicences("+ session['customerID'] + ")"
+    call2 = "getCustomersPastLicences("+ session['customerID'] + ")"
+    return render_template('customer_licences.html', title = "Licences", currentLicences = readFromDatabaseUsingStoredProcedures(call),previousLicences = readFromDatabaseUsingStoredProcedures(call2))
+
+
 # Logs a user out
 @app.route("/customer/logOut")
 @customer_required
@@ -224,8 +237,26 @@ def customerForm():
         session['customer']['vatNumber'] = request.form['vatNumber']
         session.modified = True
         # Calls function to process transactions
-        return processTransaction()
+        return redirect('/payment')
     return "Error with form"
+
+@app.route("/gatherPaymentDetails", methods=['POST'])
+@basket_required
+def paymentForm():
+    if request.method == 'POST':
+        # Stores the customer details in a dictionary in the server session storage
+        print(request.form['cardNumber'])
+        print(request.form['expiryDateMonth'])
+        print(request.form['expiryDateYear'])
+        print(request.form['securityCode'])
+        print(request.form['issueNumber'])
+        session.modified = True
+        # Calls function to process transactions
+        # processPayment()
+        processTransaction()
+    return "Error with form"
+
+
 
 @app.route("/gatherLicenceData", methods=['POST'])
 def licenceForm():
@@ -390,7 +421,7 @@ def gatherBasketDetails():
             temp = list(readFromDatabaseUsingStoredProcedures(callItem)[0])
             temp.append(key)
             basketArray.append(temp)
-            price = price + temp[4]
+            price = price + float(temp[4])
             size =  size + 1
     return basketArray,price,size
 
