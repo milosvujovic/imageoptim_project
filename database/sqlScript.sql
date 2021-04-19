@@ -381,7 +381,7 @@ CREATE PROCEDURE recordPurchase(
 IN tierParameter int,
 IN lengthParameter int,
 IN customerParameter int,
-IN priceParameter int)
+IN priceParameter double)
 BEGIN
 SET @numberOfYears = (SELECT getLength(lengthParameter));
 IF @numberOfYears = -1

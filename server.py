@@ -425,6 +425,7 @@ def writePurchaseIntoDatabase(customerID):
         for item in session['basket'].values():
             print("Writing purchase")
             cur = mysql.connection.cursor()
+            print("price " + item.get('price'))
             cur.execute("CALL recordPurchase(%s,%s,%s,%s);", (item.get('tier'), item.get('length'), customerID, item.get('price')))
             mysql.connection.commit()
             data = cur.fetchall()
