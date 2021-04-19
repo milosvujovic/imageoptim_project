@@ -172,8 +172,12 @@ def hackSystem():
 @app.route("/customer/licences")
 def gatherCustomersLicences():
     call = "getCustomersCurrentLicences("+ session['customerID'] + ")"
+    current= readFromDatabaseUsingStoredProcedures(call)
+    print(current)
     call2 = "getCustomersPastLicences("+ session['customerID'] + ")"
-    return render_template('customer_licences.html', title = "Licences", currentLicences = readFromDatabaseUsingStoredProcedures(call),previousLicences = readFromDatabaseUsingStoredProcedures(call2))
+    previous = readFromDatabaseUsingStoredProcedures(call2)
+    print(previous)
+    return render_template('customer_licences.html', title = "Licences", currentLicences = current,previousLicences =previous)
 
 
 # Logs a user out
@@ -206,7 +210,7 @@ def adminLogIn():
 @app.route("/admin/home")
 @admin_required
 def adminHome():
-    return render_template('admin_home.html')
+    return render_template('admin_home.html', currentLicences = readFromDatabaseUsingStoredProcedures("getListOfLicence()"))
 
 # Route to show all of the details about whose bought a specfic licence
 @app.route("/admin/licence/<licenceID>")
@@ -292,6 +296,7 @@ def customerForm():
         session['customer']['postcode'] = request.form['postcode']
         session['customer']['vatNumber'] = request.form['vatNumber']
         session.modified = True
+        print(request.form['name'])
         # Calls function to process transactions
         return redirect('/payment')
     return "Error with form"
@@ -330,8 +335,8 @@ def paymentForm():
         # Calls function to process transactions
         # processPayment()
         processTransaction()
-
-    return "Error with form"
+    # Redirects to confirmation page.
+    return purchaseConfirmationPage()
 
 
 
@@ -514,8 +519,7 @@ def processTransaction():
     sentAdminEmail(adminEmails[0],session.get("customer")["name"], session.get("customer")["nameOfContactPerson"],session.get("customer")["email"], basketDetails[0],basketDetails[1])
     # Clears the basket
     session.clear()
-    # Redirects to confirmation page.
-    return purchaseConfirmationPage()
+
 
 def gatherBasketDetails():
     basketArray = []

@@ -464,9 +464,6 @@ WHERE parameter = purchases.customerID and ((purchases.expirePurchase is null ) 
 END //
 DELIMITER ;
 
-CALL getCustomersCurrentLicences(1);
-DROP PROCEDURE getCustomersCurrentLicences;
-
 
 DELIMITER //
 CREATE PROCEDURE getCustomersPastLicences(
@@ -481,7 +478,6 @@ JOIN licences on tiers.licenceID = licences.licenceID
 WHERE parameter = purchases.customerID and ((purchases.expirePurchase < date(now())));
 END //
 DELIMITER ;
-CALL getCustomersPastLicences(1);
 
 
 DELIMITER //

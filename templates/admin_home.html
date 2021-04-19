@@ -1,4 +1,17 @@
 {% extends 'admin_template.html' %}
 {% block MainContents %}
-  <h1>Content goes here</h1>
+<div class="container-fluid">
+  <h1 class="display-4 text-center">Current Licences</h1>
+    <table class="table table-striped">
+      <tbody>
+        {% for licence in currentLicences %}
+        <tr>
+          <th scope="row">{{licence[1]}}</th>
+          <td><a href="/admin/licence/{{licence[0]}}">View Purchases</a></td>
+          <td><a href="/admin/negotiate/{{licence[0]}}">Offer Deal</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+</div>
 {% endblock %}
