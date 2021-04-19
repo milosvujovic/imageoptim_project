@@ -37,7 +37,7 @@ def customer_required(func):
     @functools.wraps(func)
     def secure_function(*args, **kwargs):
             if  'customerID' not in session:
-                return "You need to access this page by the link in the email"
+                return render_template('customer_logInError.html', title = "Log In")
             return func(*args, **kwargs)
     return secure_function
 
@@ -186,7 +186,7 @@ def gatherCustomersLicences():
 def customerLogOut():
     session.clear()
     session.modified = True
-    return "Logged Out"
+    return redirect("/")
 
 # Lets a user edit there details
 @app.route("/customer/edit")
@@ -242,7 +242,7 @@ def negotiatePrice(licenceID):
 def adminLogOut():
     session.clear()
     session.modified = True
-    return "Logged Out"
+    return redirect("/")
 
 @app.route("/admin/neg/<tierID>/<lengthID>/<priceID>")
 def createLink(tierID,lengthID,priceID):
