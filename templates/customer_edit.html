@@ -1,17 +1,9 @@
-<<<<<<< HEAD
 {% extends 'customer_template.html' %}
-=======
-{% extends 'template.html' %}
->>>>>>> 30-as-a-customer-i-would-like-to-be-able-to-change-my-companies-details
 
 {% block MainContents %}
 <div class="container-fluid">
   <h1 class="display-4 text-center">Edit Customer Details</h1>
-<<<<<<< HEAD
-  <form action = "/updatedCustomerData" id='editCustomerDetails' method='post' class="form-group">
-=======
-  <form action = "/customer/edit/<customerID>" id='editCustomerDetails' method='post' class="form-group">
->>>>>>> 30-as-a-customer-i-would-like-to-be-able-to-change-my-companies-details
+  <form action = "/updatedCustomerData" id='editCustomerDetails' method='POST' class="form-group">
     <!-- action="/url" -->
     <div class="form-group mb-4">
       <label class="mb-0"><h6 class="font-weight-bold small">Company Name</h6></label>

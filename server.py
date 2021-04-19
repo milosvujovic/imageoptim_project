@@ -389,8 +389,8 @@ def editCustomerForm():
             postcode = request.form['postcode']
             vatNumber = request.form['vatNumber']
             customerID = session['customerID']
-                # Space to save to database
-            return "Updated details"
+            # updateCustomerDetails(name,nameOfContactPerson,email,street,city,country,postcode,vatNumber,customerID)
+            return redirect("/customer/licences")
         return "Error with form"
     return "Error you can't view this area"
 
@@ -465,7 +465,7 @@ def readFromDatabaseUsingFunction(function):
 
 def updateCustomerDetails():
     cur = mysql.connection.cursor()
-    cur.execute("CALL updateCustomer(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);", (item.get('name'), item.get('street'), item.get('city'), item.get('postcode'), item.get('isoCode'), item.get('email'), item.get('emailVerified'), item.get('NameOfContactPerson'), item.get('VATNumber'), customerID))
+    cur.execute("CALL updateCustomer(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);", (name, street, city, postcode, country, email, nameOfContactPerson, vatNumber, customerID))
     mysql.connection.commit()
     data = cur.fetchall()
     cur.close()
