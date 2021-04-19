@@ -210,7 +210,7 @@ def adminLogIn():
 @app.route("/admin/home")
 @admin_required
 def adminHome():
-    return render_template('admin_home.html', currentLicences = readFromDatabaseUsingStoredProcedures("getListOfLicence()"))
+    return render_template('admin_home.html', currentLicences = readFromDatabaseUsingStoredProcedures("getListOfLicence()"),previousLicences = readFromDatabaseUsingStoredProcedures("getDiscontinutedLicences()"))
 
 # Route to show all of the details about whose bought a specfic licence
 @app.route("/admin/licence/<licenceID>")

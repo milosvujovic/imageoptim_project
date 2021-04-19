@@ -13,5 +13,16 @@
         {% endfor %}
       </tbody>
     </table>
+    <h1 class="display-4 text-center">Discontinued Licences</h1>
+      <table class="table table-striped">
+        <tbody>
+        {% for licence in previousLicences %}
+        <tr>
+          <th scope="row">{{licence[1]}}</th>
+          <td><a href="/admin/licence/{{licence[0]}}">View Purchases</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
 </div>
 {% endblock %}

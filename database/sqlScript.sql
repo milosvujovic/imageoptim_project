@@ -186,7 +186,8 @@ INSERT INTO `Licences` VALUES
 (1,"Licence A","Very helpful",false),
 (2,"Licence B","Mildly helpful",false),
 (3,"Licence C","Helps with java",false),
-(4,"Licence D","Helps with my sql",false);
+(4,"Licence D","Helps with my sql",false),
+(5,"Licence E","Helps with java",true);
 
 INSERT INTO `Tiers`(licenceID,minimumEmployees,maximumEmployees,startDate,endDate) VALUES
 (1,1,1,'2021-01-01','2021-12-31'),
@@ -512,7 +513,6 @@ WHERE parameter = tiers.licenceID and ((purchases.expirePurchase < date(now())))
 END //
 DELIMITER ;
 
-CALL getPastPurchasesForLicences(1);
 DELIMITER //
 CREATE PROCEDURE getDetailsOnCompany(
 IN parameter int
@@ -524,3 +524,15 @@ JOIN countries on countries.isoCode = customers.isoCode
 WHERE customers.customerID =  parameter;
 END //
 DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE getDiscontinutedLicences(
+)
+BEGIN
+SELECT licenceID, name
+FROM licences
+WHERE licences.discontinued = 1;
+END //
+DELIMITER ;
+
+CALL getDiscontinutedLicences();
