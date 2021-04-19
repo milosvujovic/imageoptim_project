@@ -463,8 +463,15 @@ def readFromDatabaseUsingFunction(function):
         except Exception as e:
             print(e)
 
+def updateCustomerDetails():
+    cur = mysql.connection.cursor()
+    cur.execute("CALL updateCustomer(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);", (item.get('name'), item.get('street'), item.get('city'), item.get('postcode'), item.get('isoCode'), item.get('email'), item.get('emailVerified'), item.get('NameOfContactPerson'), item.get('VATNumber'), customerID))
+    mysql.connection.commit()
+    data = cur.fetchall()
+    cur.close()
 
 # Functions
+
 def sentCustomerEmail(recipient,name, body,id,price):
     # Creates link for the user to access account
     emailBody = "http://127.0.0.1:5000/"
