@@ -53,7 +53,7 @@ def basket_required(func):
     @functools.wraps(func)
     def secure_function(*args, **kwargs):
         if 'basket' not in session or len(session['basket']) == 0:
-            return render_template('checkoutWarning.html', title = "Checkout")
+            return render_template('user_checkoutWarning.html', title = "Checkout")
         return func(*args, **kwargs)
     return secure_function
 
@@ -79,6 +79,12 @@ def load_key():
 @app.route("/")
 def homePage():
     return render_template('user_home.html', title = "Home", licences = readFromDatabaseUsingStoredProcedures("getListOfLicence()"))
+
+@app.route("/payment")
+@basket_required
+def payment():
+    return render_template('user_paymentForm.html', title = 'Payment')
+
 
 # Displays checkout page asking for users details.
 @app.route("/checkout")
@@ -163,6 +169,13 @@ def hackSystem():
     session.modified = True
     return redirect("/customer/edit")
 
+@app.route("/customer/licences")
+def gatherCustomersLicences():
+    call = "getCustomersCurrentLicences("+ session['customerID'] + ")"
+    call2 = "getCustomersPastLicences("+ session['customerID'] + ")"
+    return render_template('customer_licences.html', title = "Licences", currentLicences = readFromDatabaseUsingStoredProcedures(call),previousLicences = readFromDatabaseUsingStoredProcedures(call2))
+
+
 # Logs a user out
 @app.route("/customer/logOut")
 @customer_required
@@ -199,7 +212,18 @@ def adminHome():
 @app.route("/admin/licence/<licenceID>")
 @admin_required
 def adminLicence(licenceID):
-    return "Top Secret Details about the licence"
+    call = "getPurchasesForLicences("+ licenceID + ")"
+    call2 = "getPastPurchasesForLicences("+ licenceID + ")"
+    return render_template('admin_licenceStats.html', title = "Purchases", currentLicences = readFromDatabaseUsingStoredProcedures(call),expiredLicences = readFromDatabaseUsingStoredProcedures(call2))
+
+@app.route("/admin/customerDetails/<customerID>")
+@admin_required
+def adminCustomerDetails(customerID):
+    call = "getCustomersCurrentLicences("+ customerID + ")"
+    call2 = "getCustomersPastLicences("+ customerID + ")"
+    call3 = "getDetailsOnCompany(" + customerID + ")"
+    return render_template('admin_customerDetails.html', title = "Customer", currentLicences = readFromDatabaseUsingStoredProcedures(call),expiredLicences = readFromDatabaseUsingStoredProcedures(call2), company = readFromDatabaseUsingStoredProcedures(call3)[0])
+
 
 @app.route("/admin/negotiate/<licenceID>")
 @admin_required
@@ -269,8 +293,9 @@ def customerForm():
         session['customer']['vatNumber'] = request.form['vatNumber']
         session.modified = True
         # Calls function to process transactions
-        return processTransaction()
+        return redirect('/payment')
     return "Error with form"
+
 
 @app.route("/createLink", methods=['POST'])
 @admin_required
@@ -290,6 +315,22 @@ def linkForm():
         code = "http://127.0.0.1:5000/purchase/"+tierCode + "/" + lengthCode + "/" + priceCode
         sentOfferEmail(email,name,code)
         return redirect("/admin/home")
+
+@app.route("/gatherPaymentDetails", methods=['POST'])
+@basket_required
+def paymentForm():
+    if request.method == 'POST':
+        # Stores the customer details in a dictionary in the server session storage
+        print(request.form['cardNumber'])
+        print(request.form['expiryDateMonth'])
+        print(request.form['expiryDateYear'])
+        print(request.form['securityCode'])
+        print(request.form['issueNumber'])
+        session.modified = True
+        # Calls function to process transactions
+        # processPayment()
+        processTransaction()
+
     return "Error with form"
 
 
@@ -401,7 +442,7 @@ def readFromDatabaseUsingStoredProcedures(function):
             return data
             print("Succesfully from the database")
         except Exception as e:
-            print("Error " + e)
+            print(e)
 
 def readFromDatabaseUsingFunction(function):
         command = "SELECT " + function +";"
@@ -414,7 +455,7 @@ def readFromDatabaseUsingFunction(function):
             return data
             print("Succesfully from the database")
         except Exception as e:
-            print("Error " + e)
+            print(e)
 
 
 # Functions
