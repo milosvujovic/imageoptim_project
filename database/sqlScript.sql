@@ -322,7 +322,7 @@ CREATE PROCEDURE getBasketDetails(
 IN tierParameter int,
 IN lengthParameter int)
 BEGIN
-SELECT name,minimumEmployees,maximumEmployees,length,price
+SELECT name,minimumEmployees,maximumEmployees,length
 FROM licences
 JOIN tiers ON tiers.licenceID = licences.licenceID
 JOIN prices ON prices.tierID = tiers.tierID
@@ -379,9 +379,9 @@ DROP PROCEDURE IF EXISTS imageoptim.recordPurchase//
 CREATE PROCEDURE recordPurchase(
 IN tierParameter int,
 IN lengthParameter int,
-IN customerParameter int)
+IN customerParameter int,
+IN priceParameter int)
 BEGIN
-SET @priceValue = (SELECT getPrice(tierParameter,lengthParameter));
 SET @numberOfYears = (SELECT getLength(lengthParameter));
 IF @numberOfYears = -1
 THEN 
@@ -389,7 +389,7 @@ SET @endDate = null;
 ELSE
 SET @endDate = DATE_ADD(now(), INTERVAL @numberOfYears YEAR);
 END IF;
-INSERT INTO purchases (customerID,tierID,price,datePurchase,expirePurchase,lengthID) VALUES (customerParameter,tierParameter,@priceValue, date(now()),@endDate,lengthParameter);
+INSERT INTO purchases (customerID,tierID,price,datePurchase,expirePurchase,lengthID) VALUES (customerParameter,tierParameter,priceParameter, date(now()),@endDate,lengthParameter);
 END //
 DELIMITER ;
 -- returns all the admins email addres
@@ -424,7 +424,7 @@ WHERE parameter = customerID;
 END //
 DELIMITER ;
 
--- returns whether someone has the customerID
+-- returns whether its a valid customer ID
 DELIMITER //
 CREATE FUNCTION `checkWhetherCustomer`(parameter int) RETURNS boolean
 BEGIN
@@ -436,5 +436,14 @@ ELSE
 return false;
 END IF;
 END //
+DELIMITER ;
 
-SELECT `checkWhetherCustomer`(100);
+DELIMITER //
+CREATE FUNCTION `checkWhetherValidTierAndLength`(tierParameter int, lengthParameter int) RETURNS int
+BEGIN
+return (SELECT licenceID 
+FROM tiers
+JOIN prices on prices.tierID = tiers.tierID
+WHERE prices.tierID = tierParameter AND prices.lengthID = lengthParameter);
+END //
+DELIMITER ;
