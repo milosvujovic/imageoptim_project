@@ -398,3 +398,28 @@ BEGIN
 SELECT distinct(email) FROM admin;
 END //
 DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE updateCustomer(
+customerID int,
+name varchar(45),
+street varchar(45),
+city varchar(45),
+postcode varchar(20),
+isoCode varchar(45),
+email varchar(45),
+NameOfContactPerson varchar(45),
+VATNumber varchar(20))
+BEGIN
+UPDATE `Customers`
+SET name = name,
+street = street,
+city = city,
+postcode = postcode,
+isoCode = isoCode,
+email = email,
+emailVerified = false,
+NameOfContactPerson = NameOfContactPerson,
+VATNumber = VATNumber
+WHERE customerID = customerID;
+END //
