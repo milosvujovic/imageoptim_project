@@ -535,4 +535,28 @@ WHERE licences.discontinued = 1;
 END //
 DELIMITER ;
 
-CALL getDiscontinutedLicences();
+DELIMITER //
+CREATE PROCEDURE updateCustomer(
+name varchar(45),
+street varchar(45),
+city varchar(45),
+postcode varchar(20),
+isoCode varchar(45),
+email varchar(45),
+NameOfContactPerson varchar(45),
+VATNumber varchar(20),
+parametercustomerID int)
+BEGIN
+UPDATE `Customers`
+SET name = name,
+street = street,
+city = city,
+postcode = postcode,
+isoCode = isoCode,
+email = email,
+emailVerified = false,
+NameOfContactPerson = NameOfContactPerson,
+VATNumber = VATNumber
+WHERE customerID = parametercustomerID;
+END //
+
