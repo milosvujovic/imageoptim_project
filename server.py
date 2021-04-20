@@ -1,6 +1,7 @@
 # Imports
 import os
 import json
+import csv
 import datetime
 import functools
 from flask import Flask, render_template, request,redirect,make_response,session, url_for, flash
@@ -8,7 +9,7 @@ from flask_mysqldb import MySQL
 from flask_mail import Mail, Message
 from cryptography.fernet import Fernet
 from datetime import timedelta
-
+import xlsxwriter
 
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
 
@@ -235,6 +236,12 @@ def negotiatePrice(licenceID):
     callTiers = "getTiersForLicence("+licenceID+")"
     callLengths = "getLengthOfLicences("+licenceID+")"
     return render_template('admin_negoitatePrice.html', title = "Negotiate", tiers = readFromDatabaseUsingStoredProcedures(callTiers), lengths= readFromDatabaseUsingStoredProcedures(callLengths))
+
+@app.route("/admin/purchases")
+@admin_required
+def adminCSV():
+    CreateCSVPurchases()
+    return render_template('admin_csv.html')
 
 
 @app.route("/admin/logOut")
@@ -543,6 +550,39 @@ def gatherBasketDetails():
             price = price + float(item['price'])
             size =  size + 1
     return basketArray,price,size
+
+def CreateCSVPurchases():
+    row_list = readFromDatabaseUsingStoredProcedures("getAllPurchases()")
+    counter = 2
+    #Creates the file
+    workbook = xlsxwriter.Workbook('static/purchases/purchaseHistory.xlsx')
+    worksheet = workbook.add_worksheet()
+    #Adds heading to the file
+    worksheet.write("A1", "Date")
+    worksheet.write("B1", "Name")
+    worksheet.write("C1", "Price")
+    worksheet.write("D1", "Country")
+    #Loops through each student and adds them to the spreadsheet
+    for x in row_list:
+        Date = "A"+str(counter)
+        Name = "B"+str(counter)
+        Price = "C"+str(counter)
+        Country = "D"+str(counter)
+        worksheet.write(Date, str(x[0]))
+        worksheet.write(Name, x[1])
+        worksheet.write(Price, x[2])
+        worksheet.write(Country, x[3])
+        counter = counter + 1
+    workbook.close()
+    # row_list = readFromDatabaseUsingStoredProcedures("getAllPurchases()")
+    # print(row_list)
+    # # row_list = [["Company", "Purchase Date", "Price", "Country"],
+    # #          ["Company1", "2021-04-21", "1","UK"],
+    # #          ["Company2", "2021-04-21", "2","UK"],
+    # #          ["Company3", "2021-04-21", "3","UK"]]
+    # with open('static/purchases/purchaseHistory.csv', 'w', newline='') as file:
+    #     writer = csv.writer(file)
+    #     writer.writerows(row_list)
 
 if __name__ == "__main__":
     app.run(debug=True)
