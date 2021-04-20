@@ -307,6 +307,15 @@ JOIN tiers on tiers.tierID = prices.tierID
 WHERE tiers.licenceID = parameter;
 END //
 DELIMITER ;
+
+-- Gets description of licence
+DELIMITER //
+CREATE PROCEDURE getDescription(IN parameter int(11))
+BEGIN 
+SELECT description FROM licences WHERE licenceID = parameter;
+END //
+DELIMITER ;
+
 -- Gets the list of countries
 DELIMITER //
 CREATE PROCEDURE getCountries()
@@ -569,4 +578,3 @@ JOIN customers on customers.customerID = purchases.customerID
 JOIN countries ON countries.isoCode =  customers.isoCode
 order by datePurchase;
 END //
-
