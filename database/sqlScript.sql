@@ -165,17 +165,17 @@ SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
 INSERT INTO `Admin` VALUES
 (1,"group11IMAGEOPTIM@outlook.com","vipadmin");
 
-INSERT INTO `Countries` VALUES	
+INSERT INTO `Countries` VALUES
 ("GBR","United Kingdom"),
 ("USA","United States of America"),
 ("CHE","Switzerland"),
-("PSE","Palestine");
+("FRA","France");
 
 INSERT INTO `Customers` VALUES
 (1,'example company','1 cardiff road','Cardiff','CF10 4FT','GBR','example@email.com',false,"Karen Douglas","10191882"),
 (2,'different company','2 newport road','Newport','NW01 5HJ','GBR','different@email.com',false,"Claire White","10195882"),
 (3,'random company','3 swansea road','Swansea','SA1 4NT','GBR','different@email.com',false,"Tony Stevens","10194882"),
-(4,'random company','4 wrexham road','Wrexham','WR1 4NT','GBR','different@email.com',false,"Stewart Smith","10131882");
+(4,'new company','4 wrexham road','Wrexham','WR1 4NT','GBR','different@email.com',false,"Stewart Smith","10131882");
 
 INSERT INTO `Licence Lengths` VALUES
 (1,'annual',1),
@@ -186,7 +186,8 @@ INSERT INTO `Licences` VALUES
 (1,"Licence A","Very helpful",false),
 (2,"Licence B","Mildly helpful",false),
 (3,"Licence C","Helps with java",false),
-(4,"Licence D","Helps with my sql",false);
+(4,"Licence D","Helps with my sql",false),
+(5,"Licence E","Helps with java",true);
 
 INSERT INTO `Tiers`(licenceID,minimumEmployees,maximumEmployees,startDate,endDate) VALUES
 (1,1,1,'2021-01-01','2021-12-31'),
@@ -269,21 +270,21 @@ INSERT INTO `Prices`(tierID,lengthID,price,startDate,endDate) VALUES
 
 INSERT INTO `Purchases`(customerID,tierID,lengthID,price,datePurchase,expirePurchase) VALUES
 (1,2,1,950.00,'2021-03-22','2022-03-22'),
-(2,7,2,99500.00,'2021-03-22','2022-03-22'),
-(3,5,2,24500.00,'2021-03-22','2022-03-22'),
+(2,7,2,99500.00,'2021-03-22',null),
+(3,5,2,24500.00,'2021-03-22',null),
 (4,6,1,3950.00,'2021-03-22','2022-03-22'),
-(2,11,2,30000.00,'2021-03-22','2022-03-22'),
+(2,11,2,30000.00,'2021-03-22',null),
 (4,12,1,4500.00,'2021-03-22','2022-03-22'),
-(1,17,2,15000.00,'2021-03-22','2022-03-22'),
+(1,17,2,15000.00,'2021-03-22',null),
 (4,13,1,2500.00,'2021-03-22','2022-03-22'),
-(2,21,2,16000.00,'2021-03-22','2022-03-22'),
+(2,21,2,16000.00,'2021-03-22',null),
 (3,24,1,2800.00,'2021-03-22','2022-03-22');
 
 
 -- Gets the list of licences
 DELIMITER //
 CREATE PROCEDURE getListOfLicence()
-BEGIN 
+BEGIN
 SELECT licenceID, name From licences WHERE discontinued = false ORDER BY name;
 END //
 DELIMITER ;
@@ -291,14 +292,14 @@ DELIMITER ;
 -- Gets the compaines size
 DELIMITER //
 CREATE PROCEDURE getTiersForLicence(IN parameter int(11))
-BEGIN 
+BEGIN
 SELECT tierID,minimumEmployees,maximumEmployees FROM `Tiers` WHERE licenceID = parameter AND (CURDATE() between startDate and endDate );
 END //
 DELIMITER ;
 -- Gets the length of the licences for the licence.
 DELIMITER //
 CREATE PROCEDURE getLengthOfLicences(IN parameter int(11))
-BEGIN 
+BEGIN
 SELECT distinctrow licencelengthID,length
 FROM `Licence Lengths`
 JOIN prices on prices.lengthID = `Licence Lengths`.licencelengthID
@@ -309,7 +310,7 @@ DELIMITER ;
 -- Gets the list of countries
 DELIMITER //
 CREATE PROCEDURE getCountries()
-BEGIN 
+BEGIN
 SELECT distinctrow isoCode,name
 FROM `Countries`
 ORDER BY name ASC;
@@ -322,7 +323,7 @@ CREATE PROCEDURE getBasketDetails(
 IN tierParameter int,
 IN lengthParameter int)
 BEGIN
-SELECT name,minimumEmployees,maximumEmployees,length,price
+SELECT name,minimumEmployees,maximumEmployees,length
 FROM licences
 JOIN tiers ON tiers.licenceID = licences.licenceID
 JOIN prices ON prices.tierID = tiers.tierID
@@ -336,7 +337,7 @@ DELIMITER $$
 DROP TRIGGER IF EXISTS imageoptim.getIDNumber$$
 CREATE TRIGGER customers_AFTER_INSERT
 AFTER INSERT ON `customers` FOR EACH ROW
-BEGIN 
+BEGIN
 	SET @idNumber = NEW.customerID;
 END $$
 
@@ -379,17 +380,17 @@ DROP PROCEDURE IF EXISTS imageoptim.recordPurchase//
 CREATE PROCEDURE recordPurchase(
 IN tierParameter int,
 IN lengthParameter int,
-IN customerParameter int)
+IN customerParameter int,
+IN priceParameter double)
 BEGIN
-SET @priceValue = (SELECT getPrice(tierParameter,lengthParameter));
 SET @numberOfYears = (SELECT getLength(lengthParameter));
 IF @numberOfYears = -1
-THEN 
+THEN
 SET @endDate = null;
 ELSE
 SET @endDate = DATE_ADD(now(), INTERVAL @numberOfYears YEAR);
 END IF;
-INSERT INTO purchases (customerID,tierID,price,datePurchase,expirePurchase,lengthID) VALUES (customerParameter,tierParameter,@priceValue, date(now()),@endDate,lengthParameter);
+INSERT INTO purchases (customerID,tierID,price,datePurchase,expirePurchase,lengthID) VALUES (customerParameter,tierParameter,priceParameter, date(now()),@endDate,lengthParameter);
 END //
 DELIMITER ;
 -- returns all the admins email addres
@@ -405,7 +406,7 @@ DELIMITER //
 CREATE PROCEDURE verifyEmail(
 IN idNumber INT)
 BEGIN
-UPDATE customers 
+UPDATE customers
 SET emailVerified = 1
 WHERE customerID = idNumber;
 END //
@@ -424,17 +425,138 @@ WHERE parameter = customerID;
 END //
 DELIMITER ;
 
--- returns whether someone has the customerID
+-- returns whether its a valid customer ID
 DELIMITER //
 CREATE FUNCTION `checkWhetherCustomer`(parameter int) RETURNS boolean
 BEGIN
 SET @LENGTH = (SELECT COUNT(*) FROM customers where parameter = customerID);
 IF @LENGTH = 1
-THEN 
+THEN
 return true;
 ELSE
 return false;
 END IF;
 END //
+DELIMITER ;
 
-SELECT `checkWhetherCustomer`(100);
+
+DELIMITER //
+CREATE FUNCTION `checkWhetherValidTierAndLength`(tierParameter int, lengthParameter int) RETURNS int
+BEGIN
+return (SELECT licenceID
+FROM tiers
+JOIN prices on prices.tierID = tiers.tierID
+WHERE prices.tierID = tierParameter AND prices.lengthID = lengthParameter);
+END //
+DELIMITER ;
+
+
+DELIMITER //
+CREATE PROCEDURE getCustomersCurrentLicences(
+IN parameter int
+)
+BEGIN
+SELECT licences.name,tiers.minimumEmployees,tiers.maximumEmployees,`licence lengths`.length,purchases.price,purchases.datePurchase,purchases.expirePurchase
+FROM purchases
+JOIN `licence lengths` on `licence lengths`.licencelengthID = purchases.lengthID
+JOIN tiers on tiers.tierID = purchases.tierID
+JOIN licences on tiers.licenceID = licences.licenceID
+WHERE parameter = purchases.customerID and ((purchases.expirePurchase is null ) or (purchases.expirePurchase > date(now())));
+END //
+DELIMITER ;
+
+
+DELIMITER //
+CREATE PROCEDURE getCustomersPastLicences(
+IN parameter int
+)
+BEGIN
+SELECT licences.name,tiers.minimumEmployees,tiers.maximumEmployees,`licence lengths`.length,purchases.price,purchases.datePurchase,purchases.expirePurchase
+FROM purchases
+JOIN `licence lengths` on `licence lengths`.licencelengthID = purchases.lengthID
+JOIN tiers on tiers.tierID = purchases.tierID
+JOIN licences on tiers.licenceID = licences.licenceID
+WHERE parameter = purchases.customerID and ((purchases.expirePurchase < date(now())));
+END //
+DELIMITER ;
+
+
+DELIMITER //
+CREATE PROCEDURE getPurchasesForLicences(
+IN parameter int
+)
+BEGIN
+SELECT tiers.minimumEmployees,tiers.maximumEmployees,`licence lengths`.length,purchases.price,purchases.datePurchase,purchases.expirePurchase, customers.customerID, customers.name
+FROM purchases
+JOIN `licence lengths` on `licence lengths`.licencelengthID = purchases.lengthID
+JOIN tiers on tiers.tierID = purchases.tierID
+JOIN licences on tiers.licenceID = licences.licenceID
+JOIN customers on customers.customerID = purchases.customerID
+WHERE parameter = tiers.licenceID and ((purchases.expirePurchase is null ) or (purchases.expirePurchase > date(now())));
+END //
+DELIMITER ;
+
+CALL getPurchasesForLicences(1);
+
+DELIMITER //
+CREATE PROCEDURE getPastPurchasesForLicences(
+IN parameter int
+)
+BEGIN
+SELECT tiers.minimumEmployees,tiers.maximumEmployees,`licence lengths`.length,purchases.price,purchases.datePurchase,purchases.expirePurchase, customers.customerID, customers.name
+FROM purchases
+JOIN `licence lengths` on `licence lengths`.licencelengthID = purchases.lengthID
+JOIN tiers on tiers.tierID = purchases.tierID
+JOIN licences on tiers.licenceID = licences.licenceID
+JOIN customers on customers.customerID = purchases.customerID
+WHERE parameter = tiers.licenceID and ((purchases.expirePurchase < date(now())));
+END //
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE getDetailsOnCompany(
+IN parameter int
+)
+BEGIN
+SELECT customers.name,street,city,postcode,countries.name,email,nameOfContactPerson,vatNumber
+FROM customers
+JOIN countries on countries.isoCode = customers.isoCode
+WHERE customers.customerID =  parameter;
+END //
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE getDiscontinutedLicences(
+)
+BEGIN
+SELECT licenceID, name
+FROM licences
+WHERE licences.discontinued = 1;
+END //
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE updateCustomer(
+name varchar(45),
+street varchar(45),
+city varchar(45),
+postcode varchar(20),
+isoCode varchar(45),
+email varchar(45),
+NameOfContactPerson varchar(45),
+VATNumber varchar(20),
+parametercustomerID int)
+BEGIN
+UPDATE `Customers`
+SET name = name,
+street = street,
+city = city,
+postcode = postcode,
+isoCode = isoCode,
+email = email,
+emailVerified = false,
+NameOfContactPerson = NameOfContactPerson,
+VATNumber = VATNumber
+WHERE customerID = parametercustomerID;
+END //
+

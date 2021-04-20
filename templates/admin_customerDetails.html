@@ -1,0 +1,94 @@
+{% extends 'admin_template.html' %}
+{% block MainContents %}
+  <div class="container-fluid">
+    <h1 class="display-4 text-center">{{company[0]}}</h1>
+    <p>Address</p>
+    <p>{{company[1]}}</p>
+    <p>{{company[2]}}</p>
+    <p>{{company[3]}}</p>
+    <p>{{company[4]}}</p>
+    <p>Email Address - {{company[5]}}</p>
+    <p>Contact Name - {{company[6]}}</p>
+    <p>VAT Number - {{company[7]}}</p>
+
+  </div>
+  <div class="container-fluid">
+    <h1 class="display-4 text-center">Licences</h1>
+    <h2 class="display-5 text-center">Current Licences</h2>
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th scope="col">Licence</th>
+            <th scope="col">Number of Employees</th>
+            <th scope="col">Length</th>
+            <th scope="col">Start Date</th>
+            <th scope="col">End Date</th>
+            <th scope="col">Price</th>
+            <th scope="col"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {%if currentLicences|length > 0%}
+          {% for item in currentLicences %}
+          <tr>
+              <th scope="row">{{item[0]}}</th>
+              {%if item[2] == 1%}
+                <td>{{item[1]}} Employee</td>
+              {%elif item[2] == None%}
+                <td>{{item[1]}} + Employees</td>
+              {%else%}
+                <td>{{item[1]}} - {{item[2]}} Employees</td>
+              {%endif%}
+              <td>{{item[3]}}</td>
+              <td>{{item[5]}}</td>
+              {%if item[6] == None%}
+                <td>N/A</td>
+              {%else%}
+                <td>{{item[6]}}</td>
+              {%endif%}
+              <td>{{item[4]}}</td>
+          </tr>
+          {% endfor %}
+        {%endif%}
+        </tbody>
+      </table>
+    <h2 class="display-5 text-center">Previous Licences</h2>
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th scope="col">Licence</th>
+          <th scope="col">Number of Employees</th>
+          <th scope="col">Length</th>
+          <th scope="col">Start Date</th>
+          <th scope="col">End Date</th>
+          <th scope="col">Price</th>
+          <th scope="col"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {%if previousLicences|length > 0%}
+          {% for item in previousLicences %}
+          <tr>
+              <th scope="row">{{item[0]}}</th>
+              {%if item[2] == 1%}
+                <td>{{item[1]}} Employee</td>
+              {%elif item[2] == None%}
+                <td>{{item[1]}} + Employees</td>
+              {%else%}
+                <td>{{item[1]}} - {{item[2]}} Employees</td>
+              {%endif%}
+              <td>{{item[3]}}</td>
+              <td>{{item[5]}}</td>
+              {%if item[6] == None%}
+                <td>N/A</td>
+              {%else%}
+                <td>{{item[6]}}</td>
+              {%endif%}
+              <td>{{item[4]}}</td>
+          </tr>
+          {% endfor %}
+        {% endif %}
+      </tbody>
+    </table>
+    </div>
+{% endblock %}

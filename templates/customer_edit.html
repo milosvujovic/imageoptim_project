@@ -1,9 +1,9 @@
-{% extends 'user_template.html' %}
+{% extends 'customer_template.html' %}
 
 {% block MainContents %}
 <div class="container-fluid">
   <h1 class="display-4 text-center">Edit Customer Details</h1>
-  <form action = "/updatedCustomerData" id='editCustomerDetails' method='post' class="form-group">
+  <form action = "/updatedCustomerData" id='editCustomerDetails' method='POST' class="form-group">
     <!-- action="/url" -->
     <div class="form-group mb-4">
       <label class="mb-0"><h6 class="font-weight-bold small">Company Name</h6></label>
