@@ -97,6 +97,7 @@ def customerPage():
 def selectLicence(licenceID):
     callTiers = "getTiersForLicence("+licenceID+")"
     callLengths = "getLengthOfLicences("+licenceID+")"
+    callDescription = "getDescription("+licenceID+")"
     # If the user has already selected a licence then gets value so that it will set the selected licence as checked.
     tier = -1
     length = -1
@@ -104,7 +105,7 @@ def selectLicence(licenceID):
         if licenceID in session['basket']:
             tier = int(session['basket'][licenceID]['tier'])
             length = int(session['basket'][licenceID]['length'])
-    return render_template('user_licence.html', title = "Licence", tiers = readFromDatabaseUsingStoredProcedures(callTiers), lengths= readFromDatabaseUsingStoredProcedures(callLengths), licenceID = licenceID, selectedTier = tier, selectedLength = length)
+    return render_template('user_licence.html', title = "Licence", tiers = readFromDatabaseUsingStoredProcedures(callTiers), lengths= readFromDatabaseUsingStoredProcedures(callLengths), licenceID = licenceID, selectedTier = tier, selectedLength = length, description = readFromDatabaseUsingStoredProcedures(callDescription))
 
 # Displays basket page.
 # Having read the details about each item from the database.
