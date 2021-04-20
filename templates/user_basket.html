@@ -1,0 +1,49 @@
+{% extends 'user_template.html' %}
+{% block MainContents %}
+  <div class="container-fluid">
+    <h1 class="display-4 text-center">Basket</h1>
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th scope="col">Licence</th>
+            <th scope="col">Number of Employees</th>
+            <th scope="col">Length</th>
+            <th scope="col">Price</th>
+            <th scope="col"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in basket %}
+          <tr>
+              <th scope="row">{{item[0]}}</th>
+              {%if item[2] == 1%}
+                <td>{{item[1]}} Employee</td>
+              {%elif item[2] == None%}
+                <td>{{item[1]}} + Employees</td>
+              {%else%}
+                <td>{{item[1]}} - {{item[2]}} Employees</td>
+              {%endif%}
+              <td>{{item[3]}}</td>
+              <td>${{item[5]}}</td>
+              <td><a href = "/basket/remove/{{item[4]}}"><button type="submit" class="btn btn-primary">Remove</button></a></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <div class = "container fluid text-right"
+        <p>Price = ${{price}}</p>
+      </div>
+      <div class = "row p-2">
+        <div class="col">
+          <a href = "/" class = "p-1"><button type="submit" class="btn btn-primary" >Continue Shopping</button><a>
+        </div>
+        <div class="col text-right">
+          {%if size != 0%}
+            <a href = "/basket/clear" class = "p-1"><button type="submit" class="btn btn-primary">Remove All</button></a>
+            <a href = "/checkout" class = "p-1"><button type="submit" class="btn btn-primary" >Proceed to Checkout</button><a>
+          {%endif%}
+        </div>
+      </div>
+
+      </div>
+{% endblock %}
