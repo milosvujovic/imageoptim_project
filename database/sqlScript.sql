@@ -312,7 +312,7 @@ DELIMITER ;
 DELIMITER //
 CREATE PROCEDURE getDescription(IN parameter int(11))
 BEGIN 
-SELECT description FROM licences WHERE licenceID = parameter;
+SELECT name, description FROM licences WHERE licenceID = parameter;
 END //
 DELIMITER ;
 
