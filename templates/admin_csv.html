@@ -1,0 +1,12 @@
+{% extends 'admin_template.html' %}
+
+{% block MainContents %}
+<div class="container-fluid">
+  <h1 class="display-4 text-center">Purchase History</h1>
+  <div class = "p-2">
+    <a href='/static/purchases/purchaseHistory.xlsx' download>
+      <button class="btn btn-primary">Purchase History</button>
+    </a>
+  </div>
+</div>
+{% endblock %}

@@ -568,3 +568,13 @@ NameOfContactPerson = NameOfContactPerson,
 VATNumber = VATNumber
 WHERE customerID = parametercustomerID;
 END //
+
+DELIMITER //
+CREATE PROCEDURE getAllPurchases()
+BEGIN
+Select purchases.datePurchase,customers.name,purchases.price, countries.name
+FROM purchases
+JOIN customers on customers.customerID = purchases.customerID
+JOIN countries ON countries.isoCode =  customers.isoCode
+order by datePurchase;
+END //
