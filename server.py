@@ -158,7 +158,7 @@ def displayCustomerDetails(input):
             # Directs them to edit there details. Will change this path later on.
             return redirect("/customer/edit")
         else:
-            return "You can't be here"
+            return render_template('customer_logInError.html', title = "Log In")
     # except:
     #     return "Invalid Code"
 
