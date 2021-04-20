@@ -572,7 +572,7 @@ END //
 DELIMITER //
 CREATE PROCEDURE getAllPurchases()
 BEGIN
-Select purchases.datePurchase,customers.name,purchases.price, countries.name
+Select purchases.datePurchase,customers.name,purchases.price, countries.name, customers.vatNumber
 FROM purchases
 JOIN customers on customers.customerID = purchases.customerID
 JOIN countries ON countries.isoCode =  customers.isoCode

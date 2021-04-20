@@ -563,16 +563,19 @@ def CreateCSVPurchases():
     worksheet.write("B1", "Name")
     worksheet.write("C1", "Price")
     worksheet.write("D1", "Country")
+    worksheet.write("E1", "Vat Number")
     #Loops through each student and adds them to the spreadsheet
     for x in row_list:
         Date = "A"+str(counter)
         Name = "B"+str(counter)
         Price = "C"+str(counter)
         Country = "D"+str(counter)
+        VAT = "E"+str(counter)
         worksheet.write(Date, str(x[0]))
         worksheet.write(Name, x[1])
         worksheet.write(Price, x[2])
         worksheet.write(Country, x[3])
+        worksheet.write(VAT, x[4])
         counter = counter + 1
     workbook.close()
     # row_list = readFromDatabaseUsingStoredProcedures("getAllPurchases()")
