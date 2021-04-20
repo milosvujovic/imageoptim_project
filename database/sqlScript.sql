@@ -169,7 +169,7 @@ INSERT INTO `Countries` VALUES
 ("GBR","United Kingdom"),
 ("USA","United States of America"),
 ("CHE","Switzerland"),
-("PSE","Palestine");
+("FRA","France");
 
 INSERT INTO `Customers` VALUES
 (1,'example company','1 cardiff road','Cardiff','CF10 4FT','GBR','example@email.com',false,"Karen Douglas","10191882"),
