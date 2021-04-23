@@ -55,6 +55,9 @@
     </form>
       <div class = "container-fluid">
         <div class="row">
+          <div class ="row container pl-4">
+            <button onclick="readPrice()" class="btn btn-primary">Calculate Price</button>
+          </div>
           <!-- <div class="col">
             <div class ="row container pl-4">
               <button onclick="generatePrice()" type="submit" class="btn btn-primary">Calculate Price</button>
@@ -67,5 +70,7 @@
             <button type="submit" class="btn btn-primary" >Add to basket</button>
           </div>
         </div>
+        <h1 id = "price"></h1>
       </div>
+
 {% endblock %}

@@ -581,6 +581,15 @@ def CreateCSVPurchases():
     workbook.close()
     return row_list
 
+@app.route("/GetPrice", methods=['GET'])
+def getPrice():
+    print("Hello")
+    call = "getPrice("+ str(1) +","+ str(1) +")"
+    read = readFromDatabaseUsingFunction(call)
+    if request.method == 'GET':
+        print(json.dumps(read))
+        return json.dumps(read);
+
 
 if __name__ == "__main__":
     app.run(debug=True)
