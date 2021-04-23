@@ -104,7 +104,7 @@ CREATE TABLE IF NOT EXISTS `imageoptim`.`Purchases` (
   `purchaseID` INT NOT NULL AUTO_INCREMENT,
   `customerID` INT NOT NULL,
   `tierID` INT NOT NULL,
-  `price` DOUBLE NOT NULL,
+  `price` DECIMAL(10,2) NOT NULL,
   `datePurchase` DATE NOT NULL,
   `expirePurchase` DATE NULL,
   `lengthID` INT NOT NULL,
@@ -139,7 +139,7 @@ CREATE TABLE IF NOT EXISTS `imageoptim`.`Prices` (
   `priceID` INT NOT NULL AUTO_INCREMENT,
   `tierID` INT NOT NULL,
   `lengthID` INT NOT NULL,
-  `price` DOUBLE NOT NULL,
+  `price` DECIMAL(10,2) NOT NULL,
   `startDate` DATE NOT NULL,
   `endDate` DATE NULL,
   PRIMARY KEY (`priceID`),
@@ -367,7 +367,7 @@ END //
 -- Returns the price of the licence.
 DELIMITER //
 CREATE FUNCTION `getPrice`(tierParameter int,
-lengthParameter int) RETURNS double
+lengthParameter int) RETURNS varchar(45)
 BEGIN
 RETURN (SELECT price
 FROM prices
@@ -581,10 +581,12 @@ END //
 DELIMITER //
 CREATE PROCEDURE getNumberOfPurchasesPerLicence()
 BEGIN
-Select purchases.datePurchase,customers.name,purchases.price, countries.name, customers.vatNumber
-FROM purchases
-JOIN customers on customers.customerID = purchases.customerID
-JOIN countries ON countries.isoCode =  customers.isoCode
-order by datePurchase DESC;
+Select licences.name, count(*)
+FROM licences
+JOIN tiers on tiers.licenceID = licences.licenceID
+JOIN purchases on purchases.tierID = tiers.tierID
+GROUP BY licences.licenceID;
 END //
+
+call getNumberOfPurchasesPerLicence();
 
