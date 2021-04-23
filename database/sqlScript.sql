@@ -186,8 +186,7 @@ INSERT INTO `Licences` VALUES
 (1,"Licence A","Very helpful",false),
 (2,"Licence B","Mildly helpful",false),
 (3,"Licence C","Helps with java",false),
-(4,"Licence D","Helps with my sql",false),
-(5,"Licence E","Helps with java",true);
+(4,"Licence D","Helps with my sql",false);
 
 INSERT INTO `Tiers`(licenceID,minimumEmployees,maximumEmployees,startDate,endDate) VALUES
 (1,1,1,'2021-01-01','2021-12-31'),
@@ -285,7 +284,7 @@ INSERT INTO `Purchases`(customerID,tierID,lengthID,price,datePurchase,expirePurc
 DELIMITER //
 CREATE PROCEDURE getListOfLicence()
 BEGIN
-SELECT licenceID, name From licences WHERE discontinued = false ORDER BY name;
+SELECT licenceID, name,description  From licences WHERE discontinued = false ORDER BY name;
 END //
 DELIMITER ;
 
@@ -576,5 +575,16 @@ Select purchases.datePurchase,customers.name,purchases.price, countries.name, cu
 FROM purchases
 JOIN customers on customers.customerID = purchases.customerID
 JOIN countries ON countries.isoCode =  customers.isoCode
-order by datePurchase;
+order by datePurchase DESC;
 END //
+
+DELIMITER //
+CREATE PROCEDURE getNumberOfPurchasesPerLicence()
+BEGIN
+Select purchases.datePurchase,customers.name,purchases.price, countries.name, customers.vatNumber
+FROM purchases
+JOIN customers on customers.customerID = purchases.customerID
+JOIN countries ON countries.isoCode =  customers.isoCode
+order by datePurchase DESC;
+END //
+

@@ -2,27 +2,46 @@
 {% block MainContents %}
 <div class="container-fluid">
   <h1 class="display-4 text-center">Current Licences</h1>
-    <table class="table table-striped">
-      <tbody>
-        {% for licence in currentLicences %}
-        <tr>
-          <th scope="row">{{licence[1]}}</th>
-          <td><a href="/admin/licence/{{licence[0]}}">View Purchases</a></td>
-          <td><a href="/admin/negotiate/{{licence[0]}}">Offer Deal</a></td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+  <div class="list-group container pb-4">
+    <div class="row">
+      {% for licence in currentLicences %}
+      <div class = "col xs-2">
+        <div class="card p-3 m-2 background-color: #e3f2fd">
+          <img class="card-img-top" src="../static/images/licences.jpeg" alt="Card image cap">
+          <div class="card-body  text-center">
+            <h5 class="card-title">{{licence[1]}}</h5>
+            <div class = "row">
+              <div class = "col">
+                <a  href="/admin/licence/{{licence[0]}}" class="btn btn-primary m-1">View Purchases</a>
+              </div>
+              <div class = "col">
+                <a href="/admin/negotiate/{{licence[0]}}" class="btn btn-primary">Offer Deal</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+      </div>
+    </div>
     <h1 class="display-4 text-center">Discontinued Licences</h1>
-      <table class="table table-striped">
-        <tbody>
+    <div class="list-group container pb-4">
+      <div class="row">
         {% for licence in previousLicences %}
-        <tr>
-          <th scope="row">{{licence[1]}}</th>
-          <td><a href="/admin/licence/{{licence[0]}}">View Purchases</a></td>
-        </tr>
+        <div class = "col xs-2">
+          <div class="card p-3 m-2 background-color: #e3f2fd">
+            <img class="card-img-top" src="../static/images/licences.jpeg" alt="Card image cap">
+            <div class="card-body text-center">
+              <h5 class="card-title">{{licence[1]}}</h5>
+              <a href="/admin/licence/{{licence[0]}}" class="btn btn-primary">View Purchases</a>
+              <a href="/admin/negotiate/{{licence[0]}}" class="btn btn-primary">Offer Deal</a>
+            </div>
+          </div>
+        </div>
         {% endfor %}
-      </tbody>
-    </table>
+        </div>
+      </div>
 </div>
+
+
 {% endblock %}
