@@ -552,7 +552,7 @@ def gatherBasketDetails():
             basketArray.append(temp)
             price = price + float(item['price'])
             size =  size + 1
-    return basketArray,price,size
+    return basketArray,"{:.2f}".format(price),size
 
 def CreateCSVPurchases():
     row_list = readFromDatabaseUsingStoredProcedures("getAllPurchases()")

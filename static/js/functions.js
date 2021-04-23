@@ -1,5 +1,5 @@
 function AddToElement(price){
-  document.getElementById("price").innerHTML = price;
+  document.getElementById("price").innerHTML = '$' +  price;
 };
 function readPrice() {
   //   var command = '/GetPrices';
