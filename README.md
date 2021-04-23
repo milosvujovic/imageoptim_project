@@ -5,8 +5,9 @@ How to run the server
 pipenv install MySQL,
 pipenv install flask-mysqldb,
 pipenv install Flask-Mail,
-pipenv install paramiko
-pipenv install cryptography
+pipenv install xlsxwriter,
+pipenv install paramiko,
+pipenv install cryptography,
 pipenv shell,
 py server.py,
 
