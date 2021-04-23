@@ -12,7 +12,7 @@
       </div>
     </div>
 
-    <form action="/gatherLicenceData" method= "post" id="typeOfLicence" name="typeOfLicence"">
+    <form action="/gatherLicenceData" method= "post" id="typeOfLicence" name="typeOfLicence" onchange="readPrice()">
       <div class="row">
         <div class="col p-3 my-3 background-color: #e3f2fd;">
           <fieldset id="tier">
@@ -55,9 +55,9 @@
     </form>
       <div class = "container-fluid">
         <div class="row">
-          <div class ="row container pl-4">
+          <!-- <div class ="row container pl-4">
             <button onclick="readPrice()" class="btn btn-primary">Calculate Price</button>
-          </div>
+          </div> -->
           <!-- <div class="col">
             <div class ="row container pl-4">
               <button onclick="generatePrice()" type="submit" class="btn btn-primary">Calculate Price</button>

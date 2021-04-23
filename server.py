@@ -351,6 +351,7 @@ def linkForm():
 
 @app.route("/gatherLicenceData", methods=['POST'])
 def licenceForm():
+    print("This is not meant to be called")
     if request.method == 'POST':
         if 'basket' not in session:
             session['basket'] = {}
@@ -581,13 +582,14 @@ def CreateCSVPurchases():
     workbook.close()
     return row_list
 
-@app.route("/GetPrice", methods=['GET'])
-def getPrice():
-    print("Hello")
-    call = "getPrice("+ str(1) +","+ str(1) +")"
-    read = readFromDatabaseUsingFunction(call)
+@app.route("/GetPrices/<tier>/<length>", methods=['GET'])
+def getPrice(tier, length):
+    # # call = "getPrice("+ str(1) +","+ str(1) +")"
+    # # read = readFromDatabaseUsingFunction(call)
     if request.method == 'GET':
-        print(json.dumps(read))
+        print("Getting the prices")
+        call = "getPrice("+ str(tier) +","+ str(length) +")"
+        read = readFromDatabaseUsingFunction(call)
         return json.dumps(read);
 
 

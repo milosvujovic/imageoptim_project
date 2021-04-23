@@ -1,22 +1,18 @@
 function AddToElement(price){
-  alert("About to modify element");
   document.getElementById("price").innerHTML = price;
 };
 function readPrice() {
-  alert('reading price');
-    var command = '/GetPrice';
-  // var command = '/GetPrice' + 1 +'/' +document.forms["typeOfLicence"]["length"].value;
-  alert(command);
+  //   var command = '/GetPrices';
+  var command = '/GetPrices/'  + document.forms["typeOfLicence"]["tier"].value +'/' +document.forms["typeOfLicence"]["length"].value;
+  // alert(command);
   var xhttp = new XMLHttpRequest();
   xhttp.open("GET", command, true);
   xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
   xhttp.onreadystatechange = function() {
-    var categories = [];
     if (xhttp.readyState === 4) {
       if (xhttp.status === 200) {
         var text = xhttp.responseText;
         var price = JSON.parse(text);
-        alert(price);
         AddToElement(price);
         }
         else {
@@ -24,8 +20,8 @@ function readPrice() {
       }
     }
   };
-  // xhttp.send();
-  // return false;
+  xhttp.send();
+  return false;
 };
 function alertUser(message) {
   if (message.length > 0){
