@@ -52,9 +52,14 @@
       <label class="mb-0"><h6 class="font-weight-bold small">VAT Number</h6></label>
       <input name="vatNumber" type="number" class="form-control w-75" placeholder="Please enter the company's VAT number" value='{{customer[8]}}'>
     </div>
-
-    <button class="btn btn-primary">Edit Details</button>
+    <div class = "row">
+      <div class = "col">
+        <button class="btn btn-primary" onClick="location.href='/customer/licences'">Back</button>
+      </div>
+      <div class = "col text-right">
+        <button class="btn btn-primary">Edit Details</button>
+      </div
+    </div>
   </form>
-  <button class="btn btn-primary" onClick="location.href='/'">Back</button>
 </div>
 {% endblock %}

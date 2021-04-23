@@ -114,7 +114,6 @@ def selectLicence(licenceID):
 def basketPage():
     print("basket")
     basketDetails = gatherBasketDetails()
-    print(basketDetails)
     return render_template('user_basket.html', title = "Basket", basket =  basketDetails[0], size = basketDetails[2], price = basketDetails[1])
 
 # Displays purchase confirmation page
@@ -139,6 +138,19 @@ def removeAllFromBasket():
         session['basket'].clear()
         session.modified = True
     return redirect("/basket")
+
+@app.route("/bar")
+def bar():
+    figures = []
+    labels = []
+    procedure = "getNumberOfPurchasesPerLicence()"
+    data = readFromDatabaseUsingStoredProcedures(procedure)
+    for i in data:
+        labels.append(str(i[0]))
+        figures.append(i[1])
+    print(labels)
+    print(figures)
+    return render_template('admin_bar.html', title = "Stats", label = labels, figure = figures)
 
 # Customers Web routes
 # Logs  user in
@@ -212,7 +224,7 @@ def adminLogIn():
 @app.route("/admin/home")
 @admin_required
 def adminHome():
-    return render_template('admin_home.html', currentLicences = readFromDatabaseUsingStoredProcedures("getListOfLicence()"),previousLicences = readFromDatabaseUsingStoredProcedures("getDiscontinutedLicences()"))
+    return render_template('admin_home.html',title = "Admin",currentLicences = readFromDatabaseUsingStoredProcedures("getListOfLicence()"),previousLicences = readFromDatabaseUsingStoredProcedures("getDiscontinutedLicences()"))
 
 # Route to show all of the details about whose bought a specfic licence
 @app.route("/admin/licence/<licenceID>")
@@ -241,8 +253,8 @@ def negotiatePrice(licenceID):
 @app.route("/admin/purchases")
 @admin_required
 def adminCSV():
-    CreateCSVPurchases()
-    return render_template('admin_csv.html')
+    history = CreateCSVPurchases()
+    return render_template('admin_csv.html', purchases = history)
 
 
 @app.route("/admin/logOut")
@@ -304,9 +316,17 @@ def customerForm():
         session['customer']['postcode'] = request.form['postcode']
         session['customer']['vatNumber'] = request.form['vatNumber']
         session.modified = True
-        print(request.form['name'])
+        # Stores the customer details in a dictionary in the server session storage
+        print(request.form['cardNumber'])
+        print(request.form['expiryDateMonth'])
+        print(request.form['expiryDateYear'])
+        print(request.form['securityCode'])
+        print(request.form['issueNumber'])
         # Calls function to process transactions
-        return redirect('/payment')
+        # processPayment()
+        processTransaction()
+        # Redirects to confirmation page.
+        return purchaseConfirmationPage()
     return "Error with form"
 
 
@@ -329,27 +349,9 @@ def linkForm():
         sentOfferEmail(email,name,code)
         return redirect("/admin/home")
 
-@app.route("/gatherPaymentDetails", methods=['POST'])
-@basket_required
-def paymentForm():
-    if request.method == 'POST':
-        # Stores the customer details in a dictionary in the server session storage
-        print(request.form['cardNumber'])
-        print(request.form['expiryDateMonth'])
-        print(request.form['expiryDateYear'])
-        print(request.form['securityCode'])
-        print(request.form['issueNumber'])
-        session.modified = True
-        # Calls function to process transactions
-        # processPayment()
-        processTransaction()
-    # Redirects to confirmation page.
-    return purchaseConfirmationPage()
-
-
-
 @app.route("/gatherLicenceData", methods=['POST'])
 def licenceForm():
+    print("This is not meant to be called")
     if request.method == 'POST':
         if 'basket' not in session:
             session['basket'] = {}
@@ -550,7 +552,7 @@ def gatherBasketDetails():
             basketArray.append(temp)
             price = price + float(item['price'])
             size =  size + 1
-    return basketArray,price,size
+    return basketArray,"{:.2f}".format(price),size
 
 def CreateCSVPurchases():
     row_list = readFromDatabaseUsingStoredProcedures("getAllPurchases()")
@@ -578,15 +580,17 @@ def CreateCSVPurchases():
         worksheet.write(VAT, x[4])
         counter = counter + 1
     workbook.close()
-    # row_list = readFromDatabaseUsingStoredProcedures("getAllPurchases()")
-    # print(row_list)
-    # # row_list = [["Company", "Purchase Date", "Price", "Country"],
-    # #          ["Company1", "2021-04-21", "1","UK"],
-    # #          ["Company2", "2021-04-21", "2","UK"],
-    # #          ["Company3", "2021-04-21", "3","UK"]]
-    # with open('static/purchases/purchaseHistory.csv', 'w', newline='') as file:
-    #     writer = csv.writer(file)
-    #     writer.writerows(row_list)
+    return row_list
+
+@app.route("/GetPrices/<tier>/<length>", methods=['GET'])
+def getPrice(tier, length):
+    # # call = "getPrice("+ str(1) +","+ str(1) +")"
+    # # read = readFromDatabaseUsingFunction(call)
+    if request.method == 'GET':
+        call = "getPrice("+ str(tier) +","+ str(length) +")"
+        read = readFromDatabaseUsingFunction(call)
+        return json.dumps(read);
+
 
 if __name__ == "__main__":
     app.run(debug=True)

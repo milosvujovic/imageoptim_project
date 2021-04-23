@@ -104,7 +104,7 @@ CREATE TABLE IF NOT EXISTS `imageoptim`.`Purchases` (
   `purchaseID` INT NOT NULL AUTO_INCREMENT,
   `customerID` INT NOT NULL,
   `tierID` INT NOT NULL,
-  `price` DOUBLE NOT NULL,
+  `price` DECIMAL(10,2) NOT NULL,
   `datePurchase` DATE NOT NULL,
   `expirePurchase` DATE NULL,
   `lengthID` INT NOT NULL,
@@ -139,7 +139,7 @@ CREATE TABLE IF NOT EXISTS `imageoptim`.`Prices` (
   `priceID` INT NOT NULL AUTO_INCREMENT,
   `tierID` INT NOT NULL,
   `lengthID` INT NOT NULL,
-  `price` DOUBLE NOT NULL,
+  `price` DECIMAL(10,2) NOT NULL,
   `startDate` DATE NOT NULL,
   `endDate` DATE NULL,
   PRIMARY KEY (`priceID`),
@@ -186,8 +186,7 @@ INSERT INTO `Licences` VALUES
 (1,"Licence A","Very helpful",false),
 (2,"Licence B","Mildly helpful",false),
 (3,"Licence C","Helps with java",false),
-(4,"Licence D","Helps with my sql",false),
-(5,"Licence E","Helps with java",true);
+(4,"Licence D","Helps with my sql",false);
 
 INSERT INTO `Tiers`(licenceID,minimumEmployees,maximumEmployees,startDate,endDate) VALUES
 (1,1,1,'2021-01-01','2021-12-31'),
@@ -285,7 +284,7 @@ INSERT INTO `Purchases`(customerID,tierID,lengthID,price,datePurchase,expirePurc
 DELIMITER //
 CREATE PROCEDURE getListOfLicence()
 BEGIN
-SELECT licenceID, name From licences WHERE discontinued = false ORDER BY name;
+SELECT licenceID, name,description  From licences WHERE discontinued = false ORDER BY name;
 END //
 DELIMITER ;
 
@@ -368,7 +367,7 @@ END //
 -- Returns the price of the licence.
 DELIMITER //
 CREATE FUNCTION `getPrice`(tierParameter int,
-lengthParameter int) RETURNS double
+lengthParameter int) RETURNS varchar(45)
 BEGIN
 RETURN (SELECT price
 FROM prices
@@ -576,5 +575,18 @@ Select purchases.datePurchase,customers.name,purchases.price, countries.name, cu
 FROM purchases
 JOIN customers on customers.customerID = purchases.customerID
 JOIN countries ON countries.isoCode =  customers.isoCode
-order by datePurchase;
+order by datePurchase DESC;
 END //
+
+DELIMITER //
+CREATE PROCEDURE getNumberOfPurchasesPerLicence()
+BEGIN
+Select licences.name, count(*)
+FROM licences
+JOIN tiers on tiers.licenceID = licences.licenceID
+JOIN purchases on purchases.tierID = tiers.tierID
+GROUP BY licences.licenceID;
+END //
+
+call getNumberOfPurchasesPerLicence();
+
