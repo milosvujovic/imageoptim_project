@@ -587,7 +587,6 @@ def getPrice(tier, length):
     # # call = "getPrice("+ str(1) +","+ str(1) +")"
     # # read = readFromDatabaseUsingFunction(call)
     if request.method == 'GET':
-        print("Getting the prices")
         call = "getPrice("+ str(tier) +","+ str(length) +")"
         read = readFromDatabaseUsingFunction(call)
         return json.dumps(read);
