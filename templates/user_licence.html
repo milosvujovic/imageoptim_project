@@ -1,12 +1,20 @@
 {% extends 'user_template.html' %}
 {% block MainContents %}
   <div class="container-fluid pb-2">
-    <h3 class=" text-center">{{description[0][0]}}</h3>
-    <h4>Description</h4>
-    <p>{{description[0][1]}}</p>
-    <form action="/gatherLicenceData" method= "post" id="typeOfLicence" name="typeOfLicence"">
+    <div class = "row">
+      <div class = "col-sm-2">
+          <img class="card-img-top" src="../static/images/licences.jpeg" alt="Card image cap" style="width: 18rem;">
+      </div>
+      <div class = "col-sm-8">
+        <h3 class=" text-center">{{description[0][0]}}</h3>
+        <h4>Description</h4>
+        <p>{{description[0][1]}}</p>
+      </div>
+    </div>
+
+    <form action="/gatherLicenceData" method= "post" id="typeOfLicence" name="typeOfLicence" onchange="readPrice()">
       <div class="row">
-        <div class="col">
+        <div class="col p-3 my-3 background-color: #e3f2fd;">
           <fieldset id="tier">
 
             <h4>Select Tier</h4>
@@ -42,22 +50,18 @@
               </div>
             {% endfor %}
           </fieldset>
-        </div>
-      <input type="hidden" value ={{licenceID}} name ="licenceID" id = "licenceID">
-    </form>
-      <div class = "container-fluid">
-        <div class="row">
-          <!-- <div class="col">
-            <div class ="row container pl-4">
-              <button onclick="generatePrice()" type="submit" class="btn btn-primary">Calculate Price</button>
-            </div>
-            <div class ="row container pl-4">
-              <h6 id = "Price">Price</h6>
-            </div>
-          </div> -->
-          <div class="col align-items-end container">
-            <button type="submit" class="btn btn-primary" >Add to basket</button>
+                      <input type="hidden" value ={{licenceID}} name ="licenceID" id = "licenceID">
           </div>
         </div>
-      </div>
+        <div class = "container-fluid">
+          <div class="row">
+            <div class = "col">
+              <h1 id = "price"></h1>
+            </div>
+            <div class = "col">
+              <button type="submit" class="btn btn-primary" >Add to basket</button>
+            </div>
+          </div>
+        </div>
+    </form>
 {% endblock %}

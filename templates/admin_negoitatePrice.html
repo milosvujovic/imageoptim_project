@@ -1,9 +1,11 @@
 {% extends 'admin_template.html' %}
 {% block MainContents %}
   <div class="container-fluid pb-2">
+    <h1 class="display-4 text-center">Offer deal</h1>
     <form action="/createLink" method= "post">
       <div class="row">
-        <div class="col">
+        <div class="col-sm">
+          <div class="container-sm rounded p-1" style="background-color: #e3f2fd;">
           <fieldset id="tier">
             <h4>Select Tier</h4>
             {% for tier in tiers %}
@@ -19,8 +21,10 @@
               </div>
             {% endfor %}
           </fieldset>
+          </div>
         </div>
-        <div class ="col">
+        <div class ="col-sm">
+          <div class="container-sm rounded p-1" style="background-color: #e3f2fd;">
           <h4>Select Length</h4>
           <fieldset id="length">
             {% for length in lengths %}
@@ -30,8 +34,10 @@
               </div>
             {% endfor %}
           </fieldset>
+          </div>
         </div>
-        <div class ="col">
+        <div class ="col-sm">
+          <div class="container-sm rounded p-1" style="background-color: #e3f2fd;">
           <h4>Customer Information</h4>
           <div class="form-group mb-4">
             <label class="mb-0"><h6 class="font-weight-bold small">Price</h6></label>
@@ -45,10 +51,11 @@
             <label class="mb-0"><h6 class="font-weight-bold small">Customer Email Address</h6></label>
             <input name="email" type="email" class="form-control" placeholder="Email Address" required>
           </div>
-          <div class = "container-fluid align-items-end">
+          <div class = "container-fluid text-right">
                 <button type="submit" class="btn btn-primary" >Generate Link</button>
             </div>
         </div>
+      </div>
     </form>
     </div>
 {% endblock %}

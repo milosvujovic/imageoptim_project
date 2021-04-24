@@ -12,7 +12,8 @@
             <th scope="col">Start Date</th>
             <th scope="col">End Date</th>
             <th scope="col">Price</th>
-            <th scope="col"></th>
+            <th scope="col">Invoice</th>
+            <th scope="col">Contract</th>
           </tr>
         </thead>
         <tbody>
@@ -34,6 +35,8 @@
                 <td>{{item[6]}}</td>
               {%endif%}
               <td>{{item[4]}}</td>
+              <td><a href='/static/invoice/invoice.pdf' download><button class="btn btn-primary">Invoice</button></a></td>
+              <td><a href='/static/contract/contract.pdf' download><button class="btn btn-primary">Contract</button></a></td>
           </tr>
           {% endfor %}
         </tbody>
@@ -48,7 +51,6 @@
           <th scope="col">Start Date</th>
           <th scope="col">End Date</th>
           <th scope="col">Price</th>
-          <th scope="col"></th>
         </tr>
       </thead>
       <tbody>
