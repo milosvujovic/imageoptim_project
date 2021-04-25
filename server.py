@@ -139,18 +139,28 @@ def removeAllFromBasket():
         session.modified = True
     return redirect("/basket")
 
+# Displays basket page.
+# Having read the details about each item from the database.
+@app.route("/contactUs")
+def contactPage():
+    return render_template('user_contactUs.html', title = "Contact Us")
+
 @app.route("/bar")
 def bar():
+    numberOfSales = collectDataForGraph("getNumberOfPurchasesPerLicence()")
+    totalRevenue = collectDataForGraph("getRevenue()")
+    licenceLength = collectDataForGraph("mostCommonLicenceLength()")
+    return render_template('admin_bar.html', title = "Stats", labelNumber = numberOfSales[0], figureNumber = numberOfSales[1], labelRevenue = totalRevenue[0], figureRevenue = totalRevenue[1], lengthLabel = licenceLength[0],lengthFigure = licenceLength[1])
+
+
+def collectDataForGraph(procedure):
     figures = []
     labels = []
-    procedure = "getNumberOfPurchasesPerLicence()"
     data = readFromDatabaseUsingStoredProcedures(procedure)
     for i in data:
         labels.append(str(i[0]))
-        figures.append(i[1])
-    print(labels)
-    print(figures)
-    return render_template('admin_bar.html', title = "Stats", label = labels, figure = figures)
+        figures.append(str(i[1]))
+    return labels, figures
 
 # Customers Web routes
 # Logs  user in
@@ -328,6 +338,15 @@ def customerForm():
         # Redirects to confirmation page.
         return purchaseConfirmationPage()
     return "Error with form"
+
+@app.route("/gatherContactUs", methods=['POST'])
+def contactForm():
+    if request.method == 'POST':
+        # Stores the customer details in a dictionary in the server session storage
+        sentCommentEmail(request.form['nameOfContactPerson'], request.form['email'], request.form['name'], request.form['comment'])
+        return redirect("/")
+    return "Error with form"
+
 
 
 @app.route("/createLink", methods=['POST'])
@@ -516,6 +535,13 @@ def sentOfferEmail(recipient,name, link):
     # Prepares the email with the main body of the email being a html template
     msg = Message(subject='Negotiated Price',sender='group11IMAGEOPTIM@outlook.com', recipients = [recipient])
     msg.html = render_template('customer_offerEmail.html',name = name,link = link)
+    # Sends the email
+    mail.send(msg)
+
+def sentCommentEmail(customerName, emailAddress, companyName, comment):
+    # Prepares the email with the main body of the email being a html template
+    msg = Message(subject='Comment from customer',sender='group11IMAGEOPTIM@outlook.com', recipients = ['group11IMAGEOPTIM@outlook.com'])
+    msg.html = render_template('admin_emailContactUs.html',name = customerName,email = emailAddress,companyName = companyName,comment = comment)
     # Sends the email
     mail.send(msg)
 

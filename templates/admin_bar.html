@@ -1,8 +1,33 @@
 {% extends 'admin_template.html' %}
 
 {% block MainContents %}
-<body onload = "myFunction({{label}},{{figure}})">
-  <canvas id="myChart"  class='img-responsive'></canvas>
+<body onload = "myFunction({{labelNumber}},{{figureNumber}},{{labelRevenue}},{{figureRevenue}},{{lengthLabel}},{{lengthFigure}})">
+  <h1 class = "text-center">Stats</h1>
+  <div class = "container-fluid">
+    <div class = "row">
+      <div class = "col">
+        <h3>Number of Purchases for each licence</h3>
+        <div class="chart-container numberOfSales" style="position: relative; height:15vh; width:30vw">
+            <canvas id="numberChart"  class='img-responsive'></canvas>
+        </div>
+      </div>
+      <div class = "col">
+        <h3>Revenue per month in the last year</h3>
+        <div class="chart-container revenue" style="position: relative; height:15vh; width:30vw">
+            <canvas id="revenueChart"  class='img-responsive'></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class = "container-fluid">
+    <div class = "row">
+      <div class = "col">
+        <h3>Number of Purchases for each licence length</h3>
+        <div class="chart-container lengthOfLicence" style="position: relative; height:15vh; width:30vw">
+            <canvas id="lengthChart"  class='img-responsive'></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
 </body>
-
 {% endblock %}

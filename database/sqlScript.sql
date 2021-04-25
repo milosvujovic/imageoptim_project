@@ -590,3 +590,31 @@ END //
 
 call getNumberOfPurchasesPerLicence();
 
+
+
+DELIMITER //
+
+
+CREATE PROCEDURE getRevenue()
+BEGIN
+Select date_format(datePurchase,'%M') as Month, SUM(price) as Revenue
+FROM purchases
+WHERE datePurchase BETWEEN DATE_SUB(now(), INTERVAL 1 YEAR)AND now()
+GROUP BY month(datePurchase);
+END //
+
+DELIMITER ;
+
+call getRevenue();
+DELIMITER //
+CREATE PROCEDURE mostCommonLicenceLength()
+BEGIN
+Select length , count(*)
+FROM `licence lengths`
+JOIN purchases on purchases.lengthID = `licence lengths`.licencelengthID
+GROUP BY `licence lengths`.licencelengthID;
+END //
+
+DELIMITER ;
+
+call mostCommonLicenceLength();
