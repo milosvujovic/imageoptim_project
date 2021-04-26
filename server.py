@@ -34,6 +34,7 @@ app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
 mail = Mail(app)
 mysql = MySQL(app)
 
+# Functions for logging in
 def customer_required(func):
     @functools.wraps(func)
     def secure_function(*args, **kwargs):
@@ -59,7 +60,7 @@ def basket_required(func):
     return secure_function
 
 # Reference https://devqa.io/encrypt-decrypt-data-python/
-# Sets up the key for the encryption
+# Sets up the key for the encryption and sending the codes
 def generate_key():
     """
     Generates a key and save it into a file
@@ -79,21 +80,9 @@ def load_key():
 # User web Routes
 @app.route("/")
 def homePage():
-    comments = readFromDatabaseUsingStoredProcedures("getCommentsToVerify()")
+    comments = readFromDatabaseUsingStoredProcedures("getAllValidComments()")
     print(comments)
     return render_template('user_home.html', title = "Home", licences = readFromDatabaseUsingStoredProcedures("getListOfLicence()"),comments = comments)
-
-@app.route("/payment")
-@basket_required
-def payment():
-    return render_template('user_paymentForm.html', title = 'Payment')
-
-
-# Displays checkout page asking for users details.
-@app.route("/checkout")
-@basket_required
-def customerPage():
-    return render_template('user_customerDetails.html', title = "Customer Details", countries = readFromDatabaseUsingStoredProcedures("getCountries()"))
 
 # Displays page with options to select a licence
 @app.route("/licence/<licenceID>")
@@ -118,10 +107,6 @@ def basketPage():
     basketDetails = gatherBasketDetails()
     return render_template('user_basket.html', title = "Basket", basket =  basketDetails[0], size = basketDetails[2], price = basketDetails[1])
 
-# Displays purchase confirmation page
-def purchaseConfirmationPage():
-    return render_template('user_purchaseConfirmation.html', title = "Purchase Confirmation")
-
 # Removes selected item from the basket and redirects them to the basket
 @app.route("/basket/remove/<licenceID>")
 def removeFromBasket(licenceID):
@@ -141,24 +126,59 @@ def removeAllFromBasket():
         session.modified = True
     return redirect("/basket")
 
-@app.route("/bar")
-def bar():
-    figures = []
-    labels = []
-    procedure = "getNumberOfPurchasesPerLicence()"
-    data = readFromDatabaseUsingStoredProcedures(procedure)
-    for i in data:
-        labels.append(str(i[0]))
-        figures.append(i[1])
-    print(labels)
-    print(figures)
-    return render_template('admin_bar.html', title = "Stats", label = labels, figure = figures)
+@app.route("/purchase/<tier>/<length>/<price>")
+def addLicence(tier,length,price):
+    tier = str(decryptWord(tier))
+    length = str(decryptWord(length))
+    price = float(decryptWord(price))
+    message = 'checkWhetherValidTierAndLength(' + tier + ','+ length +')'
+    result = (readFromDatabaseUsingFunction(message))
+    print(tier)
+    print(length)
+    print(price)
+    print(result[0][0])
+    if (result[0][0] == None or price < 0):
+        return "Invalid codes"
+    else:
+        if 'basket' not in session:
+            session['basket'] = {}
+        licenceID = result[0][0]
+        session['basket'][str(licenceID)] = {'tier' : str(tier), 'length' : str(length), 'price' : str(price)}
+        session.modified = True
+    return redirect('/basket')
+
+# Displays checkout page asking for users details.
+@app.route("/checkout")
+@basket_required
+def customerPage():
+    return render_template('user_customerDetails.html', title = "Customer Details", countries = readFromDatabaseUsingStoredProcedures("getCountries()"))
+
+# Allows the user to purchase a licence at a price that has been negotiated
+@app.route("/admin/neg/<tierID>/<lengthID>/<priceID>")
+def createLink(tierID,lengthID,priceID):
+    # Reference https://cryptography.io/en/latest
+    key = load_key()
+    f = Fernet(key)
+    lengthCode = encryptWord(lengthID)
+    priceCode = encryptWord(priceID)
+    tierCode = encryptWord(tierID)
+    code = lengthCode + "/" + tierCode + "/" + priceCode
+    originalLength = decryptWord(lengthCode)
+    originalTier = decryptWord(tierCode)
+    originalPrice = decryptWord(priceCode)
+    code = code + originalLength + "/" + originalPrice + "/" + originalTier
+    return redirect("/admin/home")
+
+# Displays purchase confirmation page
+def purchaseConfirmationPage():
+    return render_template('user_purchaseConfirmation.html', title = "Purchase Confirmation")
+
 
 # Customers Web routes
 # Logs  user in
 @app.route("/customer/<input>")
 def displayCustomerDetails(input):
-    # try:
+    try:
         # Decodes the code in the email
         id = decryptWord(input)
         print(list(id))
@@ -168,15 +188,17 @@ def displayCustomerDetails(input):
         if (readFromDatabaseUsingFunction('`checkWhetherCustomer`('+newId+')')[0][0] == 1):
             session.clear()
             # Verifies there email address and logs them in by storing it in session storage.
-            verifyEmailInDatabase(newId)
+            command = "CALL verifyEmail(%s);"
+            parameters = newId
+            writeToDatabase(command, parameters)
             session['customerID'] = newId
             session.modified = True
             # Directs them to edit there details. Will change this path later on.
             return redirect("/customer/edit")
         else:
             return render_template('customer_logInError.html', title = "Log In")
-    # except:
-    #     return "Invalid Code"
+    except:
+        return "Invalid Code"
 
 # To Save us having to get a code each time.
 @app.route("/customer/hack")
@@ -185,6 +207,7 @@ def hackSystem():
     session.modified = True
     return redirect("/customer/edit")
 
+# Gets the list of licences that the customer has
 @app.route("/customer/licences")
 def gatherCustomersLicences():
     call = "getCustomersCurrentLicences("+ session['customerID'] + ")"
@@ -195,17 +218,10 @@ def gatherCustomersLicences():
     print(previous)
     return render_template('customer_licences.html', title = "Licences", currentLicences = current,previousLicences =previous)
 
+# Allows the user to leave a review
 @app.route("/customer/review")
 def review():
     return render_template('customer_review.html', title = "Review")
-
-# Logs a user out
-@app.route("/customer/logOut")
-@customer_required
-def customerLogOut():
-    session.clear()
-    session.modified = True
-    return redirect("/")
 
 # Lets a user edit there details
 @app.route("/customer/edit")
@@ -215,8 +231,19 @@ def editCustomerDetails():
     details = readFromDatabaseUsingStoredProcedures("getCustomerDetails("+customerID+")")[0]
     return render_template('customer_edit.html', title = 'Edit Company Details', countries = readFromDatabaseUsingStoredProcedures("getCountries()"), customer = details)
 
+# Logs a user out
+@app.route("/customer/logOut")
+@customer_required
+def customerLogOut():
+    session.clear()
+    session.modified = True
+    return redirect("/")
+
+
+# Admin
 
 # Admin routes
+# Allows the admin to log in
 @app.route("/admin/login")
 def adminLogIn():
     if 'admin' in session:
@@ -239,6 +266,7 @@ def adminLicence(licenceID):
     call2 = "getPastPurchasesForLicences("+ licenceID + ")"
     return render_template('admin_licenceStats.html', title = "Purchases", currentLicences = readFromDatabaseUsingStoredProcedures(call),expiredLicences = readFromDatabaseUsingStoredProcedures(call2))
 
+# Shows all the customer details
 @app.route("/admin/customerDetails/<customerID>")
 @admin_required
 def adminCustomerDetails(customerID):
@@ -247,7 +275,7 @@ def adminCustomerDetails(customerID):
     call3 = "getDetailsOnCompany(" + customerID + ")"
     return render_template('admin_customerDetails.html', title = "Customer", currentLicences = readFromDatabaseUsingStoredProcedures(call),expiredLicences = readFromDatabaseUsingStoredProcedures(call2), company = readFromDatabaseUsingStoredProcedures(call3)[0])
 
-
+# Allows the admin to negotiate a price
 @app.route("/admin/negotiate/<licenceID>")
 @admin_required
 def negotiatePrice(licenceID):
@@ -255,11 +283,32 @@ def negotiatePrice(licenceID):
     callLengths = "getLengthOfLicences("+licenceID+")"
     return render_template('admin_negoitatePrice.html', title = "Negotiate", tiers = readFromDatabaseUsingStoredProcedures(callTiers), lengths= readFromDatabaseUsingStoredProcedures(callLengths))
 
+# Allows the admin to download a list of purchases
 @app.route("/admin/purchases")
 @admin_required
 def adminCSV():
     history = CreateCSVPurchases()
     return render_template('admin_csv.html', purchases = history)
+
+# Allows the admin to verify emails
+@app.route("/admin/comments")
+@admin_required
+def adminComments():
+    return render_template('admin_validateReview.html', comments = readFromDatabaseUsingStoredProcedures("getCommentsToVerify()"))
+
+# Allows the admin to see the data about the stats
+@app.route("/admin/bar")
+def bar():
+    figures = []
+    labels = []
+    procedure = "getNumberOfPurchasesPerLicence()"
+    data = readFromDatabaseUsingStoredProcedures(procedure)
+    for i in data:
+        labels.append(str(i[0]))
+        figures.append(i[1])
+    print(labels)
+    print(figures)
+    return render_template('admin_bar.html', title = "Stats", label = labels, figure = figures)
 
 
 @app.route("/admin/logOut")
@@ -269,21 +318,7 @@ def adminLogOut():
     session.modified = True
     return redirect("/")
 
-@app.route("/admin/neg/<tierID>/<lengthID>/<priceID>")
-def createLink(tierID,lengthID,priceID):
-
-    # Reference https://cryptography.io/en/latest
-    key = load_key()
-    f = Fernet(key)
-    lengthCode = encryptWord(lengthID)
-    priceCode = encryptWord(priceID)
-    tierCode = encryptWord(tierID)
-    code = lengthCode + "/" + tierCode + "/" + priceCode
-    originalLength = decryptWord(lengthCode)
-    originalTier = decryptWord(tierCode)
-    originalPrice = decryptWord(priceCode)
-    code = code + originalLength + "/" + originalPrice + "/" + originalTier
-    return redirect("/admin/home")
+# Encyptions forms
 
 def encryptWord(word):
     # Reference https://cryptography.io/en/latest
@@ -306,6 +341,7 @@ def decryptWord(word):
     return word
 
 # Reading forms.
+# User forms
 @app.route("/gatherCustomerData", methods=['POST'])
 @basket_required
 def customerForm():
@@ -334,16 +370,66 @@ def customerForm():
         return purchaseConfirmationPage()
     return "Error with form"
 
+@app.route("/gatherLicenceData", methods=['POST'])
+def licenceForm():
+    print("This is not meant to be called")
+    if request.method == 'POST':
+        if 'basket' not in session:
+            session['basket'] = {}
+        call = "getPrice("+ request.form['tier'] +","+ request.form['length'] +")"
+        read = readFromDatabaseUsingFunction(call)
+        price = read[0][0]
+        print(price)
+        licenceID = (request.form['licenceID'])
+        session['basket'][str(licenceID)] = {'tier' : str(request.form['tier']), 'length' : str(request.form['length']), 'price' : str(price) }
+        session.modified = True
+    # Redirects them to the basket
+        return redirect("/basket")
+
+@app.route("/GetPrices/<tier>/<length>", methods=['GET'])
+def getPrice(tier, length):
+    # # call = "getPrice("+ str(1) +","+ str(1) +")"
+    # # read = readFromDatabaseUsingFunction(call)
+    if request.method == 'GET':
+        call = "getPrice("+ str(tier) +","+ str(length) +")"
+        read = readFromDatabaseUsingFunction(call)
+        return json.dumps(read);
+
+# Customer forms
 @app.route("/leaveReview", methods=['POST'])
 def reviews():
     if request.method == 'POST':
-        print(request.form['rating'])
-        print(request.form['comment'])
-        writeReviewIntoDatabase(session['customerID'],request.form['rating'],request.form['comment'])
+        command = "CALL writeReviewIntoDatabase(%s,%s,%s);"
+        parameters =(request.form['comment'], request.form['rating'], session['customerID'])
+        writeReviewIntoDatabase(command,parameters)
         return redirect('/')
     return "Error with form"
 
 
+
+@app.route("/updatedCustomerData", methods=['POST'])
+def editCustomerForm():
+    if 'customerID' in session:
+        if request.method == 'POST':
+            name = request.form['name']
+            nameOfContactPerson = request.form['nameOfContactPerson']
+            email = request.form['email']
+            street = request.form['street']
+            city = request.form['city']
+            country = request.form['countries']
+            postcode = request.form['postcode']
+            vatNumber = request.form['vatNumber']
+            customerID = session['customerID']
+            command = "CALL updateCustomer(%s,%s,%s,%s,%s,%s,%s,%s,%s);"
+            parameters = name, street, city, postcode, country, email, nameOfContactPerson, vatNumber, customerID
+            writeToDatabase(command,parameters)
+            return redirect("/customer/licences")
+        return "Error with form"
+    return "Error you can't view this area"
+
+
+
+# Admin forms
 @app.route("/createLink", methods=['POST'])
 @admin_required
 def linkForm():
@@ -363,61 +449,6 @@ def linkForm():
         sentOfferEmail(email,name,code)
         return redirect("/admin/home")
 
-@app.route("/gatherLicenceData", methods=['POST'])
-def licenceForm():
-    print("This is not meant to be called")
-    if request.method == 'POST':
-        if 'basket' not in session:
-            session['basket'] = {}
-        call = "getPrice("+ request.form['tier'] +","+ request.form['length'] +")"
-        read = readFromDatabaseUsingFunction(call)
-        price = read[0][0]
-        print(price)
-        licenceID = (request.form['licenceID'])
-        session['basket'][str(licenceID)] = {'tier' : str(request.form['tier']), 'length' : str(request.form['length']), 'price' : str(price) }
-        session.modified = True
-    # Redirects them to the basket
-        return redirect("/basket")
-
-@app.route("/purchase/<tier>/<length>/<price>")
-def addLicence(tier,length,price):
-    tier = str(decryptWord(tier))
-    length = str(decryptWord(length))
-    price = float(decryptWord(price))
-    message = 'checkWhetherValidTierAndLength(' + tier + ','+ length +')'
-    result = (readFromDatabaseUsingFunction(message))
-    print(tier)
-    print(length)
-    print(price)
-    print(result[0][0])
-    if (result[0][0] == None or price < 0):
-        return "Invalid codes"
-    else:
-        if 'basket' not in session:
-            session['basket'] = {}
-        licenceID = result[0][0]
-        session['basket'][str(licenceID)] = {'tier' : str(tier), 'length' : str(length), 'price' : str(price)}
-        session.modified = True
-    return redirect('/basket')
-
-@app.route("/updatedCustomerData", methods=['POST'])
-def editCustomerForm():
-    if 'customerID' in session:
-        if request.method == 'POST':
-            name = request.form['name']
-            nameOfContactPerson = request.form['nameOfContactPerson']
-            email = request.form['email']
-            street = request.form['street']
-            city = request.form['city']
-            country = request.form['countries']
-            postcode = request.form['postcode']
-            vatNumber = request.form['vatNumber']
-            customerID = session['customerID']
-            updateCustomerDetails(name,nameOfContactPerson,email,street,city,country,postcode,vatNumber,customerID)
-            return redirect("/customer/licences")
-        return "Error with form"
-    return "Error you can't view this area"
-
 @app.route("/formLogIn", methods=['POST'])
 def logInForm():
     print("receiving data")
@@ -433,76 +464,38 @@ def logInForm():
             flash("Incorrect username or password")
     return redirect("/admin/login")
 
+
+
 # Database Functions
-def writeToDatabaseWithCustomerDetails(name, street, city, postcode,country,email,contactPerson,vatNumber):
-    # Writes to the database with details of the customer
+def writeToDatabase(command,parameters):
     cur = mysql.connection.cursor()
-    cur.execute("SELECT createCustomer(%s,%s,%s,%s,%s,%s,%s,%s) as 'ID Number';", (name, street, city, postcode,country,email,contactPerson,vatNumber))
+    cur.execute(command, parameters)
     mysql.connection.commit()
     data = cur.fetchall()
     cur.close()
     return data
 
-# Writes to the database with details of the purchase
-def writePurchaseIntoDatabase(customerID):
-    if 'basket' in session:
-        for item in session['basket'].values():
-            print("Writing purchase")
-            cur = mysql.connection.cursor()
-            print("price " + item.get('price'))
-            cur.execute("CALL recordPurchase(%s,%s,%s,%s);", (item.get('tier'), item.get('length'), customerID, item.get('price')))
-            mysql.connection.commit()
-            data = cur.fetchall()
-            cur.close()
-
-def writeReviewIntoDatabase(customerID,rating,comment):
-    cur = mysql.connection.cursor()
-    cur.execute("CALL writeReviewIntoDatabase(%s,%s,%s);", (comment, rating, customerID))
-    mysql.connection.commit()
-    data = cur.fetchall()
-    cur.close()
-
-def verifyEmailInDatabase(customerID):
-        cur = mysql.connection.cursor()
-        cur.execute("CALL verifyEmail(%s);",[customerID])
-        mysql.connection.commit()
-        cur.close()
-
 def readFromDatabaseUsingStoredProcedures(function):
         command = "CALL " + function +";"
-        print("Reading from the database")
-        try:
-            cur = mysql.connection.cursor()
-            cur.execute(command)
-            data = cur.fetchall()
-            cur.close()
-            return data
-            print("Succesfully from the database")
-        except Exception as e:
-            print(e)
+        return readFromDatabase(command)
+
+def readFromDatabase(command):
+    try:
+        cur = mysql.connection.cursor()
+        cur.execute(command)
+        data = cur.fetchall()
+        cur.close()
+        return data
+    except Exception as e:
+        print(e)
 
 def readFromDatabaseUsingFunction(function):
         command = "SELECT " + function +";"
-        print("Reading from the database")
-        try:
-            cur = mysql.connection.cursor()
-            cur.execute(command)
-            data = cur.fetchall()
-            cur.close()
-            return data
-            print("Succesfully from the database")
-        except Exception as e:
-            print(e)
-
-def updateCustomerDetails(name,nameOfContactPerson,email,street,city,country,postcode,vatNumber,customerID):
-    cur = mysql.connection.cursor()
-    cur.execute("CALL updateCustomer(%s,%s,%s,%s,%s,%s,%s,%s,%s);", (name, street, city, postcode, country, email, nameOfContactPerson, vatNumber, customerID))
-    mysql.connection.commit()
-    data = cur.fetchall()
-    cur.close()
+        return readFromDatabase(command)
 
 # Functions
 
+# Emails
 def sentCustomerEmail(recipient,name, body,id,price):
     # Creates link for the user to access account
     emailBody = "http://127.0.0.1:5000/"
@@ -543,9 +536,15 @@ def sentOfferEmail(recipient,name, link):
 
 def processTransaction():
     # Writes the new customer to the database and returns the Id of the customer
-    id = writeToDatabaseWithCustomerDetails(session.get("customer")["name"], session.get("customer")["street"], session.get("customer")["city"], session.get("customer")["postcode"],session.get("customer")["country"],session.get("customer")["email"],session.get("customer")["nameOfContactPerson"],session.get("customer")["vatNumber"])
+    command = "SELECT createCustomer(%s,%s,%s,%s,%s,%s,%s,%s) as 'ID Number';"
+    parameters = session.get("customer")["name"], session.get("customer")["street"], session.get("customer")["city"], session.get("customer")["postcode"],session.get("customer")["country"],session.get("customer")["email"],session.get("customer")["nameOfContactPerson"],session.get("customer")["vatNumber"]
+    id = writeToDatabase(command,parameters)
     # Writes the details of the purchase into the database
-    writePurchaseIntoDatabase(id)
+    if 'basket' in session:
+        for item in session['basket'].values():
+            command = "CALL recordPurchase(%s,%s,%s,%s);"
+            parameters = (item.get('tier'), item.get('length'), id, item.get('price'))
+            writeToDatabase(command,parameters)
     # Reads the details of the basket from the datbase to put in email
     basketDetails = gatherBasketDetails()
     # Sents the email to the customer with details of their purchase
@@ -603,14 +602,7 @@ def CreateCSVPurchases():
     workbook.close()
     return row_list
 
-@app.route("/GetPrices/<tier>/<length>", methods=['GET'])
-def getPrice(tier, length):
-    # # call = "getPrice("+ str(1) +","+ str(1) +")"
-    # # read = readFromDatabaseUsingFunction(call)
-    if request.method == 'GET':
-        call = "getPrice("+ str(tier) +","+ str(length) +")"
-        read = readFromDatabaseUsingFunction(call)
-        return json.dumps(read);
+
 
 
 if __name__ == "__main__":

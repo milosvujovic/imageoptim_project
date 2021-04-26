@@ -616,9 +616,34 @@ CREATE PROCEDURE getCommentsToVerify()
 BEGIN
 SELECT reviewID,comment,rating,customers.name
 FROM reviews
-JOIN customers ON customers.customerID = reviews.customerID;
+JOIN customers ON customers.customerID = reviews.customerID
+where reviews.verified = false;
 END //
 DELIMITER ;
+DELIMITER //
+CREATE PROCEDURE getAllValidComments()
+BEGIN
+SELECT reviewID,comment,rating,customers.name
+FROM reviews
+JOIN customers ON customers.customerID = reviews.customerID
+where reviews.verified = true;
+END //
+DELIMITER ;
+DELIMITER //
+CREATE PROCEDURE verifyComment(id int)
+BEGIN
+Update reviews set reviews.verified = true where reviewID = id;
+END //
+DELIMITER ;
+DELIMITER //
+CREATE PROCEDURE removeComment(id int)
+BEGIN
+Delete from reviews where reviewID = id;
+END //
+DELIMITER ;
+CALL getCommentsToVerify();
+CALL getAllValidComments();
+CALL verifyComment(1);
+CALL removeComment(2);
 call writeReviewIntoDatabase("Super helpful Company", 5,2);
 call writeReviewIntoDatabase("Great options of licences", 5,3);
-CALL getCommentsToVerify();
