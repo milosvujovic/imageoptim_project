@@ -150,7 +150,8 @@ def bar():
     numberOfSales = collectDataForGraph("getNumberOfPurchasesPerLicence()")
     totalRevenue = collectDataForGraph("getRevenue()")
     licenceLength = collectDataForGraph("mostCommonLicenceLength()")
-    return render_template('admin_bar.html', title = "Stats", labelNumber = numberOfSales[0], figureNumber = numberOfSales[1], labelRevenue = totalRevenue[0], figureRevenue = totalRevenue[1], lengthLabel = licenceLength[0],lengthFigure = licenceLength[1])
+    countriestat =collectDataForGraph("getCountriesFrom()")
+    return render_template('admin_bar.html', title = "Stats", labelNumber = numberOfSales[0], figureNumber = numberOfSales[1], labelRevenue = totalRevenue[0], figureRevenue = totalRevenue[1], lengthLabel = licenceLength[0],lengthFigure = licenceLength[1],countryLabel = countriestat[0],countryFigure = countriestat[1])
 
 
 def collectDataForGraph(procedure):

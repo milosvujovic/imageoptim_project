@@ -1,30 +1,27 @@
 {% extends 'admin_template.html' %}
 
 {% block MainContents %}
-<body onload = "myFunction({{labelNumber}},{{figureNumber}},{{labelRevenue}},{{figureRevenue}},{{lengthLabel}},{{lengthFigure}})">
+<body>
   <h1 class = "text-center">Stats</h1>
   <div class = "container-fluid">
-    <div class = "row">
-      <div class = "col">
-        <h3>Number of Purchases for each licence</h3>
-        <div class="chart-container numberOfSales" style="position: relative; height:15vh; width:30vw">
-            <canvas id="numberChart"  class='img-responsive'></canvas>
-        </div>
+<div class = "row">
+    <div class = "col-sm-2">
+      <div class = "row m-1">
+          <button onclick="myFunction({{labelNumber}},{{figureNumber}},'Number of purchases per licence','bar')" class="btn btn-primary">Licence</button>
       </div>
-      <div class = "col">
-        <h3>Revenue per month in the last year</h3>
-        <div class="chart-container revenue" style="position: relative; height:15vh; width:30vw">
-            <canvas id="revenueChart"  class='img-responsive'></canvas>
-        </div>
+      <div class = "row m-1">
+          <button onclick="myFunction({{labelRevenue}},{{figureRevenue}},'Revenue per month','line')" class="btn btn-primary">Revenue in the last year</button>
+      </div>
+      <div class = "row m-1">
+          <button onclick="myFunction({{lengthLabel}},{{lengthFigure}},'Size of companies','bar')" class="btn btn-primary">Licence Length</button>
+      </div>
+      <div class = "row m-1">
+          <button onclick="myFunction({{countryLabel}},{{countryFigure}},'Companies from countries','bar')" class="btn btn-primary">Purchased Locations</button>
       </div>
     </div>
-  </div>
-  <div class = "container-fluid">
-    <div class = "row">
-      <div class = "col">
-        <h3>Number of Purchases for each licence length</h3>
-        <div class="chart-container lengthOfLicence" style="position: relative; height:15vh; width:30vw">
-            <canvas id="lengthChart"  class='img-responsive'></canvas>
+    <div class = "col-sm-10">
+        <div id="chart-container" style=" position : relative;height:15vh; width:30vw">
+            <!-- <canvas id="chart"  class='img-responsive'></canvas> -->
         </div>
       </div>
     </div>

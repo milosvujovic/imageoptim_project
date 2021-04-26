@@ -1,20 +1,39 @@
-function myFunction(labelsNumber, figuresNumber,labelRev, figuresREv,labelLength, figureLength ) {
+function myFunction(label, figure,title, type) {
+  $("#chart-container").empty();
+  var canvas = document.createElement('canvas'),
+      div = document.getElementById("chart-container");
+  canvas.id     = "chart";
+  canvas.class     = 'img-responsive';
+  div.appendChild(canvas);
+
   var dataNumber = {
-  labels: labelsNumber,
+  labels: label,
   datasets: [{
-    label: 'Purchase History',
-    data: figuresNumber,
-    backgroundColor:
-      'rgba(255, 99, 132, 0.2)',
-    borderColor:
-      'rgb(255, 99, 132)',
+    label: title,
+    data: figure,
+    backgroundColor: [
+        'rgba(255, 99, 132, 0.2)',
+        'rgba(54, 162, 235, 0.2)',
+        'rgba(255, 206, 86, 0.2)',
+        'rgba(75, 192, 192, 0.2)',
+        'rgba(153, 102, 255, 0.2)',
+        'rgba(255, 159, 64, 0.2)'
+    ],
+    borderColor: [
+        'rgba(255, 99, 132, 1)',
+        'rgba(54, 162, 235, 1)',
+        'rgba(255, 206, 86, 1)',
+        'rgba(75, 192, 192, 1)',
+        'rgba(153, 102, 255, 1)',
+        'rgba(255, 159, 64, 1)'
+    ],
     borderWidth: 1
   }]
 };
 
-  var ctx = document.getElementById('numberChart');
+  var ctx = document.getElementById('chart');
   var numberChart = new Chart(ctx, {
-    type: 'bar',
+    type: type,
     data: dataNumber,
     options: {
       scales: {
@@ -24,47 +43,8 @@ function myFunction(labelsNumber, figuresNumber,labelRev, figuresREv,labelLength
       }
     }
   });
-  var dataRevenue = {
-  labels: labelRev,
-  datasets: [{
-    label: 'Revenue',
-    data: figuresREv,
-    backgroundColor:
-      'rgba(255, 99, 132, 0.2)',
-    borderColor:
-      'rgb(255, 99, 132)',
-    borderWidth: 1
-  }]
-};
 
-  var chartRevenue = document.getElementById('revenueChart');
-  var numberChart = new Chart(chartRevenue, {
-    type: 'line',
-    data: dataRevenue,
-    options: {
-      scales: {
-        y: {
-          beginAtZero: true
-        }
-      }
-    }
-  });
-  var dataLength = {
-    labels: labelLength,
-      datasets: [{
-        label: 'Number of Purchase for length',
-        data: figureLength,
-        backgroundColor:
-          'rgba(255, 99, 132, 0.2)',
-        hoverOffset: 4
-      }]
-};
 
-  var chartLength = document.getElementById('lengthChart');
-  var lengthChart = new Chart(chartLength, {
-    type: 'pie',
-    data: dataLength,
-  });
 };
 function AddToElement(price){
   document.getElementById("price").innerHTML = '$' +  price;

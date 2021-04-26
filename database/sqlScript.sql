@@ -173,9 +173,9 @@ INSERT INTO `Countries` VALUES
 
 INSERT INTO `Customers` VALUES
 (1,'example company','1 cardiff road','Cardiff','CF10 4FT','GBR','example@email.com',false,"Karen Douglas","10191882"),
-(2,'different company','2 newport road','Newport','NW01 5HJ','GBR','different@email.com',false,"Claire White","10195882"),
-(3,'random company','3 swansea road','Swansea','SA1 4NT','GBR','different@email.com',false,"Tony Stevens","10194882"),
-(4,'new company','4 wrexham road','Wrexham','WR1 4NT','GBR','different@email.com',false,"Stewart Smith","10131882");
+(2,'different company','2 newport road','Newport','NW01 5HJ','USA','different@email.com',false,"Claire White","10195882"),
+(3,'random company','3 swansea road','Swansea','SA1 4NT','CHE','different@email.com',false,"Tony Stevens","10194882"),
+(4,'new company','4 wrexham road','Wrexham','WR1 4NT','FRA','different@email.com',false,"Stewart Smith","10131882");
 
 INSERT INTO `Licence Lengths` VALUES
 (1,'annual',1),
@@ -618,3 +618,17 @@ END //
 DELIMITER ;
 
 call mostCommonLicenceLength();
+
+DELIMITER //
+CREATE PROCEDURE getCountriesFrom()
+BEGIN
+Select countries.name, count(*)
+FROM countries
+JOIN customers ON countries.isoCode = customers.isoCode
+JOIN purchases ON purchases.customerID = customers.customerID
+group by countries.isoCode;
+END //
+
+DELIMITER ;
+
+call getCountriesFrom();
