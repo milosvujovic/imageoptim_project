@@ -178,27 +178,29 @@ def purchaseConfirmationPage():
 # Logs  user in
 @app.route("/customer/<input>")
 def displayCustomerDetails(input):
-    try:
+    # try:
         # Decodes the code in the email
         id = decryptWord(input)
-        print(list(id))
         index = int(id.index(','))
         newId = str(id[2:index])
+        print(newId)
         # Needs verifying stage
         if (readFromDatabaseUsingFunction('`checkWhetherCustomer`('+newId+')')[0][0] == 1):
+            print("va;od")
             session.clear()
-            # Verifies there email address and logs them in by storing it in session storage.
-            command = "CALL verifyEmail(%s);"
-            parameters = newId
-            writeToDatabase(command, parameters)
+            # command = "CALL verifyEmail(%s);"
+            # parameters = (newId)
+            command = "CALL verifyEmail('{0}');".format(newId)
+            writeToDatabase2(command)
+            print("verified the email2")
             session['customerID'] = newId
             session.modified = True
             # Directs them to edit there details. Will change this path later on.
             return redirect("/customer/edit")
         else:
             return render_template('customer_logInError.html', title = "Log In")
-    except:
-        return "Invalid Code"
+    # except:
+    #     return "Invalid Code"
 
 # To Save us having to get a code each time.
 @app.route("/customer/hack")
@@ -469,7 +471,27 @@ def logInForm():
 # Database Functions
 def writeToDatabase(command,parameters):
     cur = mysql.connection.cursor()
+    print("about to proceed the information")
     cur.execute(command, parameters)
+    print("executed the information")
+    mysql.connection.commit()
+    data = cur.fetchall()
+    cur.close()
+    return data
+
+def writeToDatabase2(command):
+    cur = mysql.connection.cursor()
+    cur.execute(command)
+    mysql.connection.commit()
+    data = cur.fetchall()
+    cur.close()
+    return data
+
+def writeToDatabase(command,parameters):
+    cur = mysql.connection.cursor()
+    print("about to proceed the information")
+    cur.execute(command, parameters)
+    print("executed the information")
     mysql.connection.commit()
     data = cur.fetchall()
     cur.close()
