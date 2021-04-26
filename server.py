@@ -79,7 +79,9 @@ def load_key():
 # User web Routes
 @app.route("/")
 def homePage():
-    return render_template('user_home.html', title = "Home", licences = readFromDatabaseUsingStoredProcedures("getListOfLicence()"))
+    comments = readFromDatabaseUsingStoredProcedures("getCommentsToVerify()")
+    print(comments)
+    return render_template('user_home.html', title = "Home", licences = readFromDatabaseUsingStoredProcedures("getListOfLicence()"),comments = comments)
 
 @app.route("/payment")
 @basket_required
@@ -193,6 +195,9 @@ def gatherCustomersLicences():
     print(previous)
     return render_template('customer_licences.html', title = "Licences", currentLicences = current,previousLicences =previous)
 
+@app.route("/customer/review")
+def review():
+    return render_template('customer_review.html', title = "Review")
 
 # Logs a user out
 @app.route("/customer/logOut")
@@ -329,6 +334,15 @@ def customerForm():
         return purchaseConfirmationPage()
     return "Error with form"
 
+@app.route("/leaveReview", methods=['POST'])
+def reviews():
+    if request.method == 'POST':
+        print(request.form['rating'])
+        print(request.form['comment'])
+        writeReviewIntoDatabase(session['customerID'],request.form['rating'],request.form['comment'])
+        return redirect('/')
+    return "Error with form"
+
 
 @app.route("/createLink", methods=['POST'])
 @admin_required
@@ -440,6 +454,13 @@ def writePurchaseIntoDatabase(customerID):
             mysql.connection.commit()
             data = cur.fetchall()
             cur.close()
+
+def writeReviewIntoDatabase(customerID,rating,comment):
+    cur = mysql.connection.cursor()
+    cur.execute("CALL writeReviewIntoDatabase(%s,%s,%s);", (comment, rating, customerID))
+    mysql.connection.commit()
+    data = cur.fetchall()
+    cur.close()
 
 def verifyEmailInDatabase(customerID):
         cur = mysql.connection.cursor()
