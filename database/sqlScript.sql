@@ -361,7 +361,12 @@ NameOfContactPerson varchar(45),
 VATNumber varchar(20)) RETURNS int(11)
 BEGIN
 INSERT INTO `Customers` (name,street,city,postcode,isoCode,email,emailVerified,NameOfContactPerson,VATNumber)VALUES (name,street,city,postcode,isoCode,email,false,NameOfContactPerson,VATNumber);
+IF @idNumber IS NULL THEN
+SIGNAL SQLSTATE VALUE '45000'
+SET MESSAGE_TEXT = 'Error with the customer id';
+ELSE
 RETURN @idNumber;
+END IF;
 END //
 
 -- Returns the price of the licence.
@@ -392,12 +397,16 @@ IN customerParameter int,
 IN priceParameter double)
 BEGIN
 SET @numberOfYears = (SELECT getLength(lengthParameter));
-IF @numberOfYears = -1
-THEN
+IF @numberOfYears IS NULL THEN
+SIGNAL SQLSTATE VALUE '45000'
+SET MESSAGE_TEXT = 'Error with the end date';
+else
+	IF @numberOfYears = -1 THEN
 SET @endDate = null;
 ELSE
 SET @endDate = DATE_ADD(now(), INTERVAL @numberOfYears YEAR);
 END IF;
+END if;
 INSERT INTO purchases (customerID,tierID,price,datePurchase,expirePurchase,lengthID) VALUES (customerParameter,tierParameter,priceParameter, date(now()),@endDate,lengthParameter);
 END //
 DELIMITER ;
