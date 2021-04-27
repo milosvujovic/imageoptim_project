@@ -1,0 +1,12 @@
+{% extends 'emailTemplate.html' %}
+{% block MainContents %}
+  <div class="container-fluid">
+    <p>Dear Admin,</p>
+    <p>A customer has contacted us.</p>
+    <p>Below are the details that the customer submitted.</p>
+    <p>Customer - {{companyName}}</p>
+    <p>Employee Name - {{name}}</p>
+    <p>Email Address - {{email}}</p>
+    <p>Comment - {{comment}}</p>
+  </div>
+{% endblock %}

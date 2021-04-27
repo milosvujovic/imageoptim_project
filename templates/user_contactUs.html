@@ -1,0 +1,36 @@
+{% extends 'user_template.html' %}
+
+{% block MainContents %}
+<div class="container-fluid">
+  <form action = "/gatherContactUs" id='contactUs' method='post' class="form-group">
+    <div class = "row">
+      <div class = "col sm-6">
+        <h1 class="display-4 text-center">Contact Us</h1>
+        <div class="form-group mb-4">
+          <label class="mb-0"><h6 class="font-weight-bold small">Company Name *</h6></label>
+          <input name="name" class="form-control w-75" placeholder="Please enter the company name" required>
+        </div>
+
+        <div class="form-group mb-4">
+          <label class="mb-0"><h6 class="font-weight-bold small">Contact Person Name</h6></label>
+          <input name="nameOfContactPerson" type="text" class="form-control w-75" placeholder="Please enter your name">
+        </div>
+
+        <div class="form-group mb-4">
+          <label class="mb-0"><h6 class="font-weight-bold small">Email Address *</h6></label>
+          <input name="email" type="email" size="30" class="form-control w-75" placeholder="Please enter your email address" required>
+        </div>
+
+        <div class="form-group mb-4">
+          <label class="mb-0"><h6 class="font-weight-bold small">Comment *</h6></label>
+          <input name="comment" class="form-control w-75" placeholder="Please enter your comment" required>
+        </div>
+      </div>
+    </div>
+    <div class = "row">
+      <button class="btn btn-primary me-auto submit m-2">Submit Details</button>
+    </div>
+  </form>
+
+</div>
+{% endblock %}

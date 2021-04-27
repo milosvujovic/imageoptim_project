@@ -1,3 +1,51 @@
+function myFunction(label, figure,title, type) {
+  $("#chart-container").empty();
+  var canvas = document.createElement('canvas'),
+      div = document.getElementById("chart-container");
+  canvas.id     = "chart";
+  canvas.class     = 'img-responsive';
+  div.appendChild(canvas);
+
+  var dataNumber = {
+  labels: label,
+  datasets: [{
+    label: title,
+    data: figure,
+    backgroundColor: [
+        'rgba(255, 99, 132, 0.2)',
+        'rgba(54, 162, 235, 0.2)',
+        'rgba(255, 206, 86, 0.2)',
+        'rgba(75, 192, 192, 0.2)',
+        'rgba(153, 102, 255, 0.2)',
+        'rgba(255, 159, 64, 0.2)'
+    ],
+    borderColor: [
+        'rgba(255, 99, 132, 1)',
+        'rgba(54, 162, 235, 1)',
+        'rgba(255, 206, 86, 1)',
+        'rgba(75, 192, 192, 1)',
+        'rgba(153, 102, 255, 1)',
+        'rgba(255, 159, 64, 1)'
+    ],
+    borderWidth: 1
+  }]
+};
+
+  var ctx = document.getElementById('chart');
+  var numberChart = new Chart(ctx, {
+    type: type,
+    data: dataNumber,
+    options: {
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
+
+
+};
 function AddToElement(price){
   document.getElementById("price").innerHTML = '$' +  price;
 };
@@ -27,53 +75,4 @@ function alertUser(message) {
   if (message.length > 0){
     alert(message);
   }
-}
-
-
-
-
-
-
-
-// function myFunction(labels, figures) {
-//   var ctx = document.getElementById('myChart');
-// //
-// //   var stars = figures;
-// //   var frameworks = labels;
-// //   var myChart = new Chart(ctx, {
-// //           type: 'bar',
-// //           data: {
-// //               labels: frameworks,
-// //               datasets: [{
-// //                   label: 'Number Of Purchases',
-// //                   data: stars
-// //               }]
-// //           }
-// //           options: {
-// //             scales: {
-// //               y: {
-// //                 suggestedMin: 0
-// //         }
-// //     }
-// // }
-// //   })
-// // }
-//
-// var chart = new Chart(ctx, {
-//     type: 'bar',
-//     data: {
-//         datasets: [{
-//             label: 'Number Of Purchases',
-//             data: figures
-//         }],
-//         labels: labels
-//     },
-//     options: {
-//         scales: {
-//           y: {
-//             beginAtZero: true
-//           }
-//         }
-//     }
-// });
-// }
+};
