@@ -332,6 +332,11 @@ def bar():
     countriestat =collectDataForGraph("getCountriesFrom()")
     return render_template('admin_bar.html', title = "Stats", labelNumber = numberOfSales[0], figureNumber = numberOfSales[1], labelRevenue = totalRevenue[0], figureRevenue = totalRevenue[1], lengthLabel = licenceLength[0],lengthFigure = licenceLength[1],countryLabel = countriestat[0],countryFigure = countriestat[1])
 
+@app.route("/admin/edit/<id>")
+@admin_required
+def adminEditLicence(id):
+    licenceData = readFromDatabaseUsingStoredProcedures("getDescription("+id+")")
+    return render_template("admin_editLicence.html", title = "Edit Licence", licence = licenceData[0], licenceID = id)
 
 def collectDataForGraph(procedure):
     figures = []
@@ -342,7 +347,21 @@ def collectDataForGraph(procedure):
         figures.append(str(i[1]))
     return labels, figures
 
+@app.route("/admin/discontinue/<licenceID>")
+@admin_required
+def adminDiscontinue(licenceID):
+    command = "CALL discontinueLicence(%s,%s);"
+    parameters = licenceID, True
+    writeToDatabase(command,parameters)
+    return redirect("/admin/home")
 
+@app.route("/admin/continue/<licenceID>")
+@admin_required
+def adminContinue(licenceID):
+    command = "CALL discontinueLicence(%s,%s);"
+    parameters = licenceID, False
+    writeToDatabase(command,parameters)
+    return redirect("/admin/home")
 
 @app.route("/admin/logOut")
 @admin_required
@@ -491,6 +510,18 @@ def linkForm():
         tierCode = encryptWord(tierID)
         code = "http://127.0.0.1:5000/purchase/"+tierCode + "/" + lengthCode + "/" + priceCode
         sentOfferEmail(email,name,code)
+        return redirect("/admin/home")
+
+@app.route("/updateLicence/<licenceID>", methods=['POST'])
+@admin_required
+def editLicence(licenceID):
+    if request.method == 'POST':
+        # Stores the customer details in a dictionary in the server session storage
+        name = request.form['name']
+        description = request.form['description']
+        command = "CALL updateLicence(%s,%s,%s);"
+        parameters = licenceID, name, description
+        writeToDatabase(command,parameters)
         return redirect("/admin/home")
 
 @app.route("/formLogIn", methods=['POST'])

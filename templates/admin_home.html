@@ -1,7 +1,7 @@
 {% extends 'admin_template.html' %}
 {% block MainContents %}
 <div class="container-fluid">
-  <h1 class="display-4 text-center">Current Licences</h1>
+  <!-- <h1 class="display-4 text-center">Current Licences</h1>
   <div class="list-group container pb-4">
     <div class="row">
       {% for licence in currentLicences %}
@@ -37,13 +37,39 @@
             <div class="card-body text-center">
               <h5 class="card-title">{{licence[1]}}</h5>
               <a href="/admin/licence/{{licence[0]}}" class="btn btn-primary">View Purchases</a>
-              <a href="/admin/negotiate/{{licence[0]}}" class="btn btn-primary">Offer Deal</a>
+              <a href="/admin/continue/{{licence[0]}}" class="btn btn-primary">Sell Licence</a>
             </div>
           </div>
         </div>
         {% endfor %}
         </div>
-      </div>
+      </div> -->
+      <h1 class="display-4 text-center">Current Licences</h1>
+      <table class="table table-striped">
+        <tbody>
+          {% for licence in currentLicences %}
+          <tr>
+              <th scope="row">{{licence[1]}}</th>
+              <td><a  href="/admin/licence/{{licence[0]}}" class="btn btn-primary m-1">View Purchases</a></td>
+              <td><a href="/admin/negotiate/{{licence[0]}}" class="btn btn-primary">Offer Deal</a></td>
+              <td><a href="/admin/edit/{{licence[0]}}" class="btn btn-primary">Edit Details</a></td>
+              <td><button onclick="location.href='/admin/discontinue/{{licence[0]}}'" class="btn btn-primary">Discontinue</button></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <h1 class="display-4 text-center">Discontinued Licences</h1>
+      <table class="table table-striped">
+        <tbody>
+          {% for licence in previousLicences %}
+          <tr>
+              <th scope="row">{{licence[1]}}</th>
+              <td><a  href="/admin/licence/{{licence[0]}}" class="btn btn-primary m-1">View Purchases</a></td>
+              <td><button onclick="location.href='/admin/continue/{{licence[0]}}'" class="btn btn-primary">Continue</button></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
 </div>
 
 

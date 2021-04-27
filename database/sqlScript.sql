@@ -332,6 +332,25 @@ SELECT name, description FROM licences WHERE licenceID = parameter;
 END //
 DELIMITER ;
 
+-- Updates licence details
+DELIMITER //
+CREATE PROCEDURE updateLicence(id int, lname varchar(45), ldescription varchar(45))
+BEGIN
+UPDATE licences
+SET name = lname, description = ldescription
+WHERE licenceID = id;
+END //
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE discontinueLicence(id int, discontinue boolean)
+BEGIN
+UPDATE licences
+SET discontinued = discontinue
+WHERE licenceID = id;
+END //
+DELIMITER ;
+
 -- Gets the list of countries
 DELIMITER //
 CREATE PROCEDURE getCountries()
