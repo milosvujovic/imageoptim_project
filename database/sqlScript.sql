@@ -157,6 +157,23 @@ CREATE TABLE IF NOT EXISTS `imageoptim`.`Prices` (
     ON UPDATE RESTRICT)
 ENGINE = InnoDB;
 
+-- -----------------------------------------------------
+-- Table `imageoptim`.`Reviews`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `imageoptim`.`Reviews` (
+  `reviewID` INT NOT NULL AUTO_INCREMENT,
+  `comment` VARCHAR(8000) NOT NULL,
+  `rating` INT NOT NULL,
+  `customerID` INT NOT NULL,
+  `verified` TINYINT NULL,
+  PRIMARY KEY (`reviewID`),
+  INDEX `fk_Reviews_Customers1_idx` (`customerID` ASC),
+  CONSTRAINT `fk_Reviews_Customers1`
+    FOREIGN KEY (`customerID`)
+    REFERENCES `imageoptim`.`Customers` (`customerID`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
 
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
@@ -310,7 +327,7 @@ DELIMITER ;
 -- Gets description of licence
 DELIMITER //
 CREATE PROCEDURE getDescription(IN parameter int(11))
-BEGIN 
+BEGIN
 SELECT name, description FROM licences WHERE licenceID = parameter;
 END //
 DELIMITER ;
@@ -597,8 +614,48 @@ JOIN purchases on purchases.tierID = tiers.tierID
 GROUP BY licences.licenceID;
 END //
 
-call getNumberOfPurchasesPerLicence();
+DELIMITER //
+CREATE PROCEDURE writeReviewIntoDatabase(commentPara varchar(8000),ratingParam int,customerIDParam int)
+BEGIN
+INSERT INTO `reviews`(comment,rating,customerID,verified) VALUES (commentPara,ratingParam,customerIDParam,false);
+END //
 
+DELIMITER //
+CREATE PROCEDURE getCommentsToVerify()
+BEGIN
+SELECT reviewID,comment,rating,customers.name
+FROM reviews
+JOIN customers ON customers.customerID = reviews.customerID
+where reviews.verified = false;
+END //
+DELIMITER ;
+DELIMITER //
+CREATE PROCEDURE getAllValidComments()
+BEGIN
+SELECT reviewID,comment,rating,customers.name
+FROM reviews
+JOIN customers ON customers.customerID = reviews.customerID
+where reviews.verified = true;
+END //
+DELIMITER ;
+DELIMITER //
+CREATE PROCEDURE verifyComment(id int)
+BEGIN
+Update reviews set reviews.verified = true where reviewID = id;
+END //
+DELIMITER ;
+DELIMITER //
+CREATE PROCEDURE removeComment(id int)
+BEGIN
+Delete from reviews where reviewID = id;
+END //
+DELIMITER ;
+CALL getCommentsToVerify();
+CALL getAllValidComments();
+CALL verifyComment(1);
+CALL removeComment(2);
+call writeReviewIntoDatabase("Super helpful Company", 5,2);
+call writeReviewIntoDatabase("Great options of licences", 5,3);
 
 
 DELIMITER //

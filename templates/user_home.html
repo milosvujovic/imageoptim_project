@@ -16,5 +16,30 @@
         {% endfor %}
         </div>
       </div>
+      <div id="carouselExampleFade" class="carousel slide carousel-fade" data-ride="carousel">
+        <div class="carousel-inner p-6" style="background-color: #f1f1f1f1; height: 100px; width:100%">
+          <div class="carousel-item active text-center">
+            <div class="d-block w-100"><p></p><p></p><p>Comments</p></div>
+          </div>
+          {% for comment in comments %}
+          <div class="carousel-item text-center">
+            <div class = "d-block w-100">
+              <p>"{{comment[1]}}"</p>
+              <p>{{comment[3]}}</p>
+              <p>{{comment[2]}}/5</p>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        <a class="carousel-control-prev" href="#carouselExampleFade" role="button" data-slide="prev">
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="sr-only">Previous</span>
+        </a>
+        <a class="carousel-control-next" href="#carouselExampleFade" role="button" data-slide="next">
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="sr-only">Next</span>
+        </a>
+      </div>
+
   </div>
 {% endblock %}
