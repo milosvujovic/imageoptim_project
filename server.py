@@ -125,7 +125,6 @@ def removeAllFromBasket():
         session['basket'].clear()
         session.modified = True
     return redirect("/basket")
-
 @app.route("/purchase/<tier>/<length>/<price>")
 def addLicence(tier,length,price):
     tier = str(decryptWord(tier))
@@ -173,6 +172,29 @@ def createLink(tierID,lengthID,priceID):
 def purchaseConfirmationPage():
     return render_template('user_purchaseConfirmation.html', title = "Purchase Confirmation")
 
+# Displays basket page.
+# Having read the details about each item from the database.
+@app.route("/contactUs")
+def contactPage():
+    return render_template('user_contactUs.html', title = "Contact Us")
+
+@app.route("/bar")
+def bar():
+    numberOfSales = collectDataForGraph("getNumberOfPurchasesPerLicence()")
+    totalRevenue = collectDataForGraph("getRevenue()")
+    licenceLength = collectDataForGraph("mostCommonLicenceLength()")
+    countriestat =collectDataForGraph("getCountriesFrom()")
+    return render_template('admin_bar.html', title = "Stats", labelNumber = numberOfSales[0], figureNumber = numberOfSales[1], labelRevenue = totalRevenue[0], figureRevenue = totalRevenue[1], lengthLabel = licenceLength[0],lengthFigure = licenceLength[1],countryLabel = countriestat[0],countryFigure = countriestat[1])
+
+
+def collectDataForGraph(procedure):
+    figures = []
+    labels = []
+    data = readFromDatabaseUsingStoredProcedures(procedure)
+    for i in data:
+        labels.append(str(i[0]))
+        figures.append(str(i[1]))
+    return labels, figures
 
 # Customers Web routes
 # Logs  user in
@@ -389,6 +411,38 @@ def customerForm():
         return purchaseConfirmationPage()
     return "Error with form"
 
+<<<<<<< HEAD
+=======
+@app.route("/gatherContactUs", methods=['POST'])
+def contactForm():
+    if request.method == 'POST':
+        # Stores the customer details in a dictionary in the server session storage
+        sentCommentEmail(request.form['nameOfContactPerson'], request.form['email'], request.form['name'], request.form['comment'])
+        return redirect("/")
+    return "Error with form"
+
+
+
+@app.route("/createLink", methods=['POST'])
+@admin_required
+def linkForm():
+    if request.method == 'POST':
+        # Stores the customer details in a dictionary in the server session storage
+        tierID = request.form['tier']
+        lengthID = request.form['length']
+        priceID = request.form['price']
+        email =  request.form['email']
+        name =  request.form['name']
+        key = load_key()
+        f = Fernet(key)
+        lengthCode = encryptWord(lengthID)
+        priceCode = encryptWord(priceID)
+        tierCode = encryptWord(tierID)
+        code = "http://127.0.0.1:5000/purchase/"+tierCode + "/" + lengthCode + "/" + priceCode
+        sentOfferEmail(email,name,code)
+        return redirect("/admin/home")
+
+>>>>>>> master
 @app.route("/gatherLicenceData", methods=['POST'])
 def licenceForm():
     print("This is not meant to be called")
@@ -569,6 +623,13 @@ def sentOfferEmail(recipient,name, link):
     # Prepares the email with the main body of the email being a html template
     msg = Message(subject='Negotiated Price',sender='group11IMAGEOPTIM@outlook.com', recipients = [recipient])
     msg.html = render_template('customer_offerEmail.html',name = name,link = link)
+    # Sends the email
+    mail.send(msg)
+
+def sentCommentEmail(customerName, emailAddress, companyName, comment):
+    # Prepares the email with the main body of the email being a html template
+    msg = Message(subject='Comment from customer',sender='group11IMAGEOPTIM@outlook.com', recipients = ['group11IMAGEOPTIM@outlook.com'])
+    msg.html = render_template('admin_emailContactUs.html',name = customerName,email = emailAddress,companyName = companyName,comment = comment)
     # Sends the email
     mail.send(msg)
 
