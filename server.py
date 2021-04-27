@@ -618,10 +618,8 @@ def processTransaction():
             writeToDatabase(command,parameters)
     # Reads the details of the basket from the datbase to put in email
     basketDetails = gatherBasketDetails()
-    result = connectWithStripe(int(basketDetails[1]*100),session.get("customer")["email"])
-    print(result)
+    connectWithStripe(int(basketDetails[1]*100),session.get("customer")["email"])
     # Sents the email to the customer with details of their purchase
-
     sentCustomerEmail(session.get("customer")["email"], session.get("customer")["nameOfContactPerson"],basketDetails[0],str(id),"{:.2f}".format(basketDetails[1]))
     #  Reads the email address of the admin from the datbase
     callItem = "getAdminEmail()"
@@ -693,7 +691,6 @@ def connectWithStripe(price,emailAddres):
     success_url='https://bbc.com',
     cancel_url='https://youtube.com',
   )
-  print(jsonify(id=session.id))
   return jsonify(id=session.id)
 
 
