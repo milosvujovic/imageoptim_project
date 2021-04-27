@@ -16,6 +16,7 @@ paramiko = "*"
 xlsxwriter = "*"
 chart = "*"
 stripe = "*"
+jsonify = "*"
 
 [requires]
 python_version = "3.8"
