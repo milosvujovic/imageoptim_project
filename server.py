@@ -4,7 +4,8 @@ import json
 import csv
 import datetime
 import functools
-from flask import Flask, render_template, request,redirect,make_response,session, url_for, flash
+import stripe
+from flask import Flask, render_template, request,redirect,make_response,session, url_for, flash,jsonify
 from flask_mysqldb import MySQL
 from flask_mail import Mail, Message
 from cryptography.fernet import Fernet
@@ -30,6 +31,8 @@ app.config["MAIL_USE_TLS"] = True
 # session data Variables
 app.secret_key = 'fj590Rt?h40gg'
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
+# Stripe key
+stripe.api_key = "sk_test_51Ij0RhIiHPFxURCath0cVui1kt3mL3f9HSS7u5GBIPiwKkyWSga2E5EZrN06DRdASmH5UO349yPSpgdYXsN7NQAH00wI76I7E9"
 
 mail = Mail(app)
 mysql = MySQL(app)
@@ -615,14 +618,14 @@ def processTransaction():
             writeToDatabase(command,parameters)
     # Reads the details of the basket from the datbase to put in email
     basketDetails = gatherBasketDetails()
+    connectWithStripe(int(basketDetails[1]*100),session.get("customer")["email"])
     # Sents the email to the customer with details of their purchase
-
-    sentCustomerEmail(session.get("customer")["email"], session.get("customer")["nameOfContactPerson"],basketDetails[0],str(id),basketDetails[1])
+    sentCustomerEmail(session.get("customer")["email"], session.get("customer")["nameOfContactPerson"],basketDetails[0],str(id),"{:.2f}".format(basketDetails[1]))
     #  Reads the email address of the admin from the datbase
     callItem = "getAdminEmail()"
     adminEmails = readFromDatabaseUsingStoredProcedures(callItem)
     # Sents email to the admin with details of the purchase
-    sentAdminEmail(adminEmails[0],session.get("customer")["name"], session.get("customer")["nameOfContactPerson"],session.get("customer")["email"], basketDetails[0],basketDetails[1])
+    sentAdminEmail(adminEmails[0],session.get("customer")["name"], session.get("customer")["nameOfContactPerson"],session.get("customer")["email"], basketDetails[0],"{:.2f}".format(basketDetails[1]))
     # Clears the basket
     session.clear()
 
@@ -640,7 +643,7 @@ def gatherBasketDetails():
             basketArray.append(temp)
             price = price + float(item['price'])
             size =  size + 1
-    return basketArray,"{:.2f}".format(price),size
+    return basketArray,price,size
 
 def CreateCSVPurchases():
     row_list = readFromDatabaseUsingStoredProcedures("getAllPurchases()")
@@ -670,6 +673,25 @@ def CreateCSVPurchases():
     workbook.close()
     return row_list
 
+def connectWithStripe(price,emailAddres):
+  session = stripe.checkout.Session.create(
+    customer_email=emailAddres,
+    payment_method_types=['card'],
+    line_items=[{
+      'price_data': {
+        'currency': 'usd',
+        'product_data': {
+          'name': 'Image Optim Licences',
+        },
+        'unit_amount': price,
+      },
+      'quantity': 1,
+    }],
+    mode='payment',
+    success_url='https://bbc.com',
+    cancel_url='https://youtube.com',
+  )
+  return jsonify(id=session.id)
 
 
 
