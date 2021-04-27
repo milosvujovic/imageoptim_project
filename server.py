@@ -297,8 +297,7 @@ def negotiatePrice(licenceID):
 @app.route("/admin/purchases")
 @admin_required
 def adminCSV():
-    history = CreateCSVPurchases()
-    return render_template('admin_csv.html', purchases = history)
+    return render_template('admin_csv.html')
 
 # Allows the admin to download a list of purchases
 @app.route("/admin/comment/validate/<id>")
@@ -630,7 +629,7 @@ def sentOfferEmail(recipient,name, link):
 
 def sentCommentEmail(customerName, emailAddress, companyName, comment):
     # Prepares the email with the main body of the email being a html template
-    msg = Message(subject='Comment from customer',sender='group11IMAGEOPTIM@outlook.com', recipients = ['group11IMAGEOPTIM@outlook.com'])
+    msg = Message(subject='Comment from customer',sender='group11IMAGEOPTIM@outlook.com', recipients = ['group11IMAGEOPTIM@outlook.com'],reply_to=emailAddress)
     msg.html = render_template('admin_emailContactUs.html',name = customerName,email = emailAddress,companyName = companyName,comment = comment)
     # Sends the email
     mail.send(msg)
