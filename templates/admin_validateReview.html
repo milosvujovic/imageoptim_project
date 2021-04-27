@@ -24,6 +24,26 @@
         {% endfor %}
       </tbody>
     </table>
-
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th scope="col">Company Name</th>
+          <th scope="col">Rating</th>
+          <th scope="col">Comment</th>
+          <th scope="col"></th>
+          <th scope="col"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for comment in currentComments %}
+        <tr>
+            <td>{{comment[3]}}</td>
+            <td>{{comment[2]}} / 5</td>
+            <td>{{comment[1]}}</td>
+            <td><a href = "/admin/comment/remove/{{comment[0]}}"><button type="submit" class="btn btn-primary">Remove</button></a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
     </div>
 {% endblock %}

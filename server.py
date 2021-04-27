@@ -292,11 +292,28 @@ def adminCSV():
     history = CreateCSVPurchases()
     return render_template('admin_csv.html', purchases = history)
 
+# Allows the admin to download a list of purchases
+@app.route("/admin/comment/validate/<id>")
+@admin_required
+def adminValidateReview(id):
+    command = "CALL verifyComment(%s);"
+    parameters =(id)
+    writeToDatabase(command,parameters)
+    return redirect("/admin/home")
+
+@app.route("/admin/comment/remove/<id>")
+@admin_required
+def adminValidateReviewRemove(id):
+    command = "CALL removeComment(%s);"
+    parameters =(id)
+    writeToDatabase(command,parameters)
+    return redirect("/admin/home")
+
 # Allows the admin to verify emails
 @app.route("/admin/comments")
 @admin_required
 def adminComments():
-    return render_template('admin_validateReview.html', comments = readFromDatabaseUsingStoredProcedures("getCommentsToVerify()"))
+    return render_template('admin_validateReview.html', comments = readFromDatabaseUsingStoredProcedures("getCommentsToVerify()"), currentComments = readFromDatabaseUsingStoredProcedures("getAllValidComments()"))
 
 # Allows the admin to see the data about the stats
 @app.route("/admin/bar")
@@ -403,8 +420,8 @@ def reviews():
     if request.method == 'POST':
         command = "CALL writeReviewIntoDatabase(%s,%s,%s);"
         parameters =(request.form['comment'], request.form['rating'], session['customerID'])
-        writeReviewIntoDatabase(command,parameters)
-        return redirect('/')
+        writeToDatabase(command,parameters)
+        return redirect('/customer/licences')
     return "Error with form"
 
 
