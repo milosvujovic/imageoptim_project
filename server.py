@@ -178,23 +178,6 @@ def purchaseConfirmationPage():
 def contactPage():
     return render_template('user_contactUs.html', title = "Contact Us")
 
-@app.route("/bar")
-def bar():
-    numberOfSales = collectDataForGraph("getNumberOfPurchasesPerLicence()")
-    totalRevenue = collectDataForGraph("getRevenue()")
-    licenceLength = collectDataForGraph("mostCommonLicenceLength()")
-    countriestat =collectDataForGraph("getCountriesFrom()")
-    return render_template('admin_bar.html', title = "Stats", labelNumber = numberOfSales[0], figureNumber = numberOfSales[1], labelRevenue = totalRevenue[0], figureRevenue = totalRevenue[1], lengthLabel = licenceLength[0],lengthFigure = licenceLength[1],countryLabel = countriestat[0],countryFigure = countriestat[1])
-
-
-def collectDataForGraph(procedure):
-    figures = []
-    labels = []
-    data = readFromDatabaseUsingStoredProcedures(procedure)
-    for i in data:
-        labels.append(str(i[0]))
-        figures.append(str(i[1]))
-    return labels, figures
 
 # Customers Web routes
 # Logs  user in
@@ -340,16 +323,22 @@ def adminComments():
 # Allows the admin to see the data about the stats
 @app.route("/admin/bar")
 def bar():
+    numberOfSales = collectDataForGraph("getNumberOfPurchasesPerLicence()")
+    totalRevenue = collectDataForGraph("getRevenue()")
+    licenceLength = collectDataForGraph("mostCommonLicenceLength()")
+    countriestat =collectDataForGraph("getCountriesFrom()")
+    return render_template('admin_bar.html', title = "Stats", labelNumber = numberOfSales[0], figureNumber = numberOfSales[1], labelRevenue = totalRevenue[0], figureRevenue = totalRevenue[1], lengthLabel = licenceLength[0],lengthFigure = licenceLength[1],countryLabel = countriestat[0],countryFigure = countriestat[1])
+
+
+def collectDataForGraph(procedure):
     figures = []
     labels = []
-    procedure = "getNumberOfPurchasesPerLicence()"
     data = readFromDatabaseUsingStoredProcedures(procedure)
     for i in data:
         labels.append(str(i[0]))
-        figures.append(i[1])
-    print(labels)
-    print(figures)
-    return render_template('admin_bar.html', title = "Stats", label = labels, figure = figures)
+        figures.append(str(i[1]))
+    return labels, figures
+
 
 
 @app.route("/admin/logOut")
@@ -411,8 +400,6 @@ def customerForm():
         return purchaseConfirmationPage()
     return "Error with form"
 
-<<<<<<< HEAD
-=======
 @app.route("/gatherContactUs", methods=['POST'])
 def contactForm():
     if request.method == 'POST':
@@ -423,26 +410,7 @@ def contactForm():
 
 
 
-@app.route("/createLink", methods=['POST'])
-@admin_required
-def linkForm():
-    if request.method == 'POST':
-        # Stores the customer details in a dictionary in the server session storage
-        tierID = request.form['tier']
-        lengthID = request.form['length']
-        priceID = request.form['price']
-        email =  request.form['email']
-        name =  request.form['name']
-        key = load_key()
-        f = Fernet(key)
-        lengthCode = encryptWord(lengthID)
-        priceCode = encryptWord(priceID)
-        tierCode = encryptWord(tierID)
-        code = "http://127.0.0.1:5000/purchase/"+tierCode + "/" + lengthCode + "/" + priceCode
-        sentOfferEmail(email,name,code)
-        return redirect("/admin/home")
 
->>>>>>> master
 @app.route("/gatherLicenceData", methods=['POST'])
 def licenceForm():
     print("This is not meant to be called")

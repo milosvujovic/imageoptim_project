@@ -1,7 +1,8 @@
 {% extends 'admin_template.html' %}
 {% block MainContents %}
   <div class="container-fluid pb-2">
-    <h1 class="display-4 text-center">Review the reviews</h1>
+    <h1 class="display-4 text-center">Validate the reviews</h1>
+    <h1 class="display-6 text-center">Reviews to moderate</h1>
     <table class="table table-striped">
       <thead>
         <tr>
@@ -24,6 +25,7 @@
         {% endfor %}
       </tbody>
     </table>
+    <h1 class="display-6 text-center">Current Comments</h1>
     <table class="table table-striped">
       <thead>
         <tr>
