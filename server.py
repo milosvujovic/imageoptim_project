@@ -108,7 +108,7 @@ def selectLicence(licenceID):
 def basketPage():
     print("basket")
     basketDetails = gatherBasketDetails()
-    return render_template('user_basket.html', title = "Basket", basket =  basketDetails[0], size = basketDetails[2], price = basketDetails[1])
+    return render_template('user_basket.html', title = "Basket", basket =  basketDetails[0], size = basketDetails[2], price ="{:.2f}".format(basketDetails[1]))
 
 # Removes selected item from the basket and redirects them to the basket
 @app.route("/basket/remove/<licenceID>")

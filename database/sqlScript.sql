@@ -698,3 +698,6 @@ END //
 DELIMITER ;
 
 call getCountriesFrom();
+
+select avg(rating)
+from reviews;
