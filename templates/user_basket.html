@@ -25,7 +25,7 @@
               {%endif%}
               <td>{{item[3]}}</td>
               <td>${{item[5]}}</td>
-              <td><a href = "/basket/remove/{{item[4]}}"><button type="submit" class="btn btn-primary">Remove</button></a></td>
+              <td><a href = "/basket/remove/{{item[4]}}"><button type="submit" class="btn btn-secondary">Remove</button></a></td>
           </tr>
           {% endfor %}
         </tbody>
@@ -35,12 +35,12 @@
       </div>
       <div class = "row p-2">
         <div class="col">
-          <a href = "/" class = "p-1"><button type="submit" class="btn btn-primary" >Continue Shopping</button><a>
+          <a href = "/" class = "p-1"><button type="submit" class="btn btn-secondary" >Continue Shopping</button><a>
         </div>
         <div class="col text-right">
           {%if size != 0%}
-            <a href = "/basket/clear" class = "p-1"><button type="submit" class="btn btn-primary">Remove All</button></a>
-            <a href = "/checkout" class = "p-1"><button type="submit" class="btn btn-primary" >Proceed to Checkout</button><a>
+            <a href = "/basket/clear" class = "p-1"><button type="submit" class="btn btn-secondary">Remove All</button></a>
+            <a href = "/checkout" class = "p-1"><button type="submit" class="btn btn-secondary" >Proceed to Checkout</button><a>
           {%endif%}
         </div>
       </div>

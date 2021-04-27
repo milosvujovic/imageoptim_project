@@ -5,24 +5,24 @@
       <div class="list-group container pb-4">
         <div class="row">
         {% for licence in licences %}
-        <div class="card p-3 m-2 background-color: #e3f2fd" style="w-25">
+        <div class="card p-3 m-2 col-xs-4 background-color: #e3f2fd">
           <img class="card-img-top" src="../static/images/licences.jpeg" alt="Card image cap">
           <div class="card-body text-center">
             <h5 class="card-title">{{licence[1]}}</h5>
             <p class="card-text">{{licence[2]}}</p>
-            <a href="/licence/{{licence[0]}}" class="btn btn-primary text-center">View product</a>
+            <a href="/licence/{{licence[0]}}" class="btn btn-secondary text-center">View product</a>
           </div>
         </div>
         {% endfor %}
         </div>
       </div>
-      <div id="carouselExampleFade" class="carousel slide carousel-fade" data-ride="carousel">
-        <div class="carousel-inner p-6" style="background-color: #f1f1f1f1; height: 100px; width:100%">
-          <div class="carousel-item active text-center">
+      <div id="carouselExampleFade" class="carousel slide carousel-fade text-center bg-secondary text-white" data-ride="carousel" style="height: 100px; width:100%">
+        <div class="carousel-inner p-6">
+          <div class="carousel-item active text-center text-white">
             <div class="d-block w-100"><p></p><p></p><p>Comments</p></div>
           </div>
           {% for comment in comments %}
-          <div class="carousel-item text-center">
+          <div class="carousel-item text-center text-white">
             <div class = "d-block w-100">
               <p>"{{comment[1]}}"</p>
               <p>{{comment[3]}}</p>
