@@ -192,7 +192,8 @@ INSERT INTO `Customers` VALUES
 (1,'example company','1 cardiff road','Cardiff','CF10 4FT','GBR','example@email.com',false,"Karen Douglas","10191882"),
 (2,'different company','2 newport road','Newport','NW01 5HJ','USA','different@email.com',false,"Claire White","10195882"),
 (3,'random company','3 swansea road','Swansea','SA1 4NT','CHE','different@email.com',false,"Tony Stevens","10194882"),
-(4,'new company','4 wrexham road','Wrexham','WR1 4NT','FRA','different@email.com',false,"Stewart Smith","10131882");
+(4,'new company','4 wrexham road','Wrexham','WR1 4NT','FRA','different@email.com',false,"Stewart Smith","10131882"),
+(5,'large company','1 mumbles road','Swansea','SA1 4NT','GBR','different@email.com',false,"Steve Stevens","10194822");
 
 INSERT INTO `Licence Lengths` VALUES
 (1,'annual',1),
@@ -201,9 +202,10 @@ INSERT INTO `Licence Lengths` VALUES
 
 INSERT INTO `Licences` VALUES
 (1,"Licence A","Very helpful",false),
-(2,"Licence B","Mildly helpful",false),
+(2,"Licence B","Helpful",false),
 (3,"Licence C","Helps with java",false),
-(4,"Licence D","Helps with my sql",false);
+(4,"Licence D","Helps with my sql",false),
+(5,"Licence E","Helps with apple payments",true);
 
 INSERT INTO `Tiers`(licenceID,minimumEmployees,maximumEmployees,startDate,endDate) VALUES
 (1,1,1,'2021-01-01','2021-12-31'),
@@ -286,15 +288,24 @@ INSERT INTO `Prices`(tierID,lengthID,price,startDate,endDate) VALUES
 
 INSERT INTO `Purchases`(customerID,tierID,lengthID,price,datePurchase,expirePurchase) VALUES
 (1,2,1,950.00,'2021-03-22','2022-03-22'),
-(2,7,2,99500.00,'2021-03-22',null),
-(3,5,2,24500.00,'2021-03-22',null),
-(4,6,1,3950.00,'2021-03-22','2022-03-22'),
-(2,11,2,30000.00,'2021-03-22',null),
-(4,12,1,4500.00,'2021-03-22','2022-03-22'),
-(1,17,2,15000.00,'2021-03-22',null),
-(4,13,1,2500.00,'2021-03-22','2022-03-22'),
-(2,21,2,16000.00,'2021-03-22',null),
-(3,24,1,2800.00,'2021-03-22','2022-03-22');
+(2,7,2,99500.00,'2021-02-22',null),
+(3,5,2,24500.00,'2021-01-22',null),
+(4,6,1,3950.00,'2020-12-22','2021-12-22'),
+(2,11,2,30000.00,'2020-11-22',null),
+(4,12,1,4500.00,'2020-10-22','2021-10-22'),
+(1,17,2,15000.00,'2020-09-22',null),
+(4,13,1,2500.00,'2020-08-22','2021-08-22'),
+(2,21,2,16000.00,'2020-07-22',null),
+(3,24,1,2800.00,'2020-06-22','2021-06-22'),
+(1,2,1,950.00,'2020-03-22','2021-03-22'),
+(5,2,1,100.00,'2020-05-22','2021-05-22'),
+(5,23,2,1000.00,'2021-04-01','2022-04-01');
+
+INSERT INTO `reviews`(reviewID,comment,rating,customerID,verified) VALUES
+(1,'Great Licences',4,1,true),
+(2,'Not very good Licences',1,2,false),
+(3,'Super helpful company',5,3,true),
+(4,'Could with discount for charities',2,4,false);
 
 
 -- Gets the list of licences
@@ -685,11 +696,13 @@ BEGIN
 Select date_format(datePurchase,'%M') as Month, SUM(price) as Revenue
 FROM purchases
 WHERE datePurchase BETWEEN DATE_SUB(now(), INTERVAL 1 YEAR)AND now()
-GROUP BY month(datePurchase);
+GROUP BY month(datePurchase)
+ORDER BY year(datePurchase),month(datePurchase) ;
 END //
 
-DELIMITER ;
 
+DELIMITER ;
+call getRevenue();
 call getRevenue();
 DELIMITER //
 CREATE PROCEDURE mostCommonLicenceLength()
