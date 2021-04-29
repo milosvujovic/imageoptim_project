@@ -1,49 +1,7 @@
 {% extends 'admin_template.html' %}
 {% block MainContents %}
 <div class="container-fluid">
-  <!-- <h1 class="display-4 text-center">Current Licences</h1>
-  <div class="list-group container pb-4">
-    <div class="row">
-      {% for licence in currentLicences %}
-      <div class = "col xs-2">
-        <div class="card p-3 m-2 background-color: #e3f2fd">
-          <img class="card-img-top" src="../static/images/licences.jpeg" alt="Card image cap">
-          <div class="card-body  text-center">
-            <h5 class="card-title">{{licence[1]}}</h5>
-            <div class = "row">
-              <div class = "col">
-                <a  href="/admin/licence/{{licence[0]}}" class="btn btn-primary m-1">View Purchases</a>
-              </div>
-              <div class = "col">
-                <a href="/admin/negotiate/{{licence[0]}}" class="btn btn-primary">Offer Deal</a>
-              </div>
-              <div class = "col">
-                <a href="/admin/edit/{{licence[0]}}" class="btn btn-primary">Edit Details</a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      {% endfor %}
-      </div>
-    </div>
-    <h1 class="display-4 text-center">Discontinued Licences</h1>
-    <div class="list-group container pb-4">
-      <div class="row">
-        {% for licence in previousLicences %}
-        <div class = "col xs-2">
-          <div class="card p-3 m-2 background-color: #e3f2fd">
-            <img class="card-img-top" src="../static/images/licences.jpeg" alt="Card image cap">
-            <div class="card-body text-center">
-              <h5 class="card-title">{{licence[1]}}</h5>
-              <a href="/admin/licence/{{licence[0]}}" class="btn btn-primary">View Purchases</a>
-              <a href="/admin/continue/{{licence[0]}}" class="btn btn-primary">Sell Licence</a>
-            </div>
-          </div>
-        </div>
-        {% endfor %}
-        </div>
-      </div> -->
+
       <h1 class="display-4 text-center">Current Licences</h1>
       <table class="table table-striped">
         <tbody>
