@@ -2,11 +2,11 @@
 {% block MainContents %}
   <div class="container-fluid pb-2">
     <div class = "row">
-      <div class = "col-sm-2">
-          <img class="card-img-top" src="../static/images/licences.jpeg" alt="Card image cap" style="width: 18rem;">
+      <div class = "col-sm-1">
+        <img class="img-responsive" src="../static/images/licences.jpeg">
       </div>
-      <div class = "col-sm-6">
-        <h3 class=" text-center">{{description[0][0]}}</h3>
+      <div class = "col-sm-8  text-center">
+        <h1 class="display-4">{{description[0][0]}}</h1>
         <h4>Description</h4>
         <p>{{description[0][1]}}</p>
       </div>
@@ -14,9 +14,8 @@
 
     <form action="/gatherLicenceData" method= "post" id="typeOfLicence" name="typeOfLicence" onchange="readPrice()">
       <div class="row">
-        <div class="col p-3 my-3 background-color: #e3f2fd;">
+        <div class="col p-3 my-3">
           <fieldset id="tier">
-
             <h4>Select Tier</h4>
             {% for tier in tiers %}
               <div class="form-check">
@@ -36,9 +35,9 @@
             {% endfor %}
           </fieldset>
         </div>
-        <div class ="col">
-          <h4>Select Length</h4>
+        <div class ="col p-3 my-3">
           <fieldset id="length">
+          <h4>Select Length</h4>
             {% for length in lengths %}
               <div class="form-check">
                 {%if length[0] == selectedLength%}
