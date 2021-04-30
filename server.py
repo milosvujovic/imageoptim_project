@@ -300,6 +300,7 @@ def negotiatePrice(licenceID):
 @app.route("/admin/purchases")
 @admin_required
 def adminCSV():
+    CreateCSVPurchases()
     return render_template('admin_csv.html')
 
 # Allows the admin to download a list of purchases
