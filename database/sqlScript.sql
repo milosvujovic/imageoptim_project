@@ -179,6 +179,8 @@ SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
 
+--  Fills all the tables with data
+
 INSERT INTO `Admin` VALUES
 (1,"group11IMAGEOPTIM@outlook.com","vipadmin");
 
@@ -307,6 +309,7 @@ INSERT INTO `reviews`(reviewID,comment,rating,customerID,verified) VALUES
 (3,'Super helpful company',5,3,true),
 (4,'Could with discount for charities',2,4,false);
 
+-- Stored Procedures and Functions
 
 -- Gets the list of licences
 DELIMITER //
@@ -316,13 +319,14 @@ SELECT licenceID, name,description  From licences WHERE discontinued = false ORD
 END //
 DELIMITER ;
 
--- Gets the compaines size
+-- Gets the list of possible companies size for the licence
 DELIMITER //
 CREATE PROCEDURE getTiersForLicence(IN parameter int(11))
 BEGIN
 SELECT tierID,minimumEmployees,maximumEmployees FROM `Tiers` WHERE licenceID = parameter AND (CURDATE() between startDate and endDate );
 END //
 DELIMITER ;
+
 -- Gets the length of the licences for the licence.
 DELIMITER //
 CREATE PROCEDURE getLengthOfLicences(IN parameter int(11))
@@ -353,6 +357,7 @@ WHERE licenceID = id;
 END //
 DELIMITER ;
 
+-- Discontinues or Continues a licence
 DELIMITER //
 CREATE PROCEDURE discontinueLicence(id int, discontinue boolean)
 BEGIN
@@ -503,7 +508,7 @@ END IF;
 END //
 DELIMITER ;
 
-
+-- Checks whether it is a valid tier and length
 DELIMITER //
 CREATE FUNCTION `checkWhetherValidTierAndLength`(tierParameter int, lengthParameter int) RETURNS int
 BEGIN
@@ -514,7 +519,7 @@ WHERE prices.tierID = tierParameter AND prices.lengthID = lengthParameter);
 END //
 DELIMITER ;
 
-
+-- Gets the list of customers current licences
 DELIMITER //
 CREATE PROCEDURE getCustomersCurrentLicences(
 IN parameter int
@@ -529,7 +534,7 @@ WHERE parameter = purchases.customerID and ((purchases.expirePurchase is null ) 
 END //
 DELIMITER ;
 
-
+-- Gets the list of customers previous licences
 DELIMITER //
 CREATE PROCEDURE getCustomersPastLicences(
 IN parameter int
@@ -544,7 +549,7 @@ WHERE parameter = purchases.customerID and ((purchases.expirePurchase < date(now
 END //
 DELIMITER ;
 
-
+-- Gets the list of purchases for a licence
 DELIMITER //
 CREATE PROCEDURE getPurchasesForLicences(
 IN parameter int
@@ -562,6 +567,7 @@ DELIMITER ;
 
 CALL getPurchasesForLicences(1);
 
+-- Gets list of purchases of licences that have expired
 DELIMITER //
 CREATE PROCEDURE getPastPurchasesForLicences(
 IN parameter int
@@ -577,6 +583,7 @@ WHERE parameter = tiers.licenceID and ((purchases.expirePurchase < date(now())))
 END //
 DELIMITER ;
 
+-- Gets the details about a company
 DELIMITER //
 CREATE PROCEDURE getDetailsOnCompany(
 IN parameter int
@@ -589,6 +596,7 @@ WHERE customers.customerID =  parameter;
 END //
 DELIMITER ;
 
+-- Gets the list of licences that have been discontinuted
 DELIMITER //
 CREATE PROCEDURE getDiscontinutedLicences(
 )
@@ -599,6 +607,7 @@ WHERE licences.discontinued = 1;
 END //
 DELIMITER ;
 
+-- Updates a customers details
 DELIMITER //
 CREATE PROCEDURE updateCustomer(
 name varchar(45),
@@ -624,6 +633,7 @@ VATNumber = VATNumber
 WHERE customerID = parametercustomerID;
 END //
 
+-- Gets all the purchases
 DELIMITER //
 CREATE PROCEDURE getAllPurchases()
 BEGIN
@@ -634,6 +644,7 @@ JOIN countries ON countries.isoCode =  customers.isoCode
 order by datePurchase DESC;
 END //
 
+-- Gets number of purchases for each licence
 DELIMITER //
 CREATE PROCEDURE getNumberOfPurchasesPerLicence()
 BEGIN
@@ -644,12 +655,14 @@ JOIN purchases on purchases.tierID = tiers.tierID
 GROUP BY licences.licenceID;
 END //
 
+-- Writes a review into the database
 DELIMITER //
 CREATE PROCEDURE writeReviewIntoDatabase(commentPara varchar(8000),ratingParam int,customerIDParam int)
 BEGIN
 INSERT INTO `reviews`(comment,rating,customerID,verified) VALUES (commentPara,ratingParam,customerIDParam,false);
 END //
 
+-- Gets the list of reviews that need to be moderated 
 DELIMITER //
 CREATE PROCEDURE getCommentsToVerify()
 BEGIN
@@ -659,6 +672,7 @@ JOIN customers ON customers.customerID = reviews.customerID
 where reviews.verified = false;
 END //
 DELIMITER ;
+-- Gets the list of all moderated comments
 DELIMITER //
 CREATE PROCEDURE getAllValidComments()
 BEGIN
@@ -668,6 +682,7 @@ JOIN customers ON customers.customerID = reviews.customerID
 where reviews.verified = true;
 END //
 DELIMITER ;
+-- Moderates a comment
 DELIMITER //
 CREATE PROCEDURE verifyComment(id int)
 BEGIN
@@ -675,22 +690,16 @@ Update reviews set reviews.verified = true where reviewID = id;
 END //
 DELIMITER ;
 DELIMITER //
+-- Removes a comment
 CREATE PROCEDURE removeComment(id int)
 BEGIN
 Delete from reviews where reviewID = id;
 END //
 DELIMITER ;
-CALL getCommentsToVerify();
-CALL getAllValidComments();
-CALL verifyComment(1);
-CALL removeComment(2);
-call writeReviewIntoDatabase("Super helpful Company", 5,2);
-call writeReviewIntoDatabase("Great options of licences", 5,3);
-
 
 DELIMITER //
 
-
+-- Gets the revenue per month
 CREATE PROCEDURE getRevenue()
 BEGIN
 Select date_format(datePurchase,'%M') as Month, SUM(price) as Revenue
@@ -702,9 +711,8 @@ END //
 
 
 DELIMITER ;
-call getRevenue();
-call getRevenue();
 DELIMITER //
+-- Gets the stats for each licence length
 CREATE PROCEDURE mostCommonLicenceLength()
 BEGIN
 Select length , count(*)
@@ -715,8 +723,7 @@ END //
 
 DELIMITER ;
 
-call mostCommonLicenceLength();
-
+-- Gets the number of purchases from each country
 DELIMITER //
 CREATE PROCEDURE getCountriesFrom()
 BEGIN
@@ -726,10 +733,4 @@ JOIN customers ON countries.isoCode = customers.isoCode
 JOIN purchases ON purchases.customerID = customers.customerID
 group by countries.isoCode;
 END //
-
 DELIMITER ;
-
-call getCountriesFrom();
-
-select avg(rating)
-from reviews;
