@@ -39,7 +39,7 @@
       <label class="mb-0"><h6 class="font-weight-bold small">Country</h6></label>
       <select name="countries" id="countries" required>
         {% for country in countries %}
-        {%if country[0] == '{{customer[6]}}'%}
+        {%if country[0] == customer[6]%}
         <option value={{country[0]}} selected>{{country[1]}}</option>
         {%else%}
           <option value={{country[0]}}>{{country[1]}}</option>
