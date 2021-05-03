@@ -234,6 +234,8 @@ def gatherCustomersLicences():
 # Allows the user to leave a review
 @app.route("/customer/review")
 def review():
+    print(session['customerID'])
+    session.modified = True
     return render_template('customer_review.html', title = "Review")
 
 # Lets a user edit there details
@@ -304,27 +306,26 @@ def adminCSV():
     return render_template('admin_csv.html')
 
 # Allows the admin to download a list of purchases
-@app.route("/admin/comment/validate/<id>")
+@app.route("/admin/reviews/validate/<id>")
 @admin_required
 def adminValidateReview(id):
-    command = "CALL verifyComment(%s);"
-    parameters =(id)
-    writeToDatabase(command,parameters)
-    return redirect("/admin/home")
+    command = "CALL verifyComment('{0}');".format(id)
+    writeToDatabase2(command)
+    return redirect("/admin/reviews")
 
-@app.route("/admin/comment/remove/<id>")
+@app.route("/admin/reviews/remove/<id>")
 @admin_required
 def adminValidateReviewRemove(id):
     command = "CALL removeComment(%s);"
     parameters =(id)
     writeToDatabase(command,parameters)
-    return redirect("/admin/home")
+    return redirect("/admin/reviews")
 
 # Allows the admin to verify emails
-@app.route("/admin/comments")
+@app.route("/admin/reviews")
 @admin_required
 def adminComments():
-    return render_template('admin_validateReview.html', comments = readFromDatabaseUsingStoredProcedures("getCommentsToVerify()"), currentComments = readFromDatabaseUsingStoredProcedures("getAllValidComments()"))
+    return render_template('admin_validateReview.html', comments = readFromDatabaseUsingStoredProcedures("getCommentsToVerify()"), currentComments = readFromDatabaseUsingStoredProcedures("getAllValidComments()"), title = "Reviews")
 
 # Allows the admin to see the data about the stats
 @app.route("/admin/bar")
