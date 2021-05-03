@@ -234,6 +234,8 @@ def gatherCustomersLicences():
 # Allows the user to leave a review
 @app.route("/customer/review")
 def review():
+    print(session['customerID'])
+    session.modified = True
     return render_template('customer_review.html', title = "Review")
 
 # Lets a user edit there details

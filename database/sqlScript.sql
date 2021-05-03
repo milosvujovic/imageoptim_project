@@ -659,8 +659,15 @@ END //
 DELIMITER //
 CREATE PROCEDURE writeReviewIntoDatabase(commentPara varchar(8000),ratingParam int,customerIDParam int)
 BEGIN
+set @NumberOfRows = (select count(*) from `reviews` where customerID = customerIDParam);
+IF @NumberOfRows > 0 
+THEN
+DELETE FROM `reviews` WHERE customerID = customerIDParam;
+END IF;
 INSERT INTO `reviews`(comment,rating,customerID,verified) VALUES (commentPara,ratingParam,customerIDParam,false);
 END //
+
+
 
 -- Gets the list of reviews that need to be moderated 
 DELIMITER //
