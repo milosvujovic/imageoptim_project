@@ -310,7 +310,7 @@ def adminValidateReview(id):
     command = "CALL verifyComment(%s);"
     parameters =(id)
     writeToDatabase(command,parameters)
-    return redirect("/admin/home")
+    return redirect("/admin/comments")
 
 @app.route("/admin/comment/remove/<id>")
 @admin_required
@@ -318,7 +318,7 @@ def adminValidateReviewRemove(id):
     command = "CALL removeComment(%s);"
     parameters =(id)
     writeToDatabase(command,parameters)
-    return redirect("/admin/home")
+    return redirect("/admin/comments")
 
 # Allows the admin to verify emails
 @app.route("/admin/comments")
