@@ -301,7 +301,8 @@ INSERT INTO `Purchases`(customerID,tierID,lengthID,price,datePurchase,expirePurc
 (3,24,1,2800.00,'2020-06-22','2021-06-22'),
 (1,2,1,950.00,'2020-03-22','2021-03-22'),
 (5,2,1,100.00,'2020-05-22','2021-05-22'),
-(5,23,2,1000.00,'2021-04-01','2022-04-01');
+(5,23,2,1000.00,'2021-04-01','2022-04-01'),
+(1,23,2,1000.00,'2021-04-01','2022-04-01');
 
 INSERT INTO `reviews`(reviewID,comment,rating,customerID,verified) VALUES
 (1,'Great Licences',4,1,true),
