@@ -304,27 +304,27 @@ def adminCSV():
     return render_template('admin_csv.html')
 
 # Allows the admin to download a list of purchases
-@app.route("/admin/comment/validate/<id>")
+@app.route("/admin/reviews/validate/<id>")
 @admin_required
 def adminValidateReview(id):
     command = "CALL verifyComment(%s);"
     parameters =(id)
     writeToDatabase(command,parameters)
-    return redirect("/admin/comments")
+    return redirect("/admin/reviews")
 
-@app.route("/admin/comment/remove/<id>")
+@app.route("/admin/reviews/remove/<id>")
 @admin_required
 def adminValidateReviewRemove(id):
     command = "CALL removeComment(%s);"
     parameters =(id)
     writeToDatabase(command,parameters)
-    return redirect("/admin/comments")
+    return redirect("/admin/reviews")
 
 # Allows the admin to verify emails
-@app.route("/admin/comments")
+@app.route("/admin/reviews")
 @admin_required
 def adminComments():
-    return render_template('admin_validateReview.html', comments = readFromDatabaseUsingStoredProcedures("getCommentsToVerify()"), currentComments = readFromDatabaseUsingStoredProcedures("getAllValidComments()"))
+    return render_template('admin_validateReview.html', comments = readFromDatabaseUsingStoredProcedures("getCommentsToVerify()"), currentComments = readFromDatabaseUsingStoredProcedures("getAllValidComments()"), title = "Reviews")
 
 # Allows the admin to see the data about the stats
 @app.route("/admin/bar")
