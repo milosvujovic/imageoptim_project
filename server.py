@@ -309,9 +309,8 @@ def adminCSV():
 @app.route("/admin/reviews/validate/<id>")
 @admin_required
 def adminValidateReview(id):
-    command = "CALL verifyComment(%s);"
-    parameters =(id)
-    writeToDatabase(command,parameters)
+    command = "CALL verifyComment('{0}');".format(id)
+    writeToDatabase2(command)
     return redirect("/admin/reviews")
 
 @app.route("/admin/reviews/remove/<id>")

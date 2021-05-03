@@ -7,7 +7,7 @@
       <div class = "col sm-6">
         <h1 class="display-4 text-center">Customer Details</h1>
         <div class="form-group mb-4">
-          <label class="mb-0"><h6 class="font-weight-bold small">Company Name</h6></label>
+          <label class="mb-0"><h6 class="font-weight-bold small">Company Name *</h6></label>
           <input name="name" class="form-control w-75" placeholder="Please enter the company name" required>
         </div>
 
@@ -17,7 +17,7 @@
         </div>
 
         <div class="form-group mb-4">
-          <label class="mb-0"><h6 class="font-weight-bold small">Email</h6></label>
+          <label class="mb-0"><h6 class="font-weight-bold small">Email *</h6></label>
           <input name="email" type="email" size="30" class="form-control w-75" placeholder="Please enter the contact email address" required>
         </div>
 
@@ -37,7 +37,7 @@
         </div>
 
         <div class="form-group mb-4">
-          <label class="mb-0"><h6 class="font-weight-bold small">Country</h6></label>
+          <label class="mb-0"><h6 class="font-weight-bold small">Country *</h6></label>
           <select name="countries" id="countries" required>
             <option value="">Select a country</option>
             {% for country in countries %}
@@ -55,12 +55,12 @@
       <div class = "col sm-6">
         <h1 class="display-4 text-center">Card Details</h1>
         <div class="form-group mb-4">
-          <label class="mb-0"><h6 class="font-weight-bold small">Card Number</h6></label>
+          <label class="mb-0"><h6 class="font-weight-bold small">Card Number *</h6></label>
           <input name="cardNumber" size="16" pattern = "[0-9]{16}" class="form-control w-75" placeholder="Card Number" required>
         </div>
 
         <div class="form-group mb-4">
-          <label class="mb-0"><h6 class="font-weight-bold small">Expiry Date</h6></label>
+          <label class="mb-0"><h6 class="font-weight-bold small">Expiry Date *</h6></label>
           <div class = "row">
             <div class = "col-sm-4">
               <input name="expiryDateMonth" type="number" min="1" step="1" max="12" class="form-control w-75" placeholder="Month" required>
@@ -71,8 +71,8 @@
           </div>
         </div>
 
-        <div class="form-group mb-4">
-          <label class="mb-0"><h6 class="font-weight-bold small">Security Code</h6></label>
+        <div class="form-group mb-4">9
+          <label class="mb-0"><h6 class="font-weight-bold small">Security Code *</h6></label>
           <input name="securityCode" pattern = "[0-9]{3}" class="form-control w-75" placeholder="Security Code" required>
         </div>
 
