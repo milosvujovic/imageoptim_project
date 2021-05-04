@@ -308,7 +308,7 @@ INSERT INTO `reviews`(reviewID,comment,rating,customerID,verified) VALUES
 (1,'Great Licences',4,1,true),
 (2,'Not very good Licences',1,2,false),
 (3,'Super helpful company',5,3,true),
-(4,'Could with discount for charities',2,4,false);
+(4,'Very expensive licences',2,4,false);
 
 -- Stored Procedures and Functions
 
