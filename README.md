@@ -8,6 +8,7 @@ pipenv install Flask-Mail,
 pipenv install xlsxwriter,
 pipenv install paramiko,
 pipenv install cryptography,
+pipenv install stripe
 pipenv shell,
 py server.py,
 
