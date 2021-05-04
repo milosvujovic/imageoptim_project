@@ -11,8 +11,9 @@ pipenv install cryptography,
 pipenv shell,
 py server.py,
 
-
+Email login details
 Email Address - group11IMAGEOPTIM@outlook.com
+Email Password - 1m@g30ptim
 
 Admin login details
 username - group11IMAGEOPTIM@outlook.com
