@@ -319,6 +319,8 @@ BEGIN
 SELECT licenceID, name,description  From licences WHERE discontinued = false ORDER BY name;
 END //
 DELIMITER ;
+ -- Example query
+Call getListOfLicence();
 
 -- Gets the list of possible companies size for the licence
 DELIMITER //
@@ -327,6 +329,8 @@ BEGIN
 SELECT tierID,minimumEmployees,maximumEmployees FROM `Tiers` WHERE licenceID = parameter AND (CURDATE() between startDate and endDate );
 END //
 DELIMITER ;
+ -- Example query
+Call getTiersForLicence(1);
 
 -- Gets the length of the licences for the licence.
 DELIMITER //
@@ -339,6 +343,8 @@ JOIN tiers on tiers.tierID = prices.tierID
 WHERE tiers.licenceID = parameter;
 END //
 DELIMITER ;
+ -- Example query
+Call getLengthOfLicences(1);
 
 -- Gets description of licence
 DELIMITER //
@@ -347,6 +353,8 @@ BEGIN
 SELECT name, description FROM licences WHERE licenceID = parameter;
 END //
 DELIMITER ;
+ -- Example query
+Call getDescription(1);
 
 -- Updates licence details
 DELIMITER //
@@ -357,6 +365,12 @@ SET name = lname, description = ldescription
 WHERE licenceID = id;
 END //
 DELIMITER ;
+ -- Example query
+Call getListOfLicence();
+Call updateLicence(4,'Licence Q', 'New Description');
+Call getListOfLicence();
+
+
 
 -- Discontinues or Continues a licence
 DELIMITER //
@@ -367,6 +381,10 @@ SET discontinued = discontinue
 WHERE licenceID = id;
 END //
 DELIMITER ;
+ -- Example query
+Call getListOfLicence();
+Call discontinueLicence(4,true);
+Call getListOfLicence();
 
 -- Gets the list of countries
 DELIMITER //
@@ -377,6 +395,8 @@ FROM `Countries`
 ORDER BY name ASC;
 END //
 DELIMITER ;
+-- Example Query
+Call getCountries();
 
 -- Get the name of the item in the basket and the price.
 DELIMITER //
@@ -392,6 +412,8 @@ JOIN `licence lengths` on `licence lengths`.licencelengthID = prices.lengthID
 WHERE tiers.tierID = tierParameter AND lengthParameter = licencelengthID AND (CURDATE() between prices.startDate and prices.endDate);
 END //
 DELIMITER ;
+-- Example Query
+Call getBasketDetails(1,1);
 
 -- When new customer created then it will save the new id number as session variable.
 DELIMITER $$
@@ -401,6 +423,10 @@ AFTER INSERT ON `customers` FOR EACH ROW
 BEGIN
 	SET @idNumber = NEW.customerID;
 END $$
+DELIMITER ;
+-- Example Query
+INSERT INTO customers(name,street,city,postcode,isoCode,email,emailVerified,nameOfContactPerson,vatNumber) VALUES('large company','1 mumbles road','Swansea','SA1 4NT','GBR','different@email.com',false,"Steve Stevens","10194822");
+select  @idNumber;
 
 -- Creates customer
 DELIMITER //
@@ -421,6 +447,10 @@ ELSE
 RETURN @idNumber;
 END IF;
 END //
+DELIMITER ;
+-- Example Query
+select `createCustomer` ('large company','1 mumbles road','Swansea','SA1 4NT','GBR','different@email.com',"Steve Stevens","10194822");
+
 
 -- Returns the price of the licence.
 DELIMITER //
@@ -431,6 +461,10 @@ RETURN (SELECT price
 FROM prices
 WHERE prices.tierID = tierParameter AND lengthParameter = prices.lengthID AND (CURDATE() between prices.startDate and prices.endDate));
 END //
+DELIMITER ;
+-- Example Query
+select `getPrice` (1,1);
+
 
 -- returns the number of years of the licence. Needs to be changed to have table with length of licence.
 DELIMITER //
@@ -439,6 +473,10 @@ BEGIN
 SET @LENGTH = (SELECT lengthInYears FROM `licence lengths` WHERE licencelengthID = lengthParameter);
 RETURN @LENGTH;
 END //
+DELIMITER ;
+-- Example Query
+select `getLength` (3);
+
 
 -- records purchase in the database and calculates the end date of the licence.
 DELIMITER //
@@ -463,6 +501,9 @@ END if;
 INSERT INTO purchases (customerID,tierID,price,datePurchase,expirePurchase,lengthID) VALUES (customerParameter,tierParameter,priceParameter, date(now()),@endDate,lengthParameter);
 END //
 DELIMITER ;
+-- example query
+call recordPurchase(1,1,4,950.0);
+
 -- returns all the admins email addres
 DELIMITER //
 CREATE PROCEDURE getAdminEmail()
@@ -470,6 +511,8 @@ BEGIN
 SELECT distinct(email) FROM admin;
 END //
 DELIMITER ;
+-- example query
+call getAdminEmail();
 
 -- verfifies someones email
 DELIMITER //
@@ -481,6 +524,11 @@ SET emailVerified = 1
 WHERE customerID = idNumber;
 END //
 DELIMITER ;
+-- example query
+select * from customers;
+call verifyEmail(1);
+select * from customers;
+
 
 -- gets customer details
 DELIMITER //
@@ -494,13 +542,15 @@ JOIN countries ON customers.isoCode = countries.isoCode
 WHERE parameter = customerID;
 END //
 DELIMITER ;
+-- example query
+call getCustomerDetails(1);
 
 -- returns whether its a valid customer ID
 DELIMITER //
 CREATE FUNCTION `checkWhetherCustomer`(parameter int) RETURNS boolean
 BEGIN
-SET @LENGTH = (SELECT COUNT(*) FROM customers where parameter = customerID);
-IF @LENGTH = 1
+SET @valid = (SELECT COUNT(*) FROM customers where parameter = customerID);
+IF @valid = 1
 THEN
 return true;
 ELSE
@@ -508,6 +558,9 @@ return false;
 END IF;
 END //
 DELIMITER ;
+-- example query
+select checkWhetherCustomer(1);
+select checkWhetherCustomer(100);
 
 -- Checks whether it is a valid tier and length
 DELIMITER //
@@ -519,6 +572,10 @@ JOIN prices on prices.tierID = tiers.tierID
 WHERE prices.tierID = tierParameter AND prices.lengthID = lengthParameter);
 END //
 DELIMITER ;
+-- example query
+select checkWhetherValidTierAndLength(100,10);
+select checkWhetherValidTierAndLength(1,1);
+
 
 -- Gets the list of customers current licences
 DELIMITER //
@@ -535,6 +592,10 @@ WHERE parameter = purchases.customerID and ((purchases.expirePurchase is null ) 
 END //
 DELIMITER ;
 
+-- example query
+call getCustomersCurrentLicences(1);
+
+
 -- Gets the list of customers previous licences
 DELIMITER //
 CREATE PROCEDURE getCustomersPastLicences(
@@ -549,6 +610,8 @@ JOIN licences on tiers.licenceID = licences.licenceID
 WHERE parameter = purchases.customerID and ((purchases.expirePurchase < date(now())));
 END //
 DELIMITER ;
+-- example query
+call getCustomersPastLicences(1);
 
 -- Gets the list of purchases for a licence
 DELIMITER //
@@ -565,7 +628,7 @@ JOIN customers on customers.customerID = purchases.customerID
 WHERE parameter = tiers.licenceID and ((purchases.expirePurchase is null ) or (purchases.expirePurchase > date(now())));
 END //
 DELIMITER ;
-
+-- example query
 CALL getPurchasesForLicences(1);
 
 -- Gets list of purchases of licences that have expired
@@ -584,6 +647,9 @@ WHERE parameter = tiers.licenceID and ((purchases.expirePurchase < date(now())))
 END //
 DELIMITER ;
 
+-- example query
+CALL getPastPurchasesForLicences(1);
+
 -- Gets the details about a company
 DELIMITER //
 CREATE PROCEDURE getDetailsOnCompany(
@@ -597,6 +663,9 @@ WHERE customers.customerID =  parameter;
 END //
 DELIMITER ;
 
+-- example query
+CALL getDetailsOnCompany(1);
+
 -- Gets the list of licences that have been discontinuted
 DELIMITER //
 CREATE PROCEDURE getDiscontinutedLicences(
@@ -607,6 +676,8 @@ FROM licences
 WHERE licences.discontinued = 1;
 END //
 DELIMITER ;
+-- example query
+CALL getDiscontinutedLicences();
 
 -- Updates a customers details
 DELIMITER //
@@ -633,6 +704,9 @@ NameOfContactPerson = NameOfContactPerson,
 VATNumber = VATNumber
 WHERE customerID = parametercustomerID;
 END //
+delimiter ;
+-- example query
+CALL updateCustomer('closed company','the drive','newport','NW22 2FS','GBR','exampleemail@company.co.uk','Owain','11','7');
 
 -- Gets all the purchases
 DELIMITER //
@@ -644,6 +718,9 @@ JOIN customers on customers.customerID = purchases.customerID
 JOIN countries ON countries.isoCode =  customers.isoCode
 order by datePurchase DESC;
 END //
+delimiter ;
+-- example query
+call getAllPurchases();
 
 -- Gets number of purchases for each licence
 DELIMITER //
@@ -655,6 +732,9 @@ JOIN tiers on tiers.licenceID = licences.licenceID
 JOIN purchases on purchases.tierID = tiers.tierID
 GROUP BY licences.licenceID;
 END //
+delimiter ;
+-- example query
+call getNumberOfPurchasesPerLicence();
 
 -- Writes a review into the database
 DELIMITER //
@@ -667,8 +747,11 @@ DELETE FROM `reviews` WHERE customerID = customerIDParam;
 END IF;
 INSERT INTO `reviews`(comment,rating,customerID,verified) VALUES (commentPara,ratingParam,customerIDParam,false);
 END //
-
-
+delimiter ;
+-- example query
+select * from reviews;
+call writeReviewIntoDatabase('Test review',5,4);
+select * from reviews;
 
 -- Gets the list of reviews that need to be moderated 
 DELIMITER //
@@ -680,6 +763,9 @@ JOIN customers ON customers.customerID = reviews.customerID
 where reviews.verified = false;
 END //
 DELIMITER ;
+-- example query
+call getCommentsToVerify();
+
 -- Gets the list of all moderated comments
 DELIMITER //
 CREATE PROCEDURE getAllValidComments()
@@ -690,6 +776,9 @@ JOIN customers ON customers.customerID = reviews.customerID
 where reviews.verified = true;
 END //
 DELIMITER ;
+-- example query
+call getAllValidComments();
+
 -- Moderates a comment
 DELIMITER //
 CREATE PROCEDURE verifyComment(id int)
@@ -697,6 +786,11 @@ BEGIN
 Update reviews set reviews.verified = true where reviewID = id;
 END //
 DELIMITER ;
+-- example query
+call getCommentsToVerify();
+call verifyComment(2);
+call getCommentsToVerify();
+
 DELIMITER //
 -- Removes a comment
 CREATE PROCEDURE removeComment(id int)
@@ -704,6 +798,9 @@ BEGIN
 Delete from reviews where reviewID = id;
 END //
 DELIMITER ;
+-- example query
+call removeComment(5);
+
 
 DELIMITER //
 
@@ -717,8 +814,10 @@ GROUP BY month(datePurchase)
 ORDER BY year(datePurchase),month(datePurchase) ;
 END //
 
-
 DELIMITER ;
+-- example query
+call getRevenue();
+
 DELIMITER //
 -- Gets the stats for each licence length
 CREATE PROCEDURE mostCommonLicenceLength()
@@ -730,6 +829,9 @@ GROUP BY `licence lengths`.licencelengthID;
 END //
 
 DELIMITER ;
+-- example query
+call mostCommonLicenceLength();
+
 
 -- Gets the number of purchases from each country
 DELIMITER //
@@ -742,3 +844,5 @@ JOIN purchases ON purchases.customerID = customers.customerID
 group by countries.isoCode;
 END //
 DELIMITER ;
+-- example query
+call getCountriesFrom();
